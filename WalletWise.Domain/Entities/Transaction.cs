@@ -15,6 +15,7 @@ namespace WalletWise.Domain.Entities
         public TypeTransaction TypeTransaction { get; set; }
         public string? Comment { get; set; }
         public Category CategoryId { get; set; }
+        public Wallet WalletId { get; set; }
         public int UserId { get; set; }
 
     }
