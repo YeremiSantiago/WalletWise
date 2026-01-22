@@ -8,15 +8,18 @@ using WalletWise.Domain.Common.Enums;
 
 namespace WalletWise.Domain.Entities
 {
-     public class Transaction : BaseEntity<int>
+     public class Transaction : AuditEntity
     {
         public decimal Amount { get; set; }
         public DateTime Date { get; set; }
-        public TypeTransaction TypeTransaction { get; set; }
+        public TypeTransaction Type { get; set; }
         public string? Comment { get; set; }
-        public Category CategoryId { get; set; }
-        public Wallet WalletId { get; set; }
-        public int UserId { get; set; }
+        public int? UserId { get; set; }
+        public int CategoryId { get; set; }
+        public int WalletId { get; set; }
 
+        //Navigations Property
+        public Category Category { get; set; }
+        public Wallet Wallet { get; set; }
     }
 }

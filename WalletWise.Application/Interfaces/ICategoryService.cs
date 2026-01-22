@@ -9,6 +9,6 @@ namespace WalletWise.Application.Interfaces
 {
     public interface ICategoryService : IGenericService<Category>
     {
-
+        
     }
 }

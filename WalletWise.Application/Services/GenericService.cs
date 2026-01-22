@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using WalletWise.Application.Interfaces;
+using WalletWise.Domain.Common;
 using WalletWise.Domain.Interfaces;
 
 namespace WalletWise.Application.Services
@@ -23,9 +24,11 @@ namespace WalletWise.Application.Services
 
             if (entity == null)
             {
-                 throw new Exception($"Entidad no con id {id} no encontrada");
+                return null;
+
             }
             return entity;
+
         }
 
         public virtual async Task<IEnumerable<T>> GetAllAsync()
@@ -33,21 +36,27 @@ namespace WalletWise.Application.Services
             return await _repository.GetAllAsync();
         }
 
-        public virtual async Task<T> AddAsync(T entity)
+        public virtual async Task<Result<T>> AddAsync(T entity)
         {
-            return await _repository.AddAsync(entity);
+            return Result<T>.Success(
+                await _repository.AddAsync(entity));
         }
 
 
-        public virtual async Task UpdateAsync(T entity)
+        public virtual async Task<Result<T>> UpdateAsync(T entity)
         {
             await _repository.UpdateAsync(entity);
+           
+           return Result<T>.Success(entity);
         }
 
-        public virtual async Task DeleteAsync(int id)
+        public virtual async Task<Result<bool>> DeleteAsync(int id)
         {
             await _repository.RemoveAsync(id);
+            return Result<bool>.Success(true);
+
         }
+
 
     }
 }

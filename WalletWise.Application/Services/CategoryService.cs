@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using WalletWise.Application.Constants;
 using WalletWise.Application.Interfaces;
+using WalletWise.Domain.Common;
 using WalletWise.Domain.Entities;
 using WalletWise.Domain.Interfaces;
 
@@ -12,9 +9,57 @@ namespace WalletWise.Application.Services
     public class CategoryService : GenericService<Category>, ICategoryService 
     {
         private readonly ICategoryRepository _categoryRepository;
-        public CategoryService(ICategoryRepository categoryRepository) : base(categoryRepository) 
+        private readonly ITransactionRepository _transactionRepository;
+        
+        public CategoryService(ICategoryRepository categoryRepository, ITransactionRepository transactionRepository) : base(categoryRepository) 
         {
             _categoryRepository = categoryRepository;
+            _transactionRepository = transactionRepository;
         }
+
+        public override async Task<Result<Category>> AddAsync(Category category)
+        {
+            var exist = await _categoryRepository.ExistsAsync(x => x.Name == category.Name); 
+            
+            if(exist == true)
+            {
+                return Result<Category>.Failure("Ya existe una Categoria con ese mismo nombre");
+            }
+
+            category.UserId = DefaultUser.Id;
+
+
+            return Result<Category>.Success(await _categoryRepository.AddAsync(category));
+
+        }
+
+        public override async Task<Result<bool>> DeleteAsync(int id)
+        {
+            var category = await GetByIdAsync(id);
+
+            if(category == null)
+            {
+                Result<bool>.Failure("La categoria no pudo ser encontrada");
+
+            }
+
+            bool exists = await _transactionRepository.ExistsTransactionByCategoryAsync(category.Id);
+
+            if (exists == true)
+            {
+                return Result<bool>.Failure("Esta categoria tiene transacciones asociadas");
+            }
+
+            category.IsDeleted = true;
+
+            await _categoryRepository.UpdateAsync(category);
+
+            return Result<bool>.Success(true);
+
+        }
+
+
+
+
     }
 }

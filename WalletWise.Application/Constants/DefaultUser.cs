@@ -4,10 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace WalletWise.Domain.Common
+namespace WalletWise.Application.Constants
 {
-    public class BaseEntity<T>
+    public static class DefaultUser
     {
-        public required T Id { get; set; }
+        public const int Id = 1;
+        
     }
 }

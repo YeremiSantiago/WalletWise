@@ -10,6 +10,9 @@ namespace WalletWise.Domain.Entities
     public class Wallet : BaseEntity<int>
     {
         public string Name { get; set; }
-        public int UserId { get; set; }
+        public int? UserId { get; set; }
+
+        // Navigation Property
+        public Transaction transaction { get; set; }
     }
 }

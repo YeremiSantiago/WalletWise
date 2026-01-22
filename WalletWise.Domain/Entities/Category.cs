@@ -7,9 +7,12 @@ using WalletWise.Domain.Common;
 
 namespace WalletWise.Domain.Entities
 {
-    public class Category : BaseEntity<int>
+    public class Category : AuditEntity
     {
         public string Name { get; set; }
-        public int IdUser { get; set; }
+        public int? UserId { get; set; }
+
+        // Navigation Property
+        public Transaction transaction { get; set; }
     }
 }
