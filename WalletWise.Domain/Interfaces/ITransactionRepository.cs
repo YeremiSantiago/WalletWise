@@ -11,5 +11,6 @@ namespace WalletWise.Domain.Interfaces
     public interface ITransactionRepository : IGenericRepository<Transaction>
     {
         Task<bool> ExistsTransactionByCategoryAsync(int id);
+        
     }
 }

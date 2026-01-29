@@ -7,9 +7,9 @@ namespace WalletWise.Application.Interfaces
 {
     public interface ITransactionService : IGenericService<Transaction>
     {
-        Task<IEnumerable<Transaction>> GetByDateRangeAsync(DateTime start, DateTime end);
-        Task<IEnumerable<Transaction>> GetByTypeTransactionAsync(TypeTransaction typeTransaction);
-        Task<IEnumerable<Transaction>> GetByCategoryAsync(int idCategory);
+        Task<Result<IEnumerable<Transaction>>> GetByDateRangeAsync(DateTime start, DateTime end);
+        Task<Result<IEnumerable<Transaction>>> GetByTypeTransactionAsync(TypeTransaction typeTransaction);
+        Task<Result<IEnumerable<Transaction>>> GetByCategoryAsync(int idCategory);
 
     }
 }

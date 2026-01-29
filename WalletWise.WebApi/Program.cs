@@ -1,3 +1,6 @@
+using WalletWise.Application.DependencyInjection;
+using WalletWise.Persistence.DependencyInjection;
+using WalletWise.Infraestructure.DependencyInjection;
 
 namespace WalletWise.WebApi
 {
@@ -8,6 +11,9 @@ namespace WalletWise.WebApi
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
+            builder.Services.AddApplicationLayerIoc().
+                AddPersistenceLayerIoc(builder.Configuration).
+                AddInfraestructureLayerIoc();
 
             builder.Services.AddControllers();
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi

@@ -28,5 +28,7 @@ namespace WalletWise.Domain.Common
             return new(false, error, default);
 
         }
+
+       
     }
 }

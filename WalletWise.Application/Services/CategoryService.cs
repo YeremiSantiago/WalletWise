@@ -1,4 +1,5 @@
-﻿using WalletWise.Application.Constants;
+﻿using Microsoft.Extensions.Logging;
+using WalletWise.Application.Constants;
 using WalletWise.Application.Interfaces;
 using WalletWise.Domain.Common;
 using WalletWise.Domain.Entities;
@@ -11,7 +12,7 @@ namespace WalletWise.Application.Services
         private readonly ICategoryRepository _categoryRepository;
         private readonly ITransactionRepository _transactionRepository;
         
-        public CategoryService(ICategoryRepository categoryRepository, ITransactionRepository transactionRepository) : base(categoryRepository) 
+        public CategoryService(ICategoryRepository categoryRepository, ITransactionRepository transactionRepository, ILogger<Category> logger) : base(categoryRepository, logger) 
         {
             _categoryRepository = categoryRepository;
             _transactionRepository = transactionRepository;
@@ -35,12 +36,11 @@ namespace WalletWise.Application.Services
 
         public override async Task<Result<bool>> DeleteAsync(int id)
         {
-            var category = await GetByIdAsync(id);
+            var category = await _categoryRepository.GetByIdAsync(id);
 
             if(category == null)
             {
-                Result<bool>.Failure("La categoria no pudo ser encontrada");
-
+                return Result<bool>.Failure($"La categoria con id {id} no pudo ser encontrada");
             }
 
             bool exists = await _transactionRepository.ExistsTransactionByCategoryAsync(category.Id);

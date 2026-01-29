@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,7 +15,7 @@ namespace WalletWise.Application.Services
     public class WalletService : GenericService<Wallet>, IWalletService
     {
         private readonly IWalletRepository _walletRepository;
-        public WalletService(IWalletRepository walletRepository) : base(walletRepository)
+        public WalletService(IWalletRepository walletRepository, ILogger<Wallet> logger) : base(walletRepository, logger)
         {
             _walletRepository = walletRepository;
         }
