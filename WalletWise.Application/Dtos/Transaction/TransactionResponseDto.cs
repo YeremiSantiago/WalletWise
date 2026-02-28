@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using WalletWise.Domain.Common;
 using WalletWise.Domain.Common.Enums;
 
-namespace WalletWise.Domain.Entities
+namespace WalletWise.Application.Dtos.Transaction
 {
-     public class Transaction : BaseEntity<int>
+    public class TransactionResponseDto
     {
+        public int Id { get; set; }
         public decimal Amount { get; set; }
         public DateTime Date { get; set; }
         public TypeTransaction Type { get; set; }
@@ -18,8 +18,5 @@ namespace WalletWise.Domain.Entities
         public int CategoryId { get; set; }
         public int WalletId { get; set; }
 
-        //Navigations Property
-        public Category? Category { get; set; }
-        public Wallet? Wallet { get; set; }
     }
 }

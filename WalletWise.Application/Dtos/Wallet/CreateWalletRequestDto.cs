@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace WalletWise.Domain.Common
+namespace WalletWise.Application.Dtos.Wallet
 {
-    public class BaseEntity<T>
+    public class CreateWalletRequestDto
     {
-        public  T Id { get; set; }
+        public string Name { get; set; }
     }
 }

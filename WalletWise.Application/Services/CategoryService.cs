@@ -1,65 +1,115 @@
 ﻿using Microsoft.Extensions.Logging;
 using WalletWise.Application.Constants;
+using WalletWise.Application.Dtos.Category;
 using WalletWise.Application.Interfaces;
 using WalletWise.Domain.Common;
 using WalletWise.Domain.Entities;
 using WalletWise.Domain.Interfaces;
+using System.Linq;
+using AutoMapper;
 
 namespace WalletWise.Application.Services
 {
-    public class CategoryService : GenericService<Category>, ICategoryService 
+    public class CategoryService : GenericService<Category, CategoryResponseDto, CreateCategoryRequestDto, UpdateCategoryRequestDto>, ICategoryService
     {
         private readonly ICategoryRepository _categoryRepository;
         private readonly ITransactionRepository _transactionRepository;
-        
-        public CategoryService(ICategoryRepository categoryRepository, ITransactionRepository transactionRepository, ILogger<Category> logger) : base(categoryRepository, logger) 
+        private readonly IClock _clock;
+
+        public CategoryService(ICategoryRepository categoryRepository, ITransactionRepository transactionRepository, ILogger<Category> logger, IClock clock, IMapper mapper) : base(categoryRepository, logger, mapper)
         {
             _categoryRepository = categoryRepository;
             _transactionRepository = transactionRepository;
+            _clock = clock;
         }
 
-        public override async Task<Result<Category>> AddAsync(Category category)
+
+        public async Task<Result<CategoryResponseDto>> CreateCategoryAsync(CreateCategoryRequestDto categoryDto)
         {
-            var exist = await _categoryRepository.ExistsAsync(x => x.Name == category.Name); 
-            
-            if(exist == true)
+            try
             {
-                return Result<Category>.Failure("Ya existe una Categoria con ese mismo nombre");
+
+                var category = _mapper.Map<Category>(categoryDto);
+
+                category.UserId = DefaultUser.Id;
+                category.CreatedAt = _clock.UtcNow();
+
+                var exist = await _categoryRepository.ExistsAsync(x => x.Name == category.Name);
+
+                if (exist == true)
+                {
+                    return Result<CategoryResponseDto>.Failure("Ya existe una Categoria con ese mismo nombre");
+                }
+
+                var Response = await _categoryRepository.AddAsync(category);
+
+                return Result<CategoryResponseDto>.Success(_mapper.Map<CategoryResponseDto>(Response));
             }
-
-            category.UserId = DefaultUser.Id;
-
-
-            return Result<Category>.Success(await _categoryRepository.AddAsync(category));
-
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ha ocurrido un fallo al crear la categoria");
+                return Result<CategoryResponseDto>.Failure("No se ha podido crear la categoria");
+            }
         }
 
-        public override async Task<Result<bool>> DeleteAsync(int id)
+        public async Task<Result<CategoryResponseDto>> UpdateCategoryAsync(int id, UpdateCategoryRequestDto categoryDto)
         {
-            var category = await _categoryRepository.GetByIdAsync(id);
-
-            if(category == null)
+            try
             {
-                return Result<bool>.Failure($"La categoria con id {id} no pudo ser encontrada");
+
+                var exist = await _categoryRepository.GetByIdAsync(id);
+
+                if (exist == null)
+                {
+                    return Result<CategoryResponseDto>.Failure($"La Categoria con el id {id} no existe");
+                }
+
+                _mapper.Map(categoryDto, exist);
+
+                exist.UpdatedAt = _clock.UtcNow();
+
+                return Result<CategoryResponseDto>.Success(_mapper.Map<CategoryResponseDto>(exist));
             }
-
-            bool exists = await _transactionRepository.ExistsTransactionByCategoryAsync(category.Id);
-
-            if (exists == true)
+            catch (Exception ex)
             {
-                return Result<bool>.Failure("Esta categoria tiene transacciones asociadas");
+                _logger.LogError(ex, "Ha ocurrido un error inesperado al actualizar la categoria {Id}", id);
+                return Result<CategoryResponseDto>.Failure("No se ha podido actualizar la categoria");
             }
-
-            category.IsDeleted = true;
-
-            await _categoryRepository.UpdateAsync(category);
-
-            return Result<bool>.Success(true);
-
         }
 
+        public async Task<Result<bool>> DeleteCategoryAsync(int id)
+        {
+            try
+            {
 
+                var category = await _categoryRepository.GetByIdAsync(id);
 
+                if (category == null)
+                {
+                    return Result<bool>.Failure($"La categoria con id {id} no pudo ser encontrada");
+                }
+
+                bool exists = await _transactionRepository.ExistsTransactionByCategoryAsync(category.Id);
+
+                if (exists == true)
+                {
+                    return Result<bool>.Failure("Esta categoria tiene transacciones asociadas");
+                }
+
+                category.UpdatedAt = _clock.UtcNow();
+                category.IsDeleted = true;
+
+                await _categoryRepository.UpdateAsync(category);
+
+                return Result<bool>.Success(true);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ha ocurrido un fallo al borrar la categoria id {Id}", id);
+                return Result<bool>.Failure("No se ha podido eliminar la categoria");
+            }
+
+        }
 
     }
 }

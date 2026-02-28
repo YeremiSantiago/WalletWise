@@ -7,12 +7,15 @@ using WalletWise.Domain.Common;
 
 namespace WalletWise.Application.Interfaces
 {
-    public interface IGenericService<T> where T : class
+    public interface IGenericService<ResDto, CreatDto, UpdaDto> 
+        where ResDto : class
+        where CreatDto : class
+        where UpdaDto : class
     {
-        Task<Result<T?>> GetByIdAsync(int id);
-        Task<Result<IEnumerable<T>>> GetAllAsync();
-        Task<Result<T>> AddAsync(T entity);
-        Task<Result<T>> UpdateAsync(T entity);
+        Task<Result<ResDto?>> GetByIdAsync(int id);
+        Task<Result<IEnumerable<ResDto>>> GetAllAsync();
+        Task<Result<ResDto>> AddAsync(CreatDto entity);
+        Task<Result<ResDto>> UpdateAsync(int id, UpdaDto entity);
         Task<Result<bool>> DeleteAsync(int id);
         
     }

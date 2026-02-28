@@ -23,7 +23,7 @@ namespace WalletWise.Persistence.DependencyInjection
 
 
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
-            services.AddScoped<ITransactionRepository, ITransactionRepository>();
+            services.AddScoped<ITransactionRepository, TransactionRepository>();
             services.AddScoped<IWalletRepository, WalletRepository>();
             services.AddScoped<ICategoryRepository, CategoryRepository>();
 

@@ -35,7 +35,7 @@ namespace WalletWise.Persistence.Repositories
         {
             await _context.Set<T>().AddAsync(entity);
 
-           await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
 
             return entity;
 
@@ -43,9 +43,8 @@ namespace WalletWise.Persistence.Repositories
 
         public virtual async Task UpdateAsync(T entity)
         {
-             _context.Set<T>().Update(entity);
-
-            await _context.SaveChangesAsync();
+                _context.Set<T>().Update(entity);
+                await _context.SaveChangesAsync(); 
         }
 
         public virtual async Task RemoveAsync(int id)

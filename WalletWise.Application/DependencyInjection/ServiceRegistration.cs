@@ -13,10 +13,14 @@ namespace WalletWise.Application.DependencyInjection
     {
         public static IServiceCollection AddApplicationLayerIoc(this IServiceCollection services)
         {
-            services.AddScoped(typeof(IGenericService<>), typeof(GenericService<>));
+            // Services
             services.AddScoped<ICategoryService, CategoryService>();
             services.AddScoped<ITransactionService, TransactionService>();
             services.AddScoped<IWalletService, WalletService>();
+
+            // Configurations
+
+            services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
             return services;
         }

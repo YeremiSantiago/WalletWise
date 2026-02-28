@@ -21,6 +21,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WalletWise.Persistence", "W
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WalletWise.Infraestructure", "Infraestructure.WalletWise\WalletWise.Infraestructure.csproj", "{08EC920C-868F-4C2A-9A57-2682D5C3012E}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{D85D1AEB-CA79-4483-A28C-172DFC84FF7F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WalletWise.Unit.Tests", "WalletWise.UnitTest\WalletWise.Unit.Tests.csproj", "{41A8204F-1603-4CE5-99C8-E1B4D481AA87}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WalletWise.Integration.Test", "WalletWise.Integration.Test\WalletWise.Integration.Test.csproj", "{0455FE3E-2B42-4A79-939C-76F4AFC49EEB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -47,6 +53,14 @@ Global
 		{08EC920C-868F-4C2A-9A57-2682D5C3012E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{08EC920C-868F-4C2A-9A57-2682D5C3012E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{08EC920C-868F-4C2A-9A57-2682D5C3012E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{41A8204F-1603-4CE5-99C8-E1B4D481AA87}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{41A8204F-1603-4CE5-99C8-E1B4D481AA87}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{41A8204F-1603-4CE5-99C8-E1B4D481AA87}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{41A8204F-1603-4CE5-99C8-E1B4D481AA87}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0455FE3E-2B42-4A79-939C-76F4AFC49EEB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0455FE3E-2B42-4A79-939C-76F4AFC49EEB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0455FE3E-2B42-4A79-939C-76F4AFC49EEB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0455FE3E-2B42-4A79-939C-76F4AFC49EEB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -58,6 +72,8 @@ Global
 		{CBEB5117-6414-4B64-9691-A7F67AB1DCA5} = {D3C078CD-D1FB-4490-81FB-5828E382553E}
 		{463B04FF-D017-4EB3-A805-CC8CCA0B0FA3} = {45C94724-789B-40BB-8C68-763E35B45B01}
 		{08EC920C-868F-4C2A-9A57-2682D5C3012E} = {45C94724-789B-40BB-8C68-763E35B45B01}
+		{41A8204F-1603-4CE5-99C8-E1B4D481AA87} = {D85D1AEB-CA79-4483-A28C-172DFC84FF7F}
+		{0455FE3E-2B42-4A79-939C-76F4AFC49EEB} = {D85D1AEB-CA79-4483-A28C-172DFC84FF7F}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {9DC7D193-D733-42E9-96F3-2863EC5CD3B2}

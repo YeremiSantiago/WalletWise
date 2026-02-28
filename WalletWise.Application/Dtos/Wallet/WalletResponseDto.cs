@@ -3,16 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using WalletWise.Domain.Common;
 
-namespace WalletWise.Domain.Entities
+namespace WalletWise.Application.Dtos.Wallet
 {
-    public class Category : AuditEntity
+    public class WalletResponseDto
     {
+        public int Id { get; set; }
         public string Name { get; set; }
         public int? UserId { get; set; }
-
-        // Navigation Property
-        public IEnumerable<Transaction>? Transactions { get; set; }
     }
 }

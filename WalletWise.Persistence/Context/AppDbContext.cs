@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using WalletWise.Domain.Entities;
+using WalletWise.Persistence.Seeds;
 
 namespace WalletWise.Persistence.Context
 {
@@ -20,8 +21,9 @@ namespace WalletWise.Persistence.Context
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            base.OnModelCreating(modelBuilder);
+            modelBuilder.SeedUsers();
 
+            base.OnModelCreating(modelBuilder);
             modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
 
         }

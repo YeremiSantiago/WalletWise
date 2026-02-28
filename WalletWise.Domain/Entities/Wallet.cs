@@ -13,6 +13,6 @@ namespace WalletWise.Domain.Entities
         public int? UserId { get; set; }
 
         // Navigation Property
-        public Transaction transaction { get; set; }
+        public IEnumerable<Transaction>? Transactions { get; set; }
     }
 }
