@@ -36,7 +36,7 @@ namespace WalletWise.Application.Services
 
                 if (entity == null)
                 {
-                    return Result<ResDto?>.Failure($"La entidad con el Id {id} no pudo ser encontrada");
+                    return Result<ResDto?>.Failure($"La entidad con el Id {id} no existe");
 
                 }
 

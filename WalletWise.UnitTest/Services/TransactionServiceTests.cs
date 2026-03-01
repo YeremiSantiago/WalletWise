@@ -22,19 +22,23 @@ namespace WalletWise.Unit.Tests.Services
         private readonly Mock<ITransactionRepository> _transactionRepoMock;
         private readonly Mock<IClock> _iClockMock;
         private readonly Mock<ILogger<Transaction>> _loggerMock;
+        private readonly Mock<IWalletRepository> _walletRepoMock;
+        private readonly Mock<ICategoryRepository> _categoryRepoMock;
 
         public TransactionServiceTests()
         {
             _transactionRepoMock = new Mock<ITransactionRepository>();
             _iClockMock = new Mock<IClock>();
             _loggerMock = new Mock<ILogger<Transaction>>();
+            _walletRepoMock = new Mock<IWalletRepository>();
+            _categoryRepoMock = new Mock<ICategoryRepository>();
+
 
             var config = new MapperConfiguration(
-                c => c.AddProfile<TransactionMappingProfile>(),
-                NullLoggerFactory.Instance);
+                c => c.AddProfile<TransactionMappingProfile>());
 
             var mapper = config.CreateMapper();
-            _transactionService = new TransactionService(_transactionRepoMock.Object, _iClockMock.Object, _loggerMock.Object, mapper);
+            _transactionService = new TransactionService(_transactionRepoMock.Object, _iClockMock.Object, _loggerMock.Object, mapper, _walletRepoMock.Object, _categoryRepoMock.Object);
         }
 
         [Fact]
@@ -171,7 +175,6 @@ namespace WalletWise.Unit.Tests.Services
         public async Task GetTransactionByIdAsync_WhenATransactionIsObtainedThatDoesNotExist_ReturnFailureOperationWithError()
         {
             // Arrange
-
             var transactions = new List<Transaction>()
             {
                 new Transaction
@@ -215,15 +218,13 @@ namespace WalletWise.Unit.Tests.Services
                 .ReturnsAsync(default(Transaction));
 
             // Act
-
             var result = await _transactionService.GetByIdAsync(id);
 
             // Assert
-
             Assert.NotNull(result.Error);
             Assert.Null(result.Value);
             Assert.False(result.IsSuccess);
-            Assert.Equal($"La entidad con el Id {id} no pudo ser encontrada", result.Error);
+            Assert.Equal($"La entidad con el Id {id} no existe", result.Error); // ✅ Cambiado
 
         }
 
@@ -231,7 +232,6 @@ namespace WalletWise.Unit.Tests.Services
         public async Task CreateTransactionAsync_WhenCreatedATransaction_ReturnOperationIsSuccessWithValue()
         {
             // Arrange
-
             var categories = new List<Category>()
             {
                 new Category {Id = 1, Name = "Comida", UserId = 1, IsDeleted = false},
@@ -250,7 +250,7 @@ namespace WalletWise.Unit.Tests.Services
             var transactionDto = new CreateTransactionRequestDto
             {
                 Amount = 15000,
-                Date = DateTime.Parse("25/02/2026"),
+                Date = DateTime.Parse("24/02/2026"),
                 Type = TypeTransaction.Income,
                 Comment = "Este es mi primer gasto",
                 CategoryId = 1,
@@ -258,15 +258,18 @@ namespace WalletWise.Unit.Tests.Services
             };
 
 
+            _iClockMock.Setup(c => c.UtcNow()).Returns(DateTime.Parse("10/03/2026"));
+            
+            _walletRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(wallets[0]);
+            _categoryRepoMock.Setup(r => r.GetCategoryActiveByIdAsync(1)).ReturnsAsync(categories[0]);
+
             _transactionRepoMock.Setup(r => r.AddAsync(It.IsAny<Transaction>()))
                 .ReturnsAsync((Transaction w) => w);
 
             // Act
-
             var result = await _transactionService.CreateTransactionAsync(transactionDto);
 
             // Assert
-
             Assert.True(result.IsSuccess);
             Assert.Null(result.Error);
             Assert.NotNull(result.Value);

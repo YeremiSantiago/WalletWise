@@ -27,7 +27,9 @@ namespace WalletWise.Persistence.Repositories
 
         public virtual async Task<IEnumerable<T>> GetAllAsync()
         {
-            return await _context.Set<T>().AsNoTracking().ToListAsync();
+            return await _context.Set<T>()
+                .AsNoTracking().
+                ToListAsync();
 
         }
 

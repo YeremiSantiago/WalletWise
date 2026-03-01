@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,5 +14,18 @@ namespace WalletWise.Persistence.Repositories
         public CategoryRepository(AppDbContext context ) : base(context)
         {
         }
+
+        public async Task<IEnumerable<Category>> GetAllCategoriesActiveAsync()
+        {
+            return await _context.Categories.Where(x => x.IsDeleted == false)
+                .AsNoTracking()
+                .ToListAsync();
+        }
+
+        public async Task<Category?> GetCategoryActiveByIdAsync(int id)
+        {
+            return await _context.Categories.FirstOrDefaultAsync(x => x.Id == id && x.IsDeleted == false);
+        }
+
     }
 }

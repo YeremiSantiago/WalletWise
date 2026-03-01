@@ -32,9 +32,7 @@ namespace WalletWise.Unit.Tests.Services
             _transactionRepoMock = new Mock<ITransactionRepository>();
 
             var config = new MapperConfiguration(
-            cfg => cfg.AddProfile<CategoryMappingProfile>(),
-            NullLoggerFactory.Instance  
-            );
+            cfg => cfg.AddProfile<CategoryMappingProfile>());
             var mapper = config.CreateMapper();
 
             _categoryService = new CategoryService(

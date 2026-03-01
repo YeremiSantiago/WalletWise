@@ -18,13 +18,17 @@ namespace WalletWise.Application.Services
     {
 
         private readonly ITransactionRepository _transactionRepository;
+        private readonly IWalletRepository _walletRepository;
+        private readonly ICategoryRepository _categoryRepository;
         private readonly IClock _clock;
 
 
-        public TransactionService(ITransactionRepository transactionRepository, IClock clock, ILogger<Transaction> logger, IMapper mapper) : base(transactionRepository, logger, mapper)
+        public TransactionService(ITransactionRepository transactionRepository, IClock clock, ILogger<Transaction> logger, IMapper mapper, IWalletRepository walletRepository, ICategoryRepository categoryRepository) : base(transactionRepository, logger, mapper)
         {
             _transactionRepository = transactionRepository;
             _clock = clock;
+            _walletRepository = walletRepository;
+            _categoryRepository = categoryRepository;
         }
 
 
@@ -32,7 +36,6 @@ namespace WalletWise.Application.Services
         {
             try
             {
-
                 var transaction = _mapper.Map<Transaction>(transactionDto);
 
                 transaction.UserId = DefaultUser.Id;
@@ -42,9 +45,24 @@ namespace WalletWise.Application.Services
                     return Result<TransactionResponseDto>.Failure("El monto tiene que ser mayor a cero");
                 }
 
-                if (transaction.Date <= _clock.UtcNow())
+
+                if (transaction.Date > _clock.UtcNow())
                 {
-                    return Result<TransactionResponseDto>.Failure("La fecha no puede futura para posibles gastos");
+                    return Result<TransactionResponseDto>.Failure("La fecha no puede ser futura para posibles gastos");
+                }
+
+
+                var walletExists = await _walletRepository.GetByIdAsync(transaction.WalletId);
+                if (walletExists == null)
+                {
+                    return Result<TransactionResponseDto>.Failure($"La wallet con ID {transaction.WalletId} no existe");
+                }
+
+
+                var categoryExists = await _categoryRepository.GetCategoryActiveByIdAsync(transaction.CategoryId);
+                if (categoryExists == null)
+                {
+                    return Result<TransactionResponseDto>.Failure($"La categoría con ID {transaction.CategoryId} no existe");
                 }
 
                 await _transactionRepository.AddAsync(transaction);
@@ -53,7 +71,7 @@ namespace WalletWise.Application.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Ha ocurrido un fallo a la hora de crear un transaccion");
+                _logger.LogError(ex, "Ha ocurrido un fallo a la hora de crear una transaccion");
                 return Result<TransactionResponseDto>.Failure("No se ha podido crear la transaccion");
             }
         }
@@ -71,6 +89,8 @@ namespace WalletWise.Application.Services
                 }
 
                 _mapper.Map(transactionDto, exist);
+
+                await _transactionRepository.UpdateAsync(exist);
 
                 return Result<TransactionResponseDto>.Success(_mapper.Map<TransactionResponseDto>(exist));
             }

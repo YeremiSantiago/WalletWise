@@ -30,10 +30,8 @@ namespace WalletWise.Unit.Tests.Services
             _repoMock = new Mock<IWalletRepository>();
             _loggerMock = new Mock<ILogger<Wallet>>();
 
-
             var options = new MapperConfiguration(
-                c => c.AddProfile<WalletMappingProfile>(),
-                NullLoggerFactory.Instance);
+                c => c.AddProfile<WalletMappingProfile>());
 
             var mapper = options.CreateMapper();
 
@@ -57,10 +55,9 @@ namespace WalletWise.Unit.Tests.Services
             var result = await _walletService.GetAllAsync();
 
             // Assert
-            Assert.Equal(3, result.Value.Count());
             Assert.NotNull(result.Value);
+            Assert.Equal(3, result.Value.Count());
             Assert.True(result.IsSuccess);
-
         }
 
         [Fact]
@@ -74,28 +71,21 @@ namespace WalletWise.Unit.Tests.Services
                 new Wallet { Id = 3, Name = "Antonia", UserId = 1 }
             };
 
-
             _repoMock.Setup(r => r.GetByIdAsync(3)).ReturnsAsync(wallets[2]);
 
             // Act
-
             var result = await _walletService.GetByIdAsync(3);
 
-
             // Assert
-
             Assert.True(result.IsSuccess);
-            Assert.Equal("Antonia", result.Value.Name);
             Assert.NotNull(result.Value);
-
-
+            Assert.Equal("Antonia", result.Value.Name);
         }
 
         [Fact]
         public async Task GetWalletByIdAsync_WhenWalletDoesnotExist_ReturnFailureWithNull()
         {
             // Arrange
-
             var wallets = new List<Wallet>()
             {
                 new Wallet { Id = 1, Name = "Anuel", UserId = 1 },
@@ -109,22 +99,18 @@ namespace WalletWise.Unit.Tests.Services
             _repoMock.Setup(r => r.GetByIdAsync(id)).ReturnsAsync((default(Wallet)));
 
             // Act
-
             var result = await _walletService.GetByIdAsync(id);
 
             // Assert
-
             Assert.False(result.IsSuccess);
-            Assert.Equal($"La entidad con el Id {id} no pudo ser encontrada", result.Error);
+            Assert.Equal($"La entidad con el Id {id} no existe", result.Error);
             Assert.Null(result.Value);
-
         }
 
         [Fact]
         public async Task CreateWalletAsync_WhenaWalletIsCreated_ReturnSuccessWithValue()
         {
             // Arrange
-
             var walletDto = new CreateWalletRequestDto
             {
                 Name = "Minimo Perazo"
@@ -133,23 +119,19 @@ namespace WalletWise.Unit.Tests.Services
             _repoMock.Setup(r => r.AddAsync(It.IsAny<Wallet>())).ReturnsAsync((Wallet w) => w);
 
             // Act
-
             var result = await _walletService.CreateWalletAsync(walletDto);
 
             // Assert
-
             Assert.True(result.IsSuccess);
+            Assert.NotNull(result.Value);
             Assert.Equal("Minimo Perazo", result.Value.Name);
             Assert.Null(result.Error);
-
         }
-
 
         [Fact]
         public async Task UpdateWalletAsync_WhenAnExistingWalletIsUpdated_ReturnSuccessWithValue()
         {
             // Arrange
-
             var wallets = new List<Wallet>()
             {
                 new Wallet { Id = 1, Name = "Anuel", UserId = 1 },
@@ -169,12 +151,11 @@ namespace WalletWise.Unit.Tests.Services
             _repoMock.Setup(r => r.UpdateAsync(It.IsAny<Wallet>())).Verifiable();
 
             // Act
-
             var result = await _walletService.UpdateWalletAsync(id, walletDto);
 
             // Assert
-
             Assert.True(result.IsSuccess);
+            Assert.NotNull(result.Value);
             Assert.Equal(walletDto.Name, result.Value.Name);
             Assert.Null(result.Error);
         }
@@ -183,7 +164,6 @@ namespace WalletWise.Unit.Tests.Services
         public async Task DeleteWalletAsync_WhenWalletIsDeleted_ReturnSuccessWithValue()
         {
             // Arrange
-
             var wallets = new List<Wallet>()
             {
                 new Wallet { Id = 1, Name = "Anuel", UserId = 1 },
@@ -201,21 +181,12 @@ namespace WalletWise.Unit.Tests.Services
                 Verifiable();
 
             // Act
-
             var result = await _walletService.DeleteWalletAsync(id);
 
             // Assert
-
             Assert.True(result.IsSuccess);
             Assert.Null(result.Error);
-            Assert.Equal(true, result.Value);
-
-
-
-
-
-
+            Assert.True(result.Value);
         }
-
     }
 }

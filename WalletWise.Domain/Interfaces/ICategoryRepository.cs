@@ -9,5 +9,7 @@ namespace WalletWise.Domain.Interfaces
 {
     public interface ICategoryRepository : IGenericRepository<Category>
     {
+        Task<IEnumerable<Category>> GetAllCategoriesActiveAsync();
+        Task<Category?> GetCategoryActiveByIdAsync(int id);
     }
 }
