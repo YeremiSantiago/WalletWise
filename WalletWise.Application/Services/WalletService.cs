@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using WalletWise.Application.Constants;
+
 using WalletWise.Application.Dtos.Wallet;
 using WalletWise.Application.Interfaces;
 using WalletWise.Domain.Common;
@@ -28,7 +28,6 @@ namespace WalletWise.Application.Services
             {
                 var wallet = _mapper.Map<Wallet>(walletDto);
 
-                wallet.UserId = DefaultUser.Id;
 
                 var walletR = await _walletRepository.AddAsync(wallet);
 

@@ -43,19 +43,19 @@ namespace WalletWise.Integration.Test.Repositories
                 {
                     Id = 1,
                     Name = "Comida",
-                    UserId = 1
+                    UserId = "1"
                 },
                 new Category()
                 {
                     Id = 2,
                     Name = "Compras",
-                    UserId = 1
+                    UserId = "1"
                 },
                 new Category()
                 {
                     Id = 3,
                     Name = "Servicios",
-                    UserId = 1
+                    UserId = "1"
                 }
             };
 
@@ -87,19 +87,19 @@ namespace WalletWise.Integration.Test.Repositories
                 {
                     Id = 1,
                     Name = "Ropa",
-                    UserId = 1
+                    UserId = "1"
                 },
                 new Category()
                 {
                     Id = 2,
                     Name = "Telecomunicaciones",
-                    UserId = 1
+                    UserId = "1"
                 },
                 new Category()
                 {
                     Id = 3,
                     Name = "Servicios",
-                    UserId = 1
+                    UserId = "1"
                 }
             };
 
@@ -129,7 +129,7 @@ namespace WalletWise.Integration.Test.Repositories
             var Category = new Category
             {
                 Name = "Antonio",
-                UserId = 1
+                UserId = "1"
             };
 
             // Act
@@ -155,19 +155,19 @@ namespace WalletWise.Integration.Test.Repositories
                 {
                     Id = 1,
                     Name = "Comida",
-                    UserId = 1
+                    UserId = "1"
                 },
                 new Category()
                 {
                     Id = 2,
                     Name = "Ropa",
-                    UserId = 1
+                    UserId = "1"
                 },
                 new Category()
                 {
                     Id = 3,
                     Name = "traje",
-                    UserId = 1
+                    UserId = "1"
                 }
             };
 
@@ -206,19 +206,19 @@ namespace WalletWise.Integration.Test.Repositories
                 {
                     Id = 1,
                     Name = "Ropa",
-                    UserId = 1
+                    UserId = "1"
                 },
                 new Category()
                 {
                     Id = 2,
                     Name = "Comida",
-                    UserId = 1
+                    UserId = "1"
                 },
                 new Category()
                 {
                     Id = 3,
                     Name = "Ahorro",
-                    UserId = 1
+                    UserId = "1"
                 }
             };
 
@@ -251,19 +251,19 @@ namespace WalletWise.Integration.Test.Repositories
                 {
                     Id = 1,
                     Name = "Comida",
-                    UserId = 1
+                    UserId = "1"
                 },
                 new Category()
                 {
                     Id = 2,
                     Name = "Ropa",
-                    UserId = 1
+                    UserId = "1"
                 },
                 new Category()
                 {
                     Id = 3,
                     Name = "Traje",
-                    UserId = 1
+                    UserId = "1"
                 }
             };
 

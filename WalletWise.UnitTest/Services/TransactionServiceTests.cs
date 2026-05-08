@@ -33,9 +33,9 @@ namespace WalletWise.Unit.Tests.Services
             _walletRepoMock = new Mock<IWalletRepository>();
             _categoryRepoMock = new Mock<ICategoryRepository>();
 
-
-            var config = new MapperConfiguration(
-                c => c.AddProfile<TransactionMappingProfile>());
+             var config = new MapperConfiguration(
+              c => { c.AddProfile<TransactionMappingProfile>(); },
+              NullLoggerFactory.Instance);
 
             var mapper = config.CreateMapper();
             _transactionService = new TransactionService(_transactionRepoMock.Object, _iClockMock.Object, _loggerMock.Object, mapper, _walletRepoMock.Object, _categoryRepoMock.Object);
@@ -55,7 +55,7 @@ namespace WalletWise.Unit.Tests.Services
                     Date = DateTime.Parse("10/09/2026"),
                     Type = TypeTransaction.Income,
                     Comment = null,
-                    UserId = 1,
+                    UserId = "1",
                     CategoryId = 1,
                     WalletId = 1
                 },
@@ -66,7 +66,7 @@ namespace WalletWise.Unit.Tests.Services
                     Date = DateTime.Parse("24/02/2026"),
                     Type = TypeTransaction.Expense,
                     Comment = "Que sueño",
-                    UserId = 1,
+                    UserId = "1",
                     CategoryId = 3,
                     WalletId = 2
                 },
@@ -77,7 +77,7 @@ namespace WalletWise.Unit.Tests.Services
                     Date = DateTime.Parse("25/02/2026"),
                     Type = TypeTransaction.Expense,
                     Comment = "Gastos de hoy",
-                    UserId = 1,
+                    UserId = "1",
                     CategoryId = 3,
                     WalletId = 2
                 }
@@ -114,7 +114,7 @@ namespace WalletWise.Unit.Tests.Services
                     Date = DateTime.Parse("10/09/2026"),
                     Type = TypeTransaction.Income,
                     Comment = null,
-                    UserId = 1,
+                    UserId = "1",
                     CategoryId = 1,
                     WalletId = 1
                 },
@@ -125,7 +125,7 @@ namespace WalletWise.Unit.Tests.Services
                     Date = DateTime.Parse("24/02/2026"),
                     Type = TypeTransaction.Expense,
                     Comment = "Que sueño",
-                    UserId = 1,
+                    UserId = "1",
                     CategoryId = 3,
                     WalletId = 2
                 },
@@ -136,7 +136,7 @@ namespace WalletWise.Unit.Tests.Services
                     Date = DateTime.Parse("25/02/2026"),
                     Type = TypeTransaction.Expense,
                     Comment = "Gastos de hoy",
-                    UserId = 1,
+                    UserId = "1",
                     CategoryId = 3,
                     WalletId = 2
                 }
@@ -144,10 +144,10 @@ namespace WalletWise.Unit.Tests.Services
 
             var categories = new List<Category>()
             {
-                new Category {Id = 1, Name = "Comida", UserId = 1, IsDeleted = false},
-                new Category {Id = 2, Name = "Servicios", UserId = 1, IsDeleted = false},
-                new Category {Id = 3, Name = "Transporte", UserId = 1, IsDeleted = false},
-                new Category {Id = 4, Name = "Comptras", UserId = 1, IsDeleted = false}
+                new Category {Id = 1, Name = "Comida", UserId = "1", IsDeleted = false},
+                new Category {Id = 2, Name = "Servicios", UserId = "1", IsDeleted = false},
+                new Category {Id = 3, Name = "Transporte", UserId = "1", IsDeleted = false},
+                new Category {Id = 4, Name = "Comptras", UserId = "1", IsDeleted = false}
             };
 
 
@@ -184,7 +184,7 @@ namespace WalletWise.Unit.Tests.Services
                     Date = DateTime.Parse("10/09/2026"),
                     Type = TypeTransaction.Income,
                     Comment = null,
-                    UserId = 1,
+                    UserId = "1",
                     CategoryId = 1,
                     WalletId = 1
                 },
@@ -195,7 +195,7 @@ namespace WalletWise.Unit.Tests.Services
                     Date = DateTime.Parse("24/02/2026"),
                     Type = TypeTransaction.Expense,
                     Comment = "Que sueño",
-                    UserId = 1,
+                    UserId = "1",
                     CategoryId = 3,
                     WalletId = 2
                 },
@@ -206,7 +206,7 @@ namespace WalletWise.Unit.Tests.Services
                     Date = DateTime.Parse("25/02/2026"),
                     Type = TypeTransaction.Expense,
                     Comment = "Gastos de hoy",
-                    UserId = 1,
+                    UserId = "1",
                     CategoryId = 3,
                     WalletId = 2
                 }
@@ -224,7 +224,7 @@ namespace WalletWise.Unit.Tests.Services
             Assert.NotNull(result.Error);
             Assert.Null(result.Value);
             Assert.False(result.IsSuccess);
-            Assert.Equal($"La entidad con el Id {id} no existe", result.Error); // ✅ Cambiado
+            Assert.Equal($"La entidad con el Id {id} no existe", result.Error); 
 
         }
 
@@ -234,17 +234,17 @@ namespace WalletWise.Unit.Tests.Services
             // Arrange
             var categories = new List<Category>()
             {
-                new Category {Id = 1, Name = "Comida", UserId = 1, IsDeleted = false},
-                new Category {Id = 2, Name = "Servicios", UserId = 1, IsDeleted = false},
-                new Category {Id = 3, Name = "Transporte", UserId = 1, IsDeleted = false},
-                new Category {Id = 4, Name = "Comptras", UserId = 1, IsDeleted = false}
+                new Category {Id = 1, Name = "Comida", UserId = "1", IsDeleted = false},
+                new Category {Id = 2, Name = "Servicios", UserId = "1", IsDeleted = false},
+                new Category {Id = 3, Name = "Transporte", UserId = "1", IsDeleted = false},
+                new Category {Id = 4, Name = "Comptras", UserId = "1", IsDeleted = false}
             };
 
             var wallets = new List<Wallet>()
             {
-                new Wallet { Id = 1, Name = "Maximo", UserId = 1 },
-                new Wallet { Id = 2, Name = "Pedro", UserId = 1 },
-                new Wallet { Id = 3, Name = "Antonio", UserId = 1 }
+                new Wallet { Id = 1, Name = "Maximo", UserId = "1" },
+                new Wallet { Id = 2, Name = "Pedro", UserId = "1" },
+                new Wallet { Id = 3, Name = "Antonio", UserId = "1" }
             };
 
             var transactionDto = new CreateTransactionRequestDto
@@ -290,7 +290,7 @@ namespace WalletWise.Unit.Tests.Services
                     Date = DateTime.Parse("10/09/2026"),
                     Type = TypeTransaction.Income,
                     Comment = null,
-                    UserId = 1,
+                    UserId = "1",
                     CategoryId = 1,
                     WalletId = 1
                 },
@@ -301,7 +301,7 @@ namespace WalletWise.Unit.Tests.Services
                     Date = DateTime.Parse("24/02/2026"),
                     Type = TypeTransaction.Expense,
                     Comment = "Que sueño",
-                    UserId = 1,
+                    UserId = "1",
                     CategoryId = 3,
                     WalletId = 2
                 },
@@ -312,7 +312,7 @@ namespace WalletWise.Unit.Tests.Services
                     Date = DateTime.Parse("25/02/2026"),
                     Type = TypeTransaction.Expense,
                     Comment = "Gastos de hoy",
-                    UserId = 1,
+                    UserId = "1",
                     CategoryId = 3,
                     WalletId = 2
                 }
@@ -360,7 +360,7 @@ namespace WalletWise.Unit.Tests.Services
                     Date = DateTime.Parse("10/09/2026"),
                     Type = TypeTransaction.Income,
                     Comment = null,
-                    UserId = 1,
+                    UserId = "1",
                     CategoryId = 1,
                     WalletId = 1
                 },
@@ -371,7 +371,7 @@ namespace WalletWise.Unit.Tests.Services
                     Date = DateTime.Parse("24/02/2026"),
                     Type = TypeTransaction.Expense,
                     Comment = "Que sueño",
-                    UserId = 1,
+                    UserId = "1",
                     CategoryId = 3,
                     WalletId = 2
                 },
@@ -382,7 +382,7 @@ namespace WalletWise.Unit.Tests.Services
                     Date = DateTime.Parse("25/02/2026"),
                     Type = TypeTransaction.Expense,
                     Comment = "Gastos de hoy",
-                    UserId = 1,
+                    UserId = "1",
                     CategoryId = 3,
                     WalletId = 2
                 }
@@ -419,7 +419,7 @@ namespace WalletWise.Unit.Tests.Services
                     Date = DateTime.Parse("25/02/2026"),
                     Type = TypeTransaction.Income,
                     Comment = null,
-                    UserId = 1,
+                    UserId = "1",
                     CategoryId = 1,
                     WalletId = 1
                 },
@@ -430,7 +430,7 @@ namespace WalletWise.Unit.Tests.Services
                     Date = DateTime.Parse("26/02/2026"),
                     Type = TypeTransaction.Expense,
                     Comment = "Que sueño",
-                    UserId = 1,
+                    UserId = "1",
                     CategoryId = 3,
                     WalletId = 2
                 }
@@ -470,7 +470,7 @@ namespace WalletWise.Unit.Tests.Services
                     Date = DateTime.Parse("25/02/2026"),
                     Type = TypeTransaction.Income,
                     Comment = null,
-                    UserId = 1,
+                    UserId = "1",
                     CategoryId = 1,
                     WalletId = 1
                 },
@@ -481,7 +481,7 @@ namespace WalletWise.Unit.Tests.Services
                     Date = DateTime.Parse("26/02/2026"),
                     Type = TypeTransaction.Income,
                     Comment = "Que sueño",
-                    UserId = 1,
+                    UserId = "1",
                     CategoryId = 3,
                     WalletId = 2
                 }
@@ -520,7 +520,7 @@ namespace WalletWise.Unit.Tests.Services
                     Date = DateTime.Parse("10/09/2026"),
                     Type = TypeTransaction.Income,
                     Comment = null,
-                    UserId = 1,
+                    UserId = "1",
                     CategoryId = 2,
                     WalletId = 1
                 },
@@ -531,7 +531,7 @@ namespace WalletWise.Unit.Tests.Services
                     Date = DateTime.Parse("24/02/2026"),
                     Type = TypeTransaction.Expense,
                     Comment = "Que sueño",
-                    UserId = 1,
+                    UserId = "1",
                     CategoryId = 2,
                     WalletId = 2
                 },
@@ -542,7 +542,7 @@ namespace WalletWise.Unit.Tests.Services
                     Date = DateTime.Parse("25/02/2026"),
                     Type = TypeTransaction.Expense,
                     Comment = "Gastos de hoy",
-                    UserId = 1,
+                    UserId = "1",
                     CategoryId = 2,
                     WalletId = 2
                 }

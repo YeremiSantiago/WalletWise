@@ -1,14 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using WalletWise.Domain.Interfaces;
 using WalletWise.Persistence.Context;
 using WalletWise.Persistence.Repositories;
+using Microsoft.AspNetCore.Identity;
+
 
 namespace WalletWise.Persistence.DependencyInjection
 {
@@ -21,6 +18,28 @@ namespace WalletWise.Persistence.DependencyInjection
                 sqlOptions => sqlOptions.MigrationsAssembly(typeof(AppDbContext).Assembly.FullName)
                ));
 
+            services.AddDbContext<IdentityAppDbContext>(options => options.UseSqlServer(
+                configuration.GetConnectionString("IdentityConnection"),
+                sqlOptions => sqlOptions.MigrationsAssembly(typeof(IdentityAppDbContext).Assembly.FullName)));
+
+            services.Configure<IdentityOptions>(options =>
+            {
+                options.Password.RequireDigit = true;
+                options.Password.RequireLowercase = true;
+                options.Password.RequireUppercase = true;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequiredLength = 8;
+
+                options.User.RequireUniqueEmail = true;
+                
+
+                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+                options.Lockout.MaxFailedAccessAttempts = 5;
+            });
+
+            services.AddIdentity<IdentityUser, IdentityRole>()
+                .AddEntityFrameworkStores<IdentityAppDbContext>()
+                .AddDefaultTokenProviders();
 
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             services.AddScoped<ITransactionRepository, TransactionRepository>();

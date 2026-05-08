@@ -42,19 +42,19 @@ namespace WalletWise.Integration.Test.Repositories
                 {
                     Id = 1,
                     Name = "Trabajo",
-                    UserId = 1
+                    UserId = "1"
                 },
                 new Wallet()
                 {
                     Id = 2,
                     Name = "Tarjeta Credito",
-                    UserId = 1
+                    UserId = "1"
                 },
                 new Wallet()
                 {
                     Id = 3,
                     Name = "Tarjeta De Debito",
-                    UserId = 1
+                    UserId = "1"
                 }
             };
 
@@ -86,19 +86,19 @@ namespace WalletWise.Integration.Test.Repositories
                 {
                     Id = 1,
                     Name = "Trabajo",
-                    UserId = 1
+                    UserId = "1"
                 },
                 new Wallet()
                 {
                     Id = 2,
                     Name = "Tarjeta Credito",
-                    UserId = 1
+                    UserId = "1"
                 },
                 new Wallet()
                 {
                     Id = 3,
                     Name = "Tarjeta De Debito",
-                    UserId = 1
+                    UserId = "1"
                 }
             };
 
@@ -128,7 +128,7 @@ namespace WalletWise.Integration.Test.Repositories
             var Wallet = new Wallet
             {
                 Name = "Maximo",
-                UserId = 1
+                UserId = "1"
             };
 
             // Act
@@ -154,19 +154,19 @@ namespace WalletWise.Integration.Test.Repositories
                 {
                     Id = 1,
                     Name = "Trabajo",
-                    UserId = 1
+                    UserId = "1"
                 },
                 new Wallet()
                 {
                     Id = 2,
                     Name = "Tarjeta Credito",
-                    UserId = 1
+                    UserId = "1"
                 },
                 new Wallet()
                 {
                     Id = 3,
                     Name = "Tarjeta De Debito",
-                    UserId = 1
+                    UserId = "1"
                 }
             };
 
@@ -205,19 +205,19 @@ namespace WalletWise.Integration.Test.Repositories
                 {
                     Id = 1,
                     Name = "Trabajo",
-                    UserId = 1
+                    UserId = "1"
                 },
                 new Wallet()
                 {
                     Id = 2,
                     Name = "Tarjeta Credito",
-                    UserId = 1
+                    UserId = "1"
                 },
                 new Wallet()
                 {
                     Id = 3,
                     Name = "Tarjeta De Debito",
-                    UserId = 1
+                    UserId = "1"
                 }
             };
 
@@ -250,19 +250,19 @@ namespace WalletWise.Integration.Test.Repositories
                 {
                     Id = 1,
                     Name = "Trabajo",
-                    UserId = 1
+                    UserId = "1"
                 },
                 new Wallet()
                 {
                     Id = 2,
                     Name = "Tarjeta Credito",
-                    UserId = 1
+                    UserId = "1"
                 },
                 new Wallet()
                 {
                     Id = 3,
                     Name = "Tarjeta De Debito",
-                    UserId = 1
+                    UserId = "1"
                 }
             };
 

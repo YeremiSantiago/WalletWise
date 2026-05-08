@@ -2,7 +2,6 @@
 using Microsoft.Extensions.Logging;
 using System.Data.Common;
 using System.Xml.Linq;
-using WalletWise.Application.Constants;
 using WalletWise.Application.Dtos.Transaction;
 using WalletWise.Application.Interfaces;
 using WalletWise.Domain.Common;
@@ -38,7 +37,7 @@ namespace WalletWise.Application.Services
             {
                 var transaction = _mapper.Map<Transaction>(transactionDto);
 
-                transaction.UserId = DefaultUser.Id;
+               
 
                 if (transaction.Amount <= 0)
                 {

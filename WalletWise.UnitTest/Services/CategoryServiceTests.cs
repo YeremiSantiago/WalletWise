@@ -32,7 +32,8 @@ namespace WalletWise.Unit.Tests.Services
             _transactionRepoMock = new Mock<ITransactionRepository>();
 
             var config = new MapperConfiguration(
-            cfg => cfg.AddProfile<CategoryMappingProfile>());
+            cfg => cfg.AddProfile<CategoryMappingProfile>(), NullLoggerFactory.Instance
+            );
             var mapper = config.CreateMapper();
 
             _categoryService = new CategoryService(
@@ -52,10 +53,10 @@ namespace WalletWise.Unit.Tests.Services
 
             var categories = new List<Category>()
             {
-                new Category {Id = 1, Name = "Comida", UserId = 1, IsDeleted = false},
-                new Category {Id = 2, Name = "Servicios", UserId = 1, IsDeleted = false},
-                new Category {Id = 3, Name = "Transporte", UserId = 1, IsDeleted = false},
-                new Category {Id = 4, Name = "Comptras", UserId = 1, IsDeleted = false}
+                new Category {Id = 1, Name = "Comida", UserId = "1", IsDeleted = false},
+                new Category {Id = 2, Name = "Servicios", UserId = "1", IsDeleted = false},
+                new Category {Id = 3, Name = "Transporte", UserId = "1", IsDeleted = false},
+                new Category {Id = 4, Name = "Comptras", UserId = "1", IsDeleted = false}
             };
 
             _categoryRepoMock.Setup(r => r.GetAllAsync())
@@ -82,10 +83,10 @@ namespace WalletWise.Unit.Tests.Services
 
             var categories = new List<Category>()
             {
-                new Category {Id = 1, Name = "Comida", UserId = 1, IsDeleted = false},
-                new Category {Id = 2, Name = "Servicios", UserId = 1, IsDeleted = false},
-                new Category {Id = 3, Name = "Transporte", UserId = 1, IsDeleted = false},
-                new Category {Id = 4, Name = "Comptras", UserId = 1, IsDeleted = false}
+                new Category {Id = 1, Name = "Comida", UserId = "1", IsDeleted = false},
+                new Category {Id = 2, Name = "Servicios", UserId = "1", IsDeleted = false},
+                new Category {Id = 3, Name = "Transporte", UserId = "1", IsDeleted = false},
+                new Category {Id = 4, Name = "Comptras", UserId = "1", IsDeleted = false}
             };
 
             int id = 3;
@@ -113,10 +114,10 @@ namespace WalletWise.Unit.Tests.Services
 
             var categories = new List<Category>()
             {
-                new Category {Id = 1, Name = "Comida", UserId = 1, IsDeleted = false},
-                new Category {Id = 2, Name = "Servicios", UserId = 1, IsDeleted = false},
-                new Category {Id = 3, Name = "Transporte", UserId = 1, IsDeleted = false},
-                new Category {Id = 4, Name = "Comptras", UserId = 1, IsDeleted = false}
+                new Category {Id = 1, Name = "Comida", UserId = "1", IsDeleted = false},
+                new Category {Id = 2, Name = "Servicios", UserId = "1", IsDeleted = false},
+                new Category {Id = 3, Name = "Transporte", UserId = "1", IsDeleted = false},
+                new Category {Id = 4, Name = "Comptras", UserId = "1", IsDeleted = false}
             };
 
             int id = 5;
@@ -170,10 +171,10 @@ namespace WalletWise.Unit.Tests.Services
 
             var categories = new List<Category>()
             {
-                new Category {Id = 1, Name = "Comida", UserId = 1, IsDeleted = false},
-                new Category {Id = 2, Name = "Servicios", UserId = 1, IsDeleted = false},
-                new Category {Id = 3, Name = "Transporte", UserId = 1, IsDeleted = false},
-                new Category {Id = 4, Name = "Comptras", UserId = 1, IsDeleted = false}
+                new Category {Id = 1, Name = "Comida", UserId = "1", IsDeleted = false},
+                new Category {Id = 2, Name = "Servicios", UserId = "1", IsDeleted = false},
+                new Category {Id = 3, Name = "Transporte", UserId = "1", IsDeleted = false},
+                new Category {Id = 4, Name = "Comptras", UserId = "1", IsDeleted = false}
             };
 
 
@@ -208,10 +209,10 @@ namespace WalletWise.Unit.Tests.Services
 
             var categories = new List<Category>()
             {
-                new Category {Id = 1, Name = "Comida", UserId = 1, IsDeleted = false},
-                new Category {Id = 2, Name = "Servicios", UserId = 1, IsDeleted = false},
-                new Category {Id = 3, Name = "Transporte", UserId = 1, IsDeleted = false},
-                new Category {Id = 4, Name = "Comptras", UserId = 1, IsDeleted = false}
+                new Category {Id = 1, Name = "Comida", UserId = "1", IsDeleted = false},
+                new Category {Id = 2, Name = "Servicios", UserId = "1", IsDeleted = false},
+                new Category {Id = 3, Name = "Transporte", UserId = "1", IsDeleted = false},
+                new Category {Id = 4, Name = "Comptras", UserId = "1", IsDeleted = false}
             };
 
             var transactions = new List<Transaction>()
@@ -223,7 +224,7 @@ namespace WalletWise.Unit.Tests.Services
                     Date = DateTime.Parse("10/09/2026"),
                     Type = TypeTransaction.Income,
                     Comment = null,
-                    UserId = 1,
+                    UserId = "1",
                     CategoryId = 1,
                     WalletId = 1
                 },
@@ -234,7 +235,7 @@ namespace WalletWise.Unit.Tests.Services
                     Date = DateTime.Parse("24/02/2026"),
                     Type = TypeTransaction.Expense,
                     Comment = "Que sueño",
-                    UserId = 1,
+                    UserId = "1",
                     CategoryId = 3,
                     WalletId = 2
                 }
@@ -247,13 +248,13 @@ namespace WalletWise.Unit.Tests.Services
                 {
                     Id = 1,
                     Name = "Sueldo",
-                    UserId = 1
+                    UserId = "1"
                 },
                 new Wallet
                 {
                     Id = 2,
                     Name = "Tarjeta de credito",
-                    UserId = 1
+                    UserId = "1"
                 }
             };
 
@@ -284,10 +285,10 @@ namespace WalletWise.Unit.Tests.Services
 
             var categories = new List<Category>()
             {
-                new Category {Id = 1, Name = "Comida", UserId = 1, IsDeleted = false},
-                new Category {Id = 2, Name = "Servicios", UserId = 1, IsDeleted = false},
-                new Category {Id = 3, Name = "Transporte", UserId = 1, IsDeleted = false},
-                new Category {Id = 4, Name = "Comptras", UserId = 1, IsDeleted = false}
+                new Category {Id = 1, Name = "Comida", UserId = "1", IsDeleted = false},
+                new Category {Id = 2, Name = "Servicios", UserId = "1", IsDeleted = false},
+                new Category {Id = 3, Name = "Transporte", UserId = "1", IsDeleted = false},
+                new Category {Id = 4, Name = "Comptras", UserId = "1", IsDeleted = false}
             };
 
             var transactions = new List<Transaction>()
@@ -299,7 +300,7 @@ namespace WalletWise.Unit.Tests.Services
                     Date = DateTime.Parse("10/09/2026"),
                     Type = TypeTransaction.Income,
                     Comment = null,
-                    UserId = 1,
+                    UserId = "1",
                     CategoryId = 2,
                     WalletId = 1
                 },
@@ -310,7 +311,7 @@ namespace WalletWise.Unit.Tests.Services
                     Date = DateTime.Parse("24/02/2026"),
                     Type = TypeTransaction.Expense,
                     Comment = "Que sueño",
-                    UserId = 1,
+                    UserId = "1",
                     CategoryId = 3,
                     WalletId = 2
                 }
@@ -322,13 +323,13 @@ namespace WalletWise.Unit.Tests.Services
                 {
                     Id = 1,
                     Name = "Sueldo",
-                    UserId = 1
+                    UserId = "1"
                 },
                 new Wallet
                 {
                     Id = 2,
                     Name = "Tarjeta de credito",
-                    UserId = 1
+                    UserId = "1"
                 }
             };
 

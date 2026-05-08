@@ -31,7 +31,8 @@ namespace WalletWise.Unit.Tests.Services
             _loggerMock = new Mock<ILogger<Wallet>>();
 
             var options = new MapperConfiguration(
-                c => c.AddProfile<WalletMappingProfile>());
+                c => c.AddProfile<WalletMappingProfile>(), NullLoggerFactory.Instance
+                );
 
             var mapper = options.CreateMapper();
 
@@ -44,9 +45,9 @@ namespace WalletWise.Unit.Tests.Services
             // Arrange
             var wallets = new List<Wallet>()
             {
-                new Wallet { Id = 1, Name = "Maximo", UserId = 1 },
-                new Wallet { Id = 2, Name = "Pedro", UserId = 1 },
-                new Wallet { Id = 3, Name = "Antonio", UserId = 1 }
+                new Wallet { Id = 1, Name = "Maximo", UserId = "1" },
+                new Wallet { Id = 2, Name = "Pedro", UserId = "1" },
+                new Wallet { Id = 3, Name = "Antonio", UserId = "1" }
             };
 
             _repoMock.Setup(r => r.GetAllAsync()).ReturnsAsync(wallets);
@@ -66,9 +67,9 @@ namespace WalletWise.Unit.Tests.Services
             // Arrange
             var wallets = new List<Wallet>()
             {
-                new Wallet { Id = 1, Name = "Anuel", UserId = 1 },
-                new Wallet { Id = 2, Name = "Pedra", UserId = 1 },
-                new Wallet { Id = 3, Name = "Antonia", UserId = 1 }
+                new Wallet { Id = 1, Name = "Anuel", UserId = "1" },
+                new Wallet { Id = 2, Name = "Pedra", UserId = "1"},
+                new Wallet { Id = 3, Name = "Antonia", UserId = "1" }
             };
 
             _repoMock.Setup(r => r.GetByIdAsync(3)).ReturnsAsync(wallets[2]);
@@ -88,10 +89,10 @@ namespace WalletWise.Unit.Tests.Services
             // Arrange
             var wallets = new List<Wallet>()
             {
-                new Wallet { Id = 1, Name = "Anuel", UserId = 1 },
-                new Wallet { Id = 2, Name = "Pedra", UserId = 1 },
-                new Wallet { Id = 3, Name = "Antonia", UserId = 1 },
-                new Wallet {Id = 4, Name = "Juancito", UserId = 1}
+                new Wallet { Id = 1, Name = "Anuel", UserId = "1" },
+                new Wallet { Id = 2, Name = "Pedra", UserId = "1" },
+                new Wallet { Id = 3, Name = "Antonia", UserId = "1" },
+                new Wallet {Id = 4, Name = "Juancito", UserId = "1"}
             };
 
             int id = 10;
@@ -134,10 +135,10 @@ namespace WalletWise.Unit.Tests.Services
             // Arrange
             var wallets = new List<Wallet>()
             {
-                new Wallet { Id = 1, Name = "Anuel", UserId = 1 },
-                new Wallet { Id = 2, Name = "Pedra", UserId = 1 },
-                new Wallet { Id = 3, Name = "Antonia", UserId = 1 },
-                new Wallet {Id = 4, Name = "Juancito", UserId = 1}
+                new Wallet { Id = 1, Name = "Anuel", UserId = "1" },
+                new Wallet { Id = 2, Name = "Pedra", UserId = "1" },
+                new Wallet { Id = 3, Name = "Antonia", UserId = "1" },
+                new Wallet {Id = 4, Name = "Juancito", UserId = "1"}
             };
 
             var walletDto = new UpdateWalletRequestDto
@@ -166,10 +167,10 @@ namespace WalletWise.Unit.Tests.Services
             // Arrange
             var wallets = new List<Wallet>()
             {
-                new Wallet { Id = 1, Name = "Anuel", UserId = 1 },
-                new Wallet { Id = 2, Name = "Pedra", UserId = 1 },
-                new Wallet { Id = 3, Name = "Antonia", UserId = 1 },
-                new Wallet {Id = 4, Name = "Juancito", UserId = 1}
+                new Wallet { Id = 1, Name = "Anuel", UserId = "1" },
+                new Wallet { Id = 2, Name = "Pedra", UserId = "1" },
+                new Wallet { Id = 3, Name = "Antonia", UserId = "1" },
+                new Wallet {Id = 4, Name = "Juancito", UserId = "1"}
             };
 
             int id = 2;

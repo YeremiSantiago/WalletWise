@@ -21,6 +21,9 @@ namespace WalletWise.Persistence.EntityConfigurations
             builder.Property(x => x.Name)
                 .IsRequired();
 
+            builder.Property(x => x.UserId)
+                .IsRequired();
+
             // Index
 
             builder.HasIndex(x => x.Name)

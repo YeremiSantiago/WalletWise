@@ -1,11 +1,15 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Annotations;
 using WalletWise.Application.Dtos.Wallet;
 using WalletWise.Application.Interfaces;
 using WalletWise.Domain.Entities;
 
 namespace WalletWise.WebApi.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/wallets")]
+    [SwaggerTag("Proporciona operaciones CRUD para gestionar las wallets")]
+    [Authorize]
     [ApiController]
     public class WalletsController : ControllerBase
     {
@@ -17,6 +21,10 @@ namespace WalletWise.WebApi.Controllers
         }
 
         [HttpGet]
+        [SwaggerOperation(
+            Summary="Obtener todas las wallets existentes",
+            Description="Te devuelve todas las wallets registradas existentes")]
+        [ProducesResponseType(typeof(List<WalletResponseDto>),StatusCodes.Status200OK)]
         public async Task<ActionResult<IEnumerable<WalletResponseDto>>> GetAllWallets()
         {
             var wallets = await _walletService.GetAllAsync();
@@ -25,6 +33,11 @@ namespace WalletWise.WebApi.Controllers
         }
 
         [HttpGet("{id}")]
+        [SwaggerOperation(
+            Summary="Obtiene una transaccion por ID",
+            Description= "Devuelve la wallet registrada asociada al identificador proporcionado, si existe.")]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(WalletResponseDto), StatusCodes.Status200OK)]
         public async Task<ActionResult<WalletResponseDto>> GetWalletById(int id)
         {
             var response = await _walletService.GetByIdAsync(id);
@@ -38,6 +51,10 @@ namespace WalletWise.WebApi.Controllers
         }
 
         [HttpPost]
+        [SwaggerOperation(
+            Summary="Crear wallet",
+            Description="Te permite crear una wallet y te la devuelve si es creada existosamente")]
+        [ProducesResponseType(typeof(WalletResponseDto),StatusCodes.Status201Created)]
         public async Task<ActionResult<WalletResponseDto>> CreateWallet([FromBody] CreateWalletRequestDto requestDto)
         {
             var response = await _walletService.CreateWalletAsync(requestDto);
@@ -46,6 +63,11 @@ namespace WalletWise.WebApi.Controllers
         }
 
         [HttpPut("{id}")]
+        [SwaggerOperation(
+            Summary="Actualizar wallet existente",
+            Description="Te permite actualizar una wallet existe y te la devuelve si la operacion sale exitosa ")]
+        [ProducesResponseType(typeof(ProblemDetails),StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(WalletResponseDto), StatusCodes.Status200OK)]
         public async Task<ActionResult<WalletResponseDto>> UpdateWallet(int id, [FromBody] UpdateWalletRequestDto requestDto)
         {
             var response = await _walletService.UpdateWalletAsync(id, requestDto);
@@ -59,6 +81,11 @@ namespace WalletWise.WebApi.Controllers
         }
 
         [HttpDelete("{id}")]
+        [SwaggerOperation(
+            Summary="Borrar wallet existente",
+            Description="Te permite borrar una wallet existente")]
+        [ProducesResponseType(typeof(ProblemDetails),StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
         public async Task<ActionResult> DeleteWallet(int id)
         {
             var response = await _walletService.DeleteWalletAsync(id);
@@ -70,10 +97,6 @@ namespace WalletWise.WebApi.Controllers
 
             return NoContent();
         }
-            
-        
-
-
 
     }
 }

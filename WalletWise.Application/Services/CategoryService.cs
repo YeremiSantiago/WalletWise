@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.Logging;
-using WalletWise.Application.Constants;
 using WalletWise.Application.Dtos.Category;
 using WalletWise.Application.Interfaces;
 using WalletWise.Domain.Common;
@@ -69,7 +68,7 @@ namespace WalletWise.Application.Services
 
                 var category = _mapper.Map<Category>(categoryDto);
 
-                category.UserId = DefaultUser.Id;
+            
                 category.CreatedAt = _clock.UtcNow();
 
                 var exist = await _categoryRepository.ExistsAsync(x => x.Name == category.Name);

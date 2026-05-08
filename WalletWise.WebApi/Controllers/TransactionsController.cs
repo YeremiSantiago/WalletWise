@@ -1,11 +1,15 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Annotations;
 using WalletWise.Application.Dtos.Transaction;
 using WalletWise.Application.Interfaces;
 
 namespace WalletWise.WebApi.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/transactions")]
+    [Authorize]
+    [SwaggerTag("Proporciorna operaciones CRUD para gestionar transacciones")]
     public class TransactionsController : ControllerBase
     {
         private readonly ITransactionService _transactionService;
@@ -16,6 +20,11 @@ namespace WalletWise.WebApi.Controllers
         }
 
         [HttpGet]
+        [SwaggerOperation(
+            Summary = "Obtener todas las transacciones",
+            Description = "Te devuelve todas las transacciones registradas existentes"
+            )]
+        [ProducesResponseType(typeof(List<TransactionResponseDto>), StatusCodes.Status200OK)]
         public async Task<ActionResult<IEnumerable<TransactionResponseDto>>> GetAllTransactions()
         {
             var response = await _transactionService.GetAllAsync();
@@ -24,6 +33,11 @@ namespace WalletWise.WebApi.Controllers
         }
 
         [HttpGet("{id}")]
+        [SwaggerOperation(
+            Summary = "Obtener una transaccion por ID",
+            Description = "Devuelve la transaccion registrada asociada al identificador proporcionado, si existe.")]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(TransactionResponseDto),StatusCodes.Status200OK)]
         public async Task<ActionResult<TransactionResponseDto>> GetTransactionById(int id)
         {
             var response = await _transactionService.GetByIdAsync(id);
@@ -37,14 +51,23 @@ namespace WalletWise.WebApi.Controllers
         }
 
         [HttpPost]
+        [SwaggerOperation(
+            Summary = "Crear una transaccion",
+            Description = "Te permite crear una transaccion y te la devuelve cuando es creada exitosamente")]
+        [ProducesResponseType(typeof(TransactionResponseDto), StatusCodes.Status201Created)]
         public async Task<ActionResult<TransactionResponseDto>> CreateTransaction([FromBody] CreateTransactionRequestDto requestDto)
         {
             var response = await _transactionService.CreateTransactionAsync(requestDto);
 
-            return CreatedAtAction(nameof(GetTransactionById), new {id = response.Value.Id}, response);
+            return CreatedAtAction(nameof(GetTransactionById), new { id = response.Value.Id }, response);
         }
 
         [HttpPut("{id}")]
+        [SwaggerOperation(
+            Summary = "Actualizar una transaccion existente",
+            Description = "Te permite actualizar una transaccion existente y cuando la operacion sale exitosa te la devuelve")]
+        [ProducesResponseType(typeof(ProblemDetails),StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(TransactionResponseDto),StatusCodes.Status200OK)]
         public async Task<ActionResult<TransactionResponseDto>> UpdateTransaction(int id, [FromBody] UpdateTransactionRequestDto requestDto)
         {
             var response = await _transactionService.UpdateTransactionAsync(id, requestDto);
@@ -58,6 +81,11 @@ namespace WalletWise.WebApi.Controllers
         }
 
         [HttpDelete("{id}")]
+        [SwaggerOperation(
+            Summary = "Borrar transaccion existente",
+            Description = "Te permite borrar una transaccion existente")]
+        [ProducesResponseType(typeof(ProblemDetails),StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
         public async Task<ActionResult> DeleteTransaction(int id)
         {
             var response = await _transactionService.DeleteTransactionAsync(id);

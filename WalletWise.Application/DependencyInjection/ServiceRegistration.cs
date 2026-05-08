@@ -21,7 +21,7 @@ namespace WalletWise.Application.DependencyInjection
 
             // Configurations
 
-            services.AddAutoMapper(Assembly.GetExecutingAssembly());
+            services.AddAutoMapper(c => { c.AddMaps(typeof(ServiceRegistration).Assembly); });
 
             return services;
         }

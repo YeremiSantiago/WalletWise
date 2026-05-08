@@ -42,6 +42,21 @@ namespace WalletWise.Integration.Test.Repositories
         {
             // Arrange
 
+            var categories = new List<Category>()
+            {
+                new Category {Id = 1, Name = "Comida", UserId = "1", IsDeleted = false},
+                new Category {Id = 2, Name = "Servicios", UserId = "1", IsDeleted = false},
+                new Category {Id = 3, Name = "Transporte", UserId = "1", IsDeleted = false},
+                new Category {Id = 4, Name = "Comptras", UserId = "1", IsDeleted = false}
+            };
+
+            var wallets = new List<Wallet>()
+            {
+                new Wallet() { Id = 1, Name = "Trabajo", UserId = "1" },
+                new Wallet() { Id = 2, Name = "Tarjeta Credito", UserId = "1" },
+                new Wallet() { Id = 3, Name = "Tarjeta De Debito", UserId = "1" }
+            };
+
             var transactions = new List<Transaction>()
             {
                 new Transaction
@@ -50,7 +65,7 @@ namespace WalletWise.Integration.Test.Repositories
                     Date = DateTime.Parse("10/09/2026"),
                     Type = TypeTransaction.Income,
                     Comment = null,
-                    UserId = 1,
+                    UserId = "1",
                     CategoryId = 1,
                     WalletId = 1
                 },
@@ -60,7 +75,7 @@ namespace WalletWise.Integration.Test.Repositories
                     Date = DateTime.Parse("24/02/2026"),
                     Type = TypeTransaction.Expense,
                     Comment = "Que sueño",
-                    UserId = 1,
+                    UserId = "1",
                     CategoryId = 2,
                     WalletId = 2
                 },
@@ -70,45 +85,12 @@ namespace WalletWise.Integration.Test.Repositories
                     Date = DateTime.Parse("25/02/2026"),
                     Type = TypeTransaction.Expense,
                     Comment = "Gastos de hoy",
-                    UserId = 1,
+                    UserId = "1",
                     CategoryId = 3,
                     WalletId = 3
                 }
 
             };
-
-            var categories = new List<Category>()
-            {
-                new Category {Id = 1, Name = "Comida", UserId = 1, IsDeleted = false},
-                new Category {Id = 2, Name = "Servicios", UserId = 1, IsDeleted = false},
-                new Category {Id = 3, Name = "Transporte", UserId = 1, IsDeleted = false},
-                new Category {Id = 4, Name = "Comptras", UserId = 1, IsDeleted = false}
-            };
-
-
-
-            var wallets = new List<Wallet>()
-            {
-                new Wallet()
-                {
-                    Id = 1,
-                    Name = "Trabajo",
-                    UserId = 1
-                },
-                new Wallet()
-                {
-                    Id = 2,
-                    Name = "Tarjeta Credito",
-                    UserId = 1
-                },
-                new Wallet()
-                {
-                    Id = 3,
-                    Name = "Tarjeta De Debito",
-                    UserId = 1
-                }
-            };
-
 
             await _context.Categories.AddRangeAsync(categories);
             await _context.Wallets.AddRangeAsync(wallets);
@@ -131,6 +113,21 @@ namespace WalletWise.Integration.Test.Repositories
         {
             // Arrange
 
+            var categories = new List<Category>()
+            {
+                new Category {Id = 1, Name = "Comida", UserId = "1", IsDeleted = false},
+                new Category {Id = 2, Name = "Servicios", UserId = "1", IsDeleted = false},
+                new Category {Id = 3, Name = "Transporte", UserId = "1", IsDeleted = false},
+                new Category {Id = 4, Name = "Comptras", UserId = "1", IsDeleted = false}
+            };
+
+            var wallets = new List<Wallet>()
+            {
+                new Wallet() { Id = 1, Name = "Trabajo", UserId = "1" },
+                new Wallet() { Id = 2, Name = "Tarjeta Credito", UserId = "1" },
+                new Wallet() { Id = 3, Name = "Tarjeta De Debito", UserId = "1" }
+            };
+
             var transactions = new List<Transaction>()
             {
                 new Transaction
@@ -139,7 +136,7 @@ namespace WalletWise.Integration.Test.Repositories
                     Date = DateTime.Parse("10/09/2026"),
                     Type = TypeTransaction.Income,
                     Comment = null,
-                    UserId = 1,
+                    UserId = "1",
                     CategoryId = 1,
                     WalletId = 1
                 },
@@ -149,7 +146,7 @@ namespace WalletWise.Integration.Test.Repositories
                     Date = DateTime.Parse("24/02/2026"),
                     Type = TypeTransaction.Expense,
                     Comment = "Que sueño",
-                    UserId = 1,
+                    UserId = "1",
                     CategoryId = 2,
                     WalletId = 2
                 },
@@ -159,43 +156,11 @@ namespace WalletWise.Integration.Test.Repositories
                     Date = DateTime.Parse("25/02/2026"),
                     Type = TypeTransaction.Expense,
                     Comment = "Gastos de hoy",
-                    UserId = 1,
+                    UserId = "1",
                     CategoryId = 3,
                     WalletId = 3
                 }
 
-            };
-
-            var categories = new List<Category>()
-            {
-                new Category {Id = 1, Name = "Comida", UserId = 1, IsDeleted = false},
-                new Category {Id = 2, Name = "Servicios", UserId = 1, IsDeleted = false},
-                new Category {Id = 3, Name = "Transporte", UserId = 1, IsDeleted = false},
-                new Category {Id = 4, Name = "Comptras", UserId = 1, IsDeleted = false}
-            };
-
-
-
-            var wallets = new List<Wallet>()
-            {
-                new Wallet()
-                {
-                    Id = 1,
-                    Name = "Trabajo",
-                    UserId = 1
-                },
-                new Wallet()
-                {
-                    Id = 2,
-                    Name = "Tarjeta Credito",
-                    UserId = 1
-                },
-                new Wallet()
-                {
-                    Id = 3,
-                    Name = "Tarjeta De Debito",
-                    UserId = 1
-                }
             };
 
             await _context.Categories.AddRangeAsync(categories);
@@ -220,37 +185,33 @@ namespace WalletWise.Integration.Test.Repositories
         {
             // Arrange
 
-            var transaction = new Transaction()
-            {
-                Amount = 15000,
-                Date = DateTime.Parse("26/02/2026"),
-                Type = TypeTransaction.Income,
-                Comment = "Primera transaction",
-                UserId = 1,
-                CategoryId = 1,
-                WalletId = 1
-            };
-
             var category = new Category()
             {
                 Name = "Comida",
-                UserId = 1
+                UserId = "1"
             };
 
            var wallet = new Wallet()
             {
                 Id = 1,
                 Name = "Trabajo",
-                UserId = 1
-            };
-
+                UserId = "1"
+           };
 
             await _context.Categories.AddAsync(category);
             await _context.Wallets.AddAsync(wallet);
-
             await _context.SaveChangesAsync();
 
-            int id = 1;
+            var transaction = new Transaction()
+            {
+                Amount = 15000,
+                Date = DateTime.Parse("26/02/2026"),
+                Type = TypeTransaction.Income,
+                Comment = "Primera transaction",
+                UserId = "1",
+                CategoryId = 1,
+                WalletId = 1
+            };
 
             // Act 
             
@@ -268,6 +229,21 @@ namespace WalletWise.Integration.Test.Repositories
         {
             // Arrange
 
+            var categories = new List<Category>()
+            {
+                new Category {Id = 1, Name = "Comida", UserId = "1", IsDeleted = false},
+                new Category {Id = 2, Name = "Servicios", UserId = "1", IsDeleted = false},
+                new Category {Id = 3, Name = "Transporte", UserId = "1", IsDeleted = false},
+                new Category {Id = 4, Name = "Comptras", UserId = "1", IsDeleted = false}
+            };
+
+            var wallets = new List<Wallet>()
+            {
+                new Wallet() { Id = 1, Name = "Trabajo", UserId = "1" },
+                new Wallet() { Id = 2, Name = "Tarjeta Credito", UserId = "1" },
+                new Wallet() { Id = 3, Name = "Tarjeta De Debito", UserId = "1" }
+            };
+
             var transactions = new List<Transaction>()
             {
                 new Transaction
@@ -276,7 +252,7 @@ namespace WalletWise.Integration.Test.Repositories
                     Date = DateTime.Parse("10/09/2026"),
                     Type = TypeTransaction.Income,
                     Comment = null,
-                    UserId = 1,
+                    UserId = "1",
                     CategoryId = 1,
                     WalletId = 1
                 },
@@ -286,7 +262,7 @@ namespace WalletWise.Integration.Test.Repositories
                     Date = DateTime.Parse("24/02/2026"),
                     Type = TypeTransaction.Expense,
                     Comment = "Que sueño",
-                    UserId = 1,
+                    UserId = "1",
                     CategoryId = 2,
                     WalletId = 2
                 },
@@ -296,41 +272,11 @@ namespace WalletWise.Integration.Test.Repositories
                     Date = DateTime.Parse("25/02/2026"),
                     Type = TypeTransaction.Expense,
                     Comment = "Gastos de hoy",
-                    UserId = 1,
+                    UserId = "1",
                     CategoryId = 3,
                     WalletId = 3
                 }
 
-            };
-
-            var categories = new List<Category>()
-            {
-                new Category {Id = 1, Name = "Comida", UserId = 1, IsDeleted = false},
-                new Category {Id = 2, Name = "Servicios", UserId = 1, IsDeleted = false},
-                new Category {Id = 3, Name = "Transporte", UserId = 1, IsDeleted = false},
-                new Category {Id = 4, Name = "Comptras", UserId = 1, IsDeleted = false}
-            };
-
-            var wallets = new List<Wallet>()
-            {
-                new Wallet()
-                {
-                    Id = 1,
-                    Name = "Trabajo",
-                    UserId = 1
-                },
-                new Wallet()
-                {
-                    Id = 2,
-                    Name = "Tarjeta Credito",
-                    UserId = 1
-                },
-                new Wallet()
-                {
-                    Id = 3,
-                    Name = "Tarjeta De Debito",
-                    UserId = 1
-                }
             };
 
             await _context.Categories.AddRangeAsync(categories);
@@ -360,6 +306,21 @@ namespace WalletWise.Integration.Test.Repositories
         {
             // Arrange
 
+            var categories = new List<Category>()
+            {
+                new Category {Id = 1, Name = "Comida", UserId = "1", IsDeleted = false},
+                new Category {Id = 2, Name = "Servicios", UserId = "1", IsDeleted = false},
+                new Category {Id = 3, Name = "Transporte", UserId = "1", IsDeleted = false},
+                new Category {Id = 4, Name = "Comptras", UserId = "1", IsDeleted = false}
+            };
+
+            var wallets = new List<Wallet>()
+            {
+                new Wallet() { Id = 1, Name = "Trabajo", UserId = "1" },
+                new Wallet() { Id = 2, Name = "Tarjeta Credito", UserId = "1" },
+                new Wallet() { Id = 3, Name = "Tarjeta De Debito", UserId = "1" }
+            };
+
             var transactions = new List<Transaction>()
             {
                 new Transaction
@@ -368,7 +329,7 @@ namespace WalletWise.Integration.Test.Repositories
                     Date = DateTime.Parse("10/09/2026"),
                     Type = TypeTransaction.Income,
                     Comment = null,
-                    UserId = 1,
+                    UserId = "1",
                     CategoryId = 1,
                     WalletId = 1
                 },
@@ -378,7 +339,7 @@ namespace WalletWise.Integration.Test.Repositories
                     Date = DateTime.Parse("24/02/2026"),
                     Type = TypeTransaction.Expense,
                     Comment = "Que sueño",
-                    UserId = 1,
+                    UserId = "1",
                     CategoryId = 2,
                     WalletId = 2
                 },
@@ -388,41 +349,11 @@ namespace WalletWise.Integration.Test.Repositories
                     Date = DateTime.Parse("25/02/2026"),
                     Type = TypeTransaction.Expense,
                     Comment = "Gastos de hoy",
-                    UserId = 1,
+                    UserId = "1",
                     CategoryId = 3,
                     WalletId = 3
                 }
 
-            };
-
-            var categories = new List<Category>()
-            {
-                new Category {Id = 1, Name = "Comida", UserId = 1, IsDeleted = false},
-                new Category {Id = 2, Name = "Servicios", UserId = 1, IsDeleted = false},
-                new Category {Id = 3, Name = "Transporte", UserId = 1, IsDeleted = false},
-                new Category {Id = 4, Name = "Comptras", UserId = 1, IsDeleted = false}
-            };
-
-            var wallets = new List<Wallet>()
-            {
-                new Wallet()
-                {
-                    Id = 1,
-                    Name = "Trabajo",
-                    UserId = 1
-                },
-                new Wallet()
-                {
-                    Id = 2,
-                    Name = "Tarjeta Credito",
-                    UserId = 1
-                },
-                new Wallet()
-                {
-                    Id = 3,
-                    Name = "Tarjeta De Debito",
-                    UserId = 1
-                }
             };
 
             int id = 2;
@@ -449,6 +380,21 @@ namespace WalletWise.Integration.Test.Repositories
         {
             // Arrange
 
+            var categories = new List<Category>()
+            {
+                new Category {Id = 1, Name = "Comida", UserId = "1", IsDeleted = false},
+                new Category {Id = 2, Name = "Servicios", UserId = "1", IsDeleted = false},
+                new Category {Id = 3, Name = "Transporte", UserId = "1", IsDeleted = false},
+                new Category {Id = 4, Name = "Comptras", UserId = "1", IsDeleted = false}
+            };
+
+            var wallets = new List<Wallet>()
+            {
+                new Wallet() { Id = 1, Name = "Trabajo", UserId = "1" },
+                new Wallet() { Id = 2, Name = "Tarjeta Credito", UserId = "1" },
+                new Wallet() { Id = 3, Name = "Tarjeta De Debito", UserId = "1" }
+            };
+
             var transactions = new List<Transaction>()
             {
                 new Transaction
@@ -457,7 +403,7 @@ namespace WalletWise.Integration.Test.Repositories
                     Date = DateTime.Parse("26/02/2026"),
                     Type = TypeTransaction.Income,
                     Comment = null,
-                    UserId = 1,
+                    UserId = "1",
                     CategoryId = 1,
                     WalletId = 1
                 },
@@ -467,7 +413,7 @@ namespace WalletWise.Integration.Test.Repositories
                     Date = DateTime.Parse("27/02/2026"),
                     Type = TypeTransaction.Expense,
                     Comment = "Que sueño",
-                    UserId = 1,
+                    UserId = "1",
                     CategoryId = 2,
                     WalletId = 2
                 },
@@ -477,7 +423,7 @@ namespace WalletWise.Integration.Test.Repositories
                     Date = DateTime.Parse("28/02/2026"),
                     Type = TypeTransaction.Expense,
                     Comment = "Gastos de hoy",
-                    UserId = 1,
+                    UserId = "1",
                     CategoryId = 3,
                     WalletId = 3
                 },
@@ -487,44 +433,12 @@ namespace WalletWise.Integration.Test.Repositories
                     Date = DateTime.Parse("28/02/2026"),
                     Type = TypeTransaction.Expense,
                     Comment = "Gastos de los otros dias",
-                    UserId = 1,
+                    UserId = "1",
                     CategoryId = 3,
                     WalletId = 3
                 }
 
             };
-
-            var categories = new List<Category>()
-            {
-                new Category {Id = 1, Name = "Comida", UserId = 1, IsDeleted = false},
-                new Category {Id = 2, Name = "Servicios", UserId = 1, IsDeleted = false},
-                new Category {Id = 3, Name = "Transporte", UserId = 1, IsDeleted = false},
-                new Category {Id = 4, Name = "Comptras", UserId = 1, IsDeleted = false}
-            };
-
-            var wallets = new List<Wallet>()
-            {
-                new Wallet()
-                {
-                    Id = 1,
-                    Name = "Trabajo",
-                    UserId = 1
-                },
-                new Wallet()
-                {
-                    Id = 2,
-                    Name = "Tarjeta Credito",
-                    UserId = 1
-                },
-                new Wallet()
-                {
-                    Id = 3,
-                    Name = "Tarjeta De Debito",
-                    UserId = 1
-                }
-            };
-
-            int id = 2;
 
             await _context.Categories.AddRangeAsync(categories);
             await _context.Wallets.AddRangeAsync(wallets);
@@ -541,15 +455,28 @@ namespace WalletWise.Integration.Test.Repositories
 
             // Assert
 
-            bool exist = await _context.Transactions.AllAsync(x => x.Date >= start && x.Date <= end);
-
-            Assert.True(true);
+            Assert.True(result.All(x => x.Date >= start && x.Date <= end));
         }
 
         [Fact]
         public async Task GetByTypeTransactionAsync_WhenTransactionsOfTypeExist_ShouldReturnListOfTransactions()
         {
             // Arrange
+
+            var categories = new List<Category>()
+            {
+                new Category {Id = 1, Name = "Comida", UserId = "1", IsDeleted = false},
+                new Category {Id = 2, Name = "Servicios", UserId = "1", IsDeleted = false},
+                new Category {Id = 3, Name = "Transporte", UserId = "1", IsDeleted = false},
+                new Category {Id = 4, Name = "Comptras", UserId = "1", IsDeleted = false}
+            };
+
+            var wallets = new List<Wallet>()
+            {
+                new Wallet() { Id = 1, Name = "Trabajo", UserId = "1" },
+                new Wallet() { Id = 2, Name = "Tarjeta Credito", UserId = "1" },
+                new Wallet() { Id = 3, Name = "Tarjeta De Debito", UserId = "1" }
+            };
 
             var transactions = new List<Transaction>()
             {
@@ -559,7 +486,7 @@ namespace WalletWise.Integration.Test.Repositories
                     Date = DateTime.Parse("26/02/2026"),
                     Type = TypeTransaction.Income,
                     Comment = null,
-                    UserId = 1,
+                    UserId = "1",
                     CategoryId = 1,
                     WalletId = 1
                 },
@@ -569,7 +496,7 @@ namespace WalletWise.Integration.Test.Repositories
                     Date = DateTime.Parse("27/02/2026"),
                     Type = TypeTransaction.Expense,
                     Comment = "Que sueño",
-                    UserId = 1,
+                    UserId = "1",
                     CategoryId = 2,
                     WalletId = 2
                 },
@@ -579,7 +506,7 @@ namespace WalletWise.Integration.Test.Repositories
                     Date = DateTime.Parse("28/02/2026"),
                     Type = TypeTransaction.Expense,
                     Comment = "Gastos de hoy",
-                    UserId = 1,
+                    UserId = "1",
                     CategoryId = 3,
                     WalletId = 3
                 },
@@ -589,41 +516,11 @@ namespace WalletWise.Integration.Test.Repositories
                     Date = DateTime.Parse("28/02/2026"),
                     Type = TypeTransaction.Expense,
                     Comment = "Gastos de los otros dias",
-                    UserId = 1,
+                    UserId = "1",
                     CategoryId = 3,
                     WalletId = 3
                 }
 
-            };
-
-            var categories = new List<Category>()
-            {
-                new Category {Id = 1, Name = "Comida", UserId = 1, IsDeleted = false},
-                new Category {Id = 2, Name = "Servicios", UserId = 1, IsDeleted = false},
-                new Category {Id = 3, Name = "Transporte", UserId = 1, IsDeleted = false},
-                new Category {Id = 4, Name = "Comptras", UserId = 1, IsDeleted = false}
-            };
-
-            var wallets = new List<Wallet>()
-            {
-                new Wallet()
-                {
-                    Id = 1,
-                    Name = "Trabajo",
-                    UserId = 1
-                },
-                new Wallet()
-                {
-                    Id = 2,
-                    Name = "Tarjeta Credito",
-                    UserId = 1
-                },
-                new Wallet()
-                {
-                    Id = 3,
-                    Name = "Tarjeta De Debito",
-                    UserId = 1
-                }
             };
 
             await _context.Categories.AddRangeAsync(categories);
@@ -647,9 +544,25 @@ namespace WalletWise.Integration.Test.Repositories
 
         }
 
+        [Fact]
         public async Task GetAllTransactionsByCategoryAsync_WhenCategoryHasTransactions_ShouldReturnListOfTransactions()
         {
             // Arrange
+
+            var categories = new List<Category>()
+            {
+                new Category {Id = 1, Name = "Comida", UserId = "1", IsDeleted = false},
+                new Category {Id = 2, Name = "Servicios", UserId = "1", IsDeleted = false},
+                new Category {Id = 3, Name = "Transporte", UserId = "1", IsDeleted = false},
+                new Category {Id = 4, Name = "Comptras", UserId = "1", IsDeleted = false}
+            };
+
+            var wallets = new List<Wallet>()
+            {
+                new Wallet() { Id = 1, Name = "Trabajo", UserId = "1" },
+                new Wallet() { Id = 2, Name = "Tarjeta Credito", UserId = "1" },
+                new Wallet() { Id = 3, Name = "Tarjeta De Debito", UserId = "1" }
+            };
 
             var transactions = new List<Transaction>()
             {
@@ -659,7 +572,7 @@ namespace WalletWise.Integration.Test.Repositories
                     Date = DateTime.Parse("26/02/2026"),
                     Type = TypeTransaction.Income,
                     Comment = null,
-                    UserId = 1,
+                    UserId = "1",
                     CategoryId = 1,
                     WalletId = 1
                 },
@@ -669,7 +582,7 @@ namespace WalletWise.Integration.Test.Repositories
                     Date = DateTime.Parse("27/02/2026"),
                     Type = TypeTransaction.Expense,
                     Comment = "Que sueño",
-                    UserId = 1,
+                    UserId = "1",
                     CategoryId = 2,
                     WalletId = 2
                 },
@@ -679,7 +592,7 @@ namespace WalletWise.Integration.Test.Repositories
                     Date = DateTime.Parse("28/02/2026"),
                     Type = TypeTransaction.Expense,
                     Comment = "Gastos de hoy",
-                    UserId = 1,
+                    UserId = "1",
                     CategoryId = 3,
                     WalletId = 3
                 },
@@ -689,41 +602,11 @@ namespace WalletWise.Integration.Test.Repositories
                     Date = DateTime.Parse("28/02/2026"),
                     Type = TypeTransaction.Expense,
                     Comment = "Gastos de los otros dias",
-                    UserId = 1,
+                    UserId = "1",
                     CategoryId = 3,
                     WalletId = 3
                 }
 
-            };
-
-            var categories = new List<Category>()
-            {
-                new Category {Id = 1, Name = "Comida", UserId = 1, IsDeleted = false},
-                new Category {Id = 2, Name = "Servicios", UserId = 1, IsDeleted = false},
-                new Category {Id = 3, Name = "Transporte", UserId = 1, IsDeleted = false},
-                new Category {Id = 4, Name = "Comptras", UserId = 1, IsDeleted = false}
-            };
-
-            var wallets = new List<Wallet>()
-            {
-                new Wallet()
-                {
-                    Id = 1,
-                    Name = "Trabajo",
-                    UserId = 1
-                },
-                new Wallet()
-                {
-                    Id = 2,
-                    Name = "Tarjeta Credito",
-                    UserId = 1
-                },
-                new Wallet()
-                {
-                    Id = 3,
-                    Name = "Tarjeta De Debito",
-                    UserId = 1
-                }
             };
 
             await _context.Categories.AddRangeAsync(categories);
@@ -741,7 +624,7 @@ namespace WalletWise.Integration.Test.Repositories
 
             int count = result.Count();
 
-            Assert.Equal(count, 1);
+            Assert.Equal(1, count);
 
         }
 
@@ -749,6 +632,21 @@ namespace WalletWise.Integration.Test.Repositories
         public async Task ExistsTransactionByCategoryAsync_WhenCategoryHasTransactions_ShouldReturnTrue()
         {
             // Arrange
+
+            var categories = new List<Category>()
+            {
+                new Category {Id = 1, Name = "Comida", UserId = "1", IsDeleted = false},
+                new Category {Id = 2, Name = "Servicios", UserId = "1", IsDeleted = false},
+                new Category {Id = 3, Name = "Transporte", UserId = "1", IsDeleted = false},
+                new Category {Id = 4, Name = "Comptras", UserId = "1", IsDeleted = false}
+            };
+
+            var wallets = new List<Wallet>()
+            {
+                new Wallet() { Id = 1, Name = "Trabajo", UserId = "1" },
+                new Wallet() { Id = 2, Name = "Tarjeta Credito", UserId = "1" },
+                new Wallet() { Id = 3, Name = "Tarjeta De Debito", UserId = "1" }
+            };
 
             var transactions = new List<Transaction>()
             {
@@ -758,7 +656,7 @@ namespace WalletWise.Integration.Test.Repositories
                     Date = DateTime.Parse("26/02/2026"),
                     Type = TypeTransaction.Income,
                     Comment = null,
-                    UserId = 1,
+                    UserId = "1",
                     CategoryId = 1,
                     WalletId = 1
                 },
@@ -768,7 +666,7 @@ namespace WalletWise.Integration.Test.Repositories
                     Date = DateTime.Parse("27/02/2026"),
                     Type = TypeTransaction.Expense,
                     Comment = "Que sueño",
-                    UserId = 1,
+                    UserId = "1",
                     CategoryId = 2,
                     WalletId = 2
                 },
@@ -778,7 +676,7 @@ namespace WalletWise.Integration.Test.Repositories
                     Date = DateTime.Parse("28/02/2026"),
                     Type = TypeTransaction.Expense,
                     Comment = "Gastos de hoy",
-                    UserId = 1,
+                    UserId = "1",
                     CategoryId = 3,
                     WalletId = 3
                 },
@@ -788,41 +686,11 @@ namespace WalletWise.Integration.Test.Repositories
                     Date = DateTime.Parse("28/02/2026"),
                     Type = TypeTransaction.Expense,
                     Comment = "Gastos de los otros dias",
-                    UserId = 1,
+                    UserId = "1",
                     CategoryId = 3,
                     WalletId = 3
                 }
 
-            };
-
-            var categories = new List<Category>()
-            {
-                new Category {Id = 1, Name = "Comida", UserId = 1, IsDeleted = false},
-                new Category {Id = 2, Name = "Servicios", UserId = 1, IsDeleted = false},
-                new Category {Id = 3, Name = "Transporte", UserId = 1, IsDeleted = false},
-                new Category {Id = 4, Name = "Comptras", UserId = 1, IsDeleted = false}
-            };
-
-            var wallets = new List<Wallet>()
-            {
-                new Wallet()
-                {
-                    Id = 1,
-                    Name = "Trabajo",
-                    UserId = 1
-                },
-                new Wallet()
-                {
-                    Id = 2,
-                    Name = "Tarjeta Credito",
-                    UserId = 1
-                },
-                new Wallet()
-                {
-                    Id = 3,
-                    Name = "Tarjeta De Debito",
-                    UserId = 1
-                }
             };
 
             await _context.Categories.AddRangeAsync(categories);

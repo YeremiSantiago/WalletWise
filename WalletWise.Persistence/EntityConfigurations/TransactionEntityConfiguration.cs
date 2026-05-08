@@ -35,6 +35,9 @@ namespace WalletWise.Persistence.EntityConfigurations
             builder.Property(x => x.WalletId)
                 .IsRequired();
 
+            builder.Property(x => x.UserId)
+                .IsRequired();
+
             //Relationships
 
             builder.HasOne(x => x.Category).
