@@ -20,6 +20,10 @@ namespace WalletWise.Infraestructure.DependencyInjection
         public static IServiceCollection AddInfraestructureLayerIoc(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddSingleton<IClock, ClockSystem>();
+            services.AddScoped<ICurrentUserService, CurrentUserService>();
+
+            // HttpContextAccesor
+            services.AddHttpContextAccessor();
 
             var jwtSettings = configuration
                 .GetSection(JwtSettings.SectionName)

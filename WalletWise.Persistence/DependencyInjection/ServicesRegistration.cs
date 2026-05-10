@@ -45,6 +45,7 @@ namespace WalletWise.Persistence.DependencyInjection
             services.AddScoped<ITransactionRepository, TransactionRepository>();
             services.AddScoped<IWalletRepository, WalletRepository>();
             services.AddScoped<ICategoryRepository, CategoryRepository>();
+            services.AddScoped<IReportRepository, ReportRepository>();
 
             return services;
         }

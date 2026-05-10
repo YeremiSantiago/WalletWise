@@ -18,6 +18,7 @@ namespace WalletWise.Application.DependencyInjection
             services.AddScoped<ICategoryService, CategoryService>();
             services.AddScoped<ITransactionService, TransactionService>();
             services.AddScoped<IWalletService, WalletService>();
+            services.AddScoped<IReportService, ReportService>();
 
             // Configurations
 

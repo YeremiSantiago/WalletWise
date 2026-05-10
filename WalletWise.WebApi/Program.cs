@@ -3,6 +3,7 @@ using System.Threading.RateLimiting;
 using WalletWise.Application.DependencyInjection;
 using WalletWise.Infraestructure.DependencyInjection;
 using WalletWise.Persistence.DependencyInjection;
+using WalletWise.WebApi.Handlers;
 
 namespace WalletWise.WebApi
 {
@@ -16,6 +17,9 @@ namespace WalletWise.WebApi
             builder.Services.AddApplicationLayerIoc().
                 AddPersistenceLayerIoc(builder.Configuration).
                 AddInfraestructureLayerIoc(builder.Configuration);
+
+            builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+            builder.Services.AddProblemDetails();
 
             builder.Services.AddControllers();
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
@@ -86,6 +90,8 @@ namespace WalletWise.WebApi
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
+
+            app.UseExceptionHandler();
 
             app.UseHttpsRedirection();
 

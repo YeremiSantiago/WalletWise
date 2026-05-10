@@ -16,33 +16,49 @@ namespace WalletWise.Persistence.Repositories
         {
         }
 
-        public async Task<bool> ExistsTransactionByCategoryAsync(int IdCategory)
+        public async Task<bool> ExistsTransactionByCategoryAsync(int IdCategory, string userId)
         {
             return await _context.Transactions.
-                AnyAsync(x => x.CategoryId == IdCategory);
+                AnyAsync(x => x.CategoryId == IdCategory && x.UserId == userId);
 
         }
 
-        public async Task<IEnumerable<Transaction>> GetAllTransactionsByCategoryAsync(int idCategory)
+        public async Task<IEnumerable<Transaction>> GetAllTransactionsByCategoryAsync(string userId, int idCategory)
         {
-            return await _context.Transactions.Where(x => x.CategoryId == idCategory)
+            return await _context.Transactions.Where(x => x.CategoryId == idCategory && x.UserId == userId)
+                                                        .AsNoTracking()
                                                         .OrderByDescending(x => x.Date)
                                                         .ToListAsync();
         }
 
-        public async Task<IEnumerable<Transaction>> GetByDateRangeAsync(DateTime start, DateTime end)
+        public async Task<IEnumerable<Transaction>> GetByDateRangeAsync(string userId,DateTime start, DateTime end)
         {
-             return await _context.Transactions.Where(x => x.Date >= start && x.Date <= end)
+             return await _context.Transactions.Where(x => x.Date >= start && x.Date <= end && x.UserId == userId)
+                .AsNoTracking()
                 .OrderByDescending(x => x.Date)
                 .ToListAsync();    
         }
 
-        public async Task<IEnumerable<Transaction>> GetByTypeTransactionAsync(TypeTransaction typeTransaction)
+        public async Task<IEnumerable<Transaction>> GetByTypeTransactionAsync(string userId, TypeTransaction typeTransaction)
         {
-            return await _context.Transactions.Where(x => x.Type == typeTransaction)
+            return await _context.Transactions.Where(x => x.Type == typeTransaction && x.UserId == userId)
+                .AsNoTracking()
                 .ToListAsync();
         }
 
-       
+        public async Task<Transaction?> GetByIdForUserAsync(int id, string userId)
+        {
+            return await _context.Transactions
+                .FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId);
+        }
+
+        public async Task<IEnumerable<Transaction>> GetAllByUserAsync(string userId)
+        {
+            return await _context.Transactions
+                .Where(x => x.UserId == userId)
+                .AsNoTracking()
+                .ToListAsync();
+        }
+
     }
 }

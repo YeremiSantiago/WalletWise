@@ -4,7 +4,6 @@ using WalletWise.Application.Interfaces;
 using WalletWise.Domain.Common;
 using WalletWise.Domain.Entities;
 using WalletWise.Domain.Interfaces;
-using System.Linq;
 using AutoMapper;
 
 namespace WalletWise.Application.Services
@@ -14,20 +13,29 @@ namespace WalletWise.Application.Services
         private readonly ICategoryRepository _categoryRepository;
         private readonly ITransactionRepository _transactionRepository;
         private readonly IClock _clock;
+        private readonly ICurrentUserService _currentUserService;
 
-        public CategoryService(ICategoryRepository categoryRepository, ITransactionRepository transactionRepository, ILogger<Category> logger, IClock clock, IMapper mapper) : base(categoryRepository, logger, mapper)
+        public CategoryService(
+            ICategoryRepository categoryRepository,
+            ITransactionRepository transactionRepository,
+            ILogger<Category> logger,
+            IClock clock,
+            IMapper mapper,
+            ICurrentUserService currentUserService)
+            : base(categoryRepository, logger, mapper)
         {
             _categoryRepository = categoryRepository;
             _transactionRepository = transactionRepository;
             _clock = clock;
+            _currentUserService = currentUserService;
         }
-
 
         public async Task<Result<IEnumerable<CategoryResponseDto>>> GetAllCategoriesAsync()
         {
             try
             {
-                var categories = await _categoryRepository.GetAllCategoriesActiveAsync();
+                var userId = _currentUserService.UserId!;
+                var categories = await _categoryRepository.GetAllCategoriesActiveAsync(userId);
 
                 return Result<IEnumerable<CategoryResponseDto>>.Success(_mapper.Map<IEnumerable<CategoryResponseDto>>(categories));
             }
@@ -42,15 +50,15 @@ namespace WalletWise.Application.Services
         {
             try
             {
-                var result = await _categoryRepository.GetCategoryActiveByIdAsync(id);
+                var userId = _currentUserService.UserId!;
+                var result = await _categoryRepository.GetCategoryActiveByIdAsync(id, userId);
 
-                if(result is null)
+                if (result is null)
                 {
                     return Result<CategoryResponseDto?>.Failure($"La category con el id {id} no existe");
                 }
 
                 return Result<CategoryResponseDto?>.Success(_mapper.Map<CategoryResponseDto>(result));
-
             }
             catch (Exception ex)
             {
@@ -59,28 +67,26 @@ namespace WalletWise.Application.Services
             }
         }
 
-
-
         public async Task<Result<CategoryResponseDto>> CreateCategoryAsync(CreateCategoryRequestDto categoryDto)
         {
             try
             {
-
+                var userId = _currentUserService.UserId!;
                 var category = _mapper.Map<Category>(categoryDto);
 
-            
+                category.UserId = userId;
                 category.CreatedAt = _clock.UtcNow();
 
-                var exist = await _categoryRepository.ExistsAsync(x => x.Name == category.Name);
+                var exist = await _categoryRepository.ExistsByNameAsync(category.Name, userId);
 
-                if (exist == true)
+                if (exist)
                 {
                     return Result<CategoryResponseDto>.Failure("Ya existe una Categoria con ese mismo nombre");
                 }
 
-                var Response = await _categoryRepository.AddAsync(category);
+                var response = await _categoryRepository.AddAsync(category);
 
-                return Result<CategoryResponseDto>.Success(_mapper.Map<CategoryResponseDto>(Response));
+                return Result<CategoryResponseDto>.Success(_mapper.Map<CategoryResponseDto>(response));
             }
             catch (Exception ex)
             {
@@ -93,8 +99,8 @@ namespace WalletWise.Application.Services
         {
             try
             {
-
-                var exist = await _categoryRepository.GetByIdAsync(id);
+                var userId = _currentUserService.UserId!;
+                var exist = await _categoryRepository.GetCategoryActiveByIdAsync(id, userId);
 
                 if (exist == null)
                 {
@@ -104,6 +110,8 @@ namespace WalletWise.Application.Services
                 _mapper.Map(categoryDto, exist);
 
                 exist.UpdatedAt = _clock.UtcNow();
+
+                await _categoryRepository.UpdateAsync(exist);
 
                 return Result<CategoryResponseDto>.Success(_mapper.Map<CategoryResponseDto>(exist));
             }
@@ -118,17 +126,17 @@ namespace WalletWise.Application.Services
         {
             try
             {
-
-                var category = await _categoryRepository.GetByIdAsync(id);
+                var userId = _currentUserService.UserId!;
+                var category = await _categoryRepository.GetCategoryActiveByIdAsync(id, userId);
 
                 if (category == null)
                 {
                     return Result<bool>.Failure($"La categoria con id {id} no pudo ser encontrada");
                 }
 
-                bool exists = await _transactionRepository.ExistsTransactionByCategoryAsync(category.Id);
+                var exists = await _transactionRepository.ExistsTransactionByCategoryAsync(category.Id, userId);
 
-                if (exists == true)
+                if (exists)
                 {
                     return Result<bool>.Failure("Esta categoria tiene transacciones asociadas");
                 }
@@ -145,8 +153,6 @@ namespace WalletWise.Application.Services
                 _logger.LogError(ex, "Ha ocurrido un fallo al borrar la categoria id {Id}", id);
                 return Result<bool>.Failure("No se ha podido eliminar la categoria");
             }
-
         }
-
     }
 }

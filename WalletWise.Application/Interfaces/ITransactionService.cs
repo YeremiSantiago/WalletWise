@@ -8,6 +8,8 @@ namespace WalletWise.Application.Interfaces
 {
     public interface ITransactionService : IGenericService<TransactionResponseDto, CreateTransactionRequestDto, UpdateTransactionRequestDto>
     {
+        Task<Result<IEnumerable<TransactionResponseDto>>> GetAllTransactionsAsync();
+        Task<Result<TransactionResponseDto?>> GetTransactionByIdAsync(int id);
         Task<Result<TransactionResponseDto>> CreateTransactionAsync(CreateTransactionRequestDto transactionDto);
         Task<Result<TransactionResponseDto>> UpdateTransactionAsync(int id, UpdateTransactionRequestDto transactionDto);
         Task<Result<bool>> DeleteTransactionAsync(int id);

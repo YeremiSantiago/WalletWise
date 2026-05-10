@@ -12,11 +12,13 @@ namespace WalletWise.Domain.Interfaces
 {
     public interface ITransactionRepository : IGenericRepository<Transaction>
     {
-        Task<bool> ExistsTransactionByCategoryAsync(int id);
-        Task<IEnumerable<Transaction>> GetByDateRangeAsync(DateTime start, DateTime end);
-        Task<IEnumerable<Transaction>> GetByTypeTransactionAsync(TypeTransaction typeTransaction);
-        Task<IEnumerable<Transaction>> GetAllTransactionsByCategoryAsync(int idCategory);
+        Task<Transaction?> GetByIdForUserAsync(int id, string userId);
+        Task<IEnumerable<Transaction>> GetAllByUserAsync(string userId);
+        Task<bool> ExistsTransactionByCategoryAsync(int id, string userId);
+        Task<IEnumerable<Transaction>> GetByDateRangeAsync(string userId, DateTime start, DateTime end);
+        Task<IEnumerable<Transaction>> GetByTypeTransactionAsync(string userId, TypeTransaction typeTransaction);
+        Task<IEnumerable<Transaction>> GetAllTransactionsByCategoryAsync(string userId, int idCategory);
 
-      
+
     }
 }

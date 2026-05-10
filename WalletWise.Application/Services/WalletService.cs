@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+using WalletWise.Application.Dtos.Category;
 using WalletWise.Application.Dtos.Wallet;
 using WalletWise.Application.Interfaces;
 using WalletWise.Domain.Common;
@@ -17,9 +17,47 @@ namespace WalletWise.Application.Services
     public class WalletService : GenericService<Wallet, WalletResponseDto, CreateWalletRequestDto, UpdateWalletRequestDto>, IWalletService
     {
         private readonly IWalletRepository _walletRepository;
-        public WalletService(IWalletRepository walletRepository, ILogger<Wallet> logger, IMapper mapper) : base(walletRepository, logger, mapper)
+        private readonly ICurrentUserService _currentUserService;
+        public WalletService(IWalletRepository walletRepository, ILogger<Wallet> logger, IMapper mapper, ICurrentUserService currentUserService) : base(walletRepository, logger, mapper)
         {
             _walletRepository = walletRepository;
+            _currentUserService = currentUserService;
+        }
+
+        public async Task<Result<IEnumerable<WalletResponseDto>>> GetAllWalletsAsync()
+        {
+            try
+            {
+                var wallets = await _walletRepository.GetAllByUserAsync(_currentUserService.UserId!);
+
+                return Result<IEnumerable<WalletResponseDto>>.Success(_mapper.Map<IEnumerable<WalletResponseDto>>(wallets));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "A ocurrido un fallo inesperado al obtener todas las wallets");
+                return Result<IEnumerable<WalletResponseDto>>.Failure("No se ha podido obtener todas las wallets");
+            }
+        }
+
+        public async Task<Result<WalletResponseDto?>> GetWalletByIdAsync(int id)
+        {
+            try
+            {
+                var result = await _walletRepository.GetByIdForUserAsync(id, _currentUserService.UserId!);
+
+                if (result is null)
+                {
+                    return Result<WalletResponseDto?>.Failure($"La category con el id {id} no existe");
+                }
+
+                return Result<WalletResponseDto?>.Success(_mapper.Map<WalletResponseDto>(result));
+
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ha ocurrido un fallo inesperado al obtener la wallet con el id {Id} ", id);
+                return Result<WalletResponseDto?>.Failure($"No se ha podido obtener la wallet con el id {id}");
+            }
         }
 
         public async Task<Result<WalletResponseDto>> CreateWalletAsync(CreateWalletRequestDto walletDto)
@@ -28,7 +66,7 @@ namespace WalletWise.Application.Services
             {
                 var wallet = _mapper.Map<Wallet>(walletDto);
 
-
+                wallet.UserId = _currentUserService.UserId!;
                 var walletR = await _walletRepository.AddAsync(wallet);
 
                 return Result<WalletResponseDto>.Success(_mapper.Map<WalletResponseDto>(walletR));
@@ -45,7 +83,7 @@ namespace WalletWise.Application.Services
             try
             {
 
-                var exist = await _walletRepository.GetByIdAsync(id);
+                var exist = await _walletRepository.GetByIdForUserAsync(id, _currentUserService.UserId!);
 
                 if (exist == null)
                 {
@@ -69,7 +107,7 @@ namespace WalletWise.Application.Services
         {
             try
             {
-                var exist = await _walletRepository.GetByIdAsync(id);
+                var exist = await _walletRepository.GetByIdForUserAsync(id, _currentUserService.UserId!);
 
                 if (exist == null)
                 {
@@ -86,5 +124,7 @@ namespace WalletWise.Application.Services
                 return Result<bool>.Failure("No se ha podido eliminar la wallet");
             }
         }
+
+        
     }
 }

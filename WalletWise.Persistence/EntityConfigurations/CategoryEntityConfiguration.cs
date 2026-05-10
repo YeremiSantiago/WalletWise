@@ -27,7 +27,8 @@ namespace WalletWise.Persistence.EntityConfigurations
 
             builder.HasIndex(x => x.Name).
                 HasDatabaseName("IDX_Category_Name")
-                .IsUnique();
+                .IsUnique()
+                .HasFilter("[IsDeleted] = 0");
 
         }
     }

@@ -1,16 +1,15 @@
 ﻿using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using WalletWise.Domain.Common.Enums;
 using WalletWise.Domain.Entities;
 using WalletWise.Domain.Interfaces;
 using WalletWise.Persistence.Context;
 using WalletWise.Persistence.Repositories;
+using Xunit;
 
 namespace WalletWise.Integration.Test.Repositories
 {
@@ -18,11 +17,11 @@ namespace WalletWise.Integration.Test.Repositories
     {
         private readonly ITransactionRepository _transactionRepository;
         private readonly AppDbContext _context;
+        private const string TestUserId = "1";
 
         public TransactionRepositoryTest()
         {
             var connection = new SqliteConnection("DataSource=:memory:");
-
             connection.Open();
 
             var options = new DbContextOptionsBuilder<AppDbContext>()
@@ -30,197 +29,67 @@ namespace WalletWise.Integration.Test.Repositories
                 .Options;
 
             _context = new AppDbContext(options);
-
-            _context.Database.EnsureCreatedAsync();
+            _context.Database.EnsureCreated();
 
             _transactionRepository = new TransactionRepository(_context);
-
         }
 
         [Fact]
         public async Task GetAllTransactions_WhenTransactionsHaveBeenCreated_ReturnsAlltransactionsExisting()
         {
             // Arrange
-
-            var categories = new List<Category>()
-            {
-                new Category {Id = 1, Name = "Comida", UserId = "1", IsDeleted = false},
-                new Category {Id = 2, Name = "Servicios", UserId = "1", IsDeleted = false},
-                new Category {Id = 3, Name = "Transporte", UserId = "1", IsDeleted = false},
-                new Category {Id = 4, Name = "Comptras", UserId = "1", IsDeleted = false}
-            };
-
-            var wallets = new List<Wallet>()
-            {
-                new Wallet() { Id = 1, Name = "Trabajo", UserId = "1" },
-                new Wallet() { Id = 2, Name = "Tarjeta Credito", UserId = "1" },
-                new Wallet() { Id = 3, Name = "Tarjeta De Debito", UserId = "1" }
-            };
-
-            var transactions = new List<Transaction>()
-            {
-                new Transaction
-                {
-                    Amount = 125,
-                    Date = DateTime.Parse("10/09/2026"),
-                    Type = TypeTransaction.Income,
-                    Comment = null,
-                    UserId = "1",
-                    CategoryId = 1,
-                    WalletId = 1
-                },
-                new Transaction
-                {
-                    Amount = 500,
-                    Date = DateTime.Parse("24/02/2026"),
-                    Type = TypeTransaction.Expense,
-                    Comment = "Que sueño",
-                    UserId = "1",
-                    CategoryId = 2,
-                    WalletId = 2
-                },
-                new Transaction
-                {
-                    Amount = 7500,
-                    Date = DateTime.Parse("25/02/2026"),
-                    Type = TypeTransaction.Expense,
-                    Comment = "Gastos de hoy",
-                    UserId = "1",
-                    CategoryId = 3,
-                    WalletId = 3
-                }
-
-            };
-
-            await _context.Categories.AddRangeAsync(categories);
-            await _context.Wallets.AddRangeAsync(wallets);
-            await _context.Transactions.AddRangeAsync(transactions);
-            await _context.SaveChangesAsync();
+            await SeedDataAsync();
 
             // Act
-
-            var result = await _transactionRepository.GetAllAsync();
+            var result = await _transactionRepository.GetAllByUserAsync(TestUserId);
 
             // Assert
-
-            Assert.True(result.Count() == 3);
+            Assert.Equal(3, result.Count());
             Assert.NotEmpty(result);
-
         }
 
         [Fact]
         public async Task GetTransactionById_WhenATransactionExisting_ReturnTransactionFound()
         {
             // Arrange
-
-            var categories = new List<Category>()
-            {
-                new Category {Id = 1, Name = "Comida", UserId = "1", IsDeleted = false},
-                new Category {Id = 2, Name = "Servicios", UserId = "1", IsDeleted = false},
-                new Category {Id = 3, Name = "Transporte", UserId = "1", IsDeleted = false},
-                new Category {Id = 4, Name = "Comptras", UserId = "1", IsDeleted = false}
-            };
-
-            var wallets = new List<Wallet>()
-            {
-                new Wallet() { Id = 1, Name = "Trabajo", UserId = "1" },
-                new Wallet() { Id = 2, Name = "Tarjeta Credito", UserId = "1" },
-                new Wallet() { Id = 3, Name = "Tarjeta De Debito", UserId = "1" }
-            };
-
-            var transactions = new List<Transaction>()
-            {
-                new Transaction
-                {
-                    Amount = 125,
-                    Date = DateTime.Parse("10/09/2026"),
-                    Type = TypeTransaction.Income,
-                    Comment = null,
-                    UserId = "1",
-                    CategoryId = 1,
-                    WalletId = 1
-                },
-                new Transaction
-                {
-                    Amount = 500,
-                    Date = DateTime.Parse("24/02/2026"),
-                    Type = TypeTransaction.Expense,
-                    Comment = "Que sueño",
-                    UserId = "1",
-                    CategoryId = 2,
-                    WalletId = 2
-                },
-                new Transaction
-                {
-                    Amount = 7500,
-                    Date = DateTime.Parse("25/02/2026"),
-                    Type = TypeTransaction.Expense,
-                    Comment = "Gastos de hoy",
-                    UserId = "1",
-                    CategoryId = 3,
-                    WalletId = 3
-                }
-
-            };
-
-            await _context.Categories.AddRangeAsync(categories);
-            await _context.Wallets.AddRangeAsync(wallets);
-            await _context.Transactions.AddRangeAsync(transactions);
-            await _context.SaveChangesAsync();
-
+            await SeedDataAsync();
             int id = 2;
 
             // Act
-
-            var result = await _transactionRepository.GetByIdAsync(id);
+            var result = await _transactionRepository.GetByIdForUserAsync(id, TestUserId);
 
             // Assert
-
-            Assert.Equal(result.Id, id);
+            Assert.NotNull(result);
+            Assert.Equal(id, result.Id);
         }
-
 
         [Fact]
         public async Task AddTransactionAsync_WhenTransactionIsAdded_ShouldBeCreatedYRetunValue()
         {
             // Arrange
-
-            var category = new Category()
-            {
-                Name = "Comida",
-                UserId = "1"
-            };
-
-           var wallet = new Wallet()
-            {
-                Id = 1,
-                Name = "Trabajo",
-                UserId = "1"
-           };
+            var category = new Category { Name = "Comida", UserId = TestUserId };
+            var wallet = new Wallet { Id = 1, Name = "Trabajo", UserId = TestUserId };
 
             await _context.Categories.AddAsync(category);
             await _context.Wallets.AddAsync(wallet);
             await _context.SaveChangesAsync();
 
-            var transaction = new Transaction()
+            var transaction = new Transaction
             {
                 Amount = 15000,
                 Date = DateTime.Parse("26/02/2026"),
                 Type = TypeTransaction.Income,
                 Comment = "Primera transaction",
-                UserId = "1",
+                UserId = TestUserId,
                 CategoryId = 1,
                 WalletId = 1
             };
 
             // Act 
-            
             var result = await _transactionRepository.AddAsync(transaction);
 
             // Assert
-
-            bool exist = await _context.Transactions.AnyAsync();
-
+            bool exist = await _context.Transactions.AnyAsync(x => x.Id == result.Id);
             Assert.True(exist);
         }
 
@@ -228,233 +97,49 @@ namespace WalletWise.Integration.Test.Repositories
         public async Task UpdateTransactionAsync_WhenTransactionIsUpdated_TheTransactionShouldBeUpdated()
         {
             // Arrange
-
-            var categories = new List<Category>()
-            {
-                new Category {Id = 1, Name = "Comida", UserId = "1", IsDeleted = false},
-                new Category {Id = 2, Name = "Servicios", UserId = "1", IsDeleted = false},
-                new Category {Id = 3, Name = "Transporte", UserId = "1", IsDeleted = false},
-                new Category {Id = 4, Name = "Comptras", UserId = "1", IsDeleted = false}
-            };
-
-            var wallets = new List<Wallet>()
-            {
-                new Wallet() { Id = 1, Name = "Trabajo", UserId = "1" },
-                new Wallet() { Id = 2, Name = "Tarjeta Credito", UserId = "1" },
-                new Wallet() { Id = 3, Name = "Tarjeta De Debito", UserId = "1" }
-            };
-
-            var transactions = new List<Transaction>()
-            {
-                new Transaction
-                {
-                    Amount = 125,
-                    Date = DateTime.Parse("10/09/2026"),
-                    Type = TypeTransaction.Income,
-                    Comment = null,
-                    UserId = "1",
-                    CategoryId = 1,
-                    WalletId = 1
-                },
-                new Transaction
-                {
-                    Amount = 500,
-                    Date = DateTime.Parse("24/02/2026"),
-                    Type = TypeTransaction.Expense,
-                    Comment = "Que sueño",
-                    UserId = "1",
-                    CategoryId = 2,
-                    WalletId = 2
-                },
-                new Transaction
-                {
-                    Amount = 7500,
-                    Date = DateTime.Parse("25/02/2026"),
-                    Type = TypeTransaction.Expense,
-                    Comment = "Gastos de hoy",
-                    UserId = "1",
-                    CategoryId = 3,
-                    WalletId = 3
-                }
-
-            };
-
-            await _context.Categories.AddRangeAsync(categories);
-            await _context.Wallets.AddRangeAsync(wallets);
-            await _context.Transactions.AddRangeAsync(transactions);
-            await _context.SaveChangesAsync();
-
+            await SeedDataAsync();
             int id = 2;
 
             var transaction = await _context.Transactions.FindAsync(id);
-            transaction.Amount = 30000;
-            transaction.Comment = "Abinader Presidente";
+            transaction!.Amount = 30000;
+            transaction.Comment = "Modificado";
 
             // Act
-
-             await _transactionRepository.UpdateAsync(transaction);
+            await _transactionRepository.UpdateAsync(transaction);
 
             // Assert
-
-            bool exist = await _context.Transactions.AnyAsync(x => x.Amount == transaction.Amount && x.Comment == transaction.Comment);
+            bool exist = await _context.Transactions.AnyAsync(x => x.Amount == 30000 && x.Comment == "Modificado" && x.Id == id);
             Assert.True(exist);
-
         }
 
         [Fact]
         public async Task RemoveTransactionAsync_WhenTransactionIsRemoved_TransactionShouldBeDeleted()
         {
             // Arrange
-
-            var categories = new List<Category>()
-            {
-                new Category {Id = 1, Name = "Comida", UserId = "1", IsDeleted = false},
-                new Category {Id = 2, Name = "Servicios", UserId = "1", IsDeleted = false},
-                new Category {Id = 3, Name = "Transporte", UserId = "1", IsDeleted = false},
-                new Category {Id = 4, Name = "Comptras", UserId = "1", IsDeleted = false}
-            };
-
-            var wallets = new List<Wallet>()
-            {
-                new Wallet() { Id = 1, Name = "Trabajo", UserId = "1" },
-                new Wallet() { Id = 2, Name = "Tarjeta Credito", UserId = "1" },
-                new Wallet() { Id = 3, Name = "Tarjeta De Debito", UserId = "1" }
-            };
-
-            var transactions = new List<Transaction>()
-            {
-                new Transaction
-                {
-                    Amount = 125,
-                    Date = DateTime.Parse("10/09/2026"),
-                    Type = TypeTransaction.Income,
-                    Comment = null,
-                    UserId = "1",
-                    CategoryId = 1,
-                    WalletId = 1
-                },
-                new Transaction
-                {
-                    Amount = 500,
-                    Date = DateTime.Parse("24/02/2026"),
-                    Type = TypeTransaction.Expense,
-                    Comment = "Que sueño",
-                    UserId = "1",
-                    CategoryId = 2,
-                    WalletId = 2
-                },
-                new Transaction
-                {
-                    Amount = 7500,
-                    Date = DateTime.Parse("25/02/2026"),
-                    Type = TypeTransaction.Expense,
-                    Comment = "Gastos de hoy",
-                    UserId = "1",
-                    CategoryId = 3,
-                    WalletId = 3
-                }
-
-            };
-
+            await SeedDataAsync();
             int id = 2;
 
-            await _context.Categories.AddRangeAsync(categories);
-            await _context.Wallets.AddRangeAsync(wallets);
-            await _context.Transactions.AddRangeAsync(transactions);
-            await _context.SaveChangesAsync();
-
-
             // Act
-
-            await _transactionRepository.RemoveAsync(2);
+            await _transactionRepository.RemoveAsync(id);
 
             // Assert
-
-            var exist = await _context.Transactions.FirstOrDefaultAsync(x => x.Id == 2);
+            var exist = await _context.Transactions.FirstOrDefaultAsync(x => x.Id == id);
             Assert.Null(exist);
-
         }
 
         [Fact]
         public async Task GetByDateRangeAsync_WhenTransactionsExistInRange_ShouldReturnListOfTransactions()
         {
             // Arrange
-
-            var categories = new List<Category>()
-            {
-                new Category {Id = 1, Name = "Comida", UserId = "1", IsDeleted = false},
-                new Category {Id = 2, Name = "Servicios", UserId = "1", IsDeleted = false},
-                new Category {Id = 3, Name = "Transporte", UserId = "1", IsDeleted = false},
-                new Category {Id = 4, Name = "Comptras", UserId = "1", IsDeleted = false}
-            };
-
-            var wallets = new List<Wallet>()
-            {
-                new Wallet() { Id = 1, Name = "Trabajo", UserId = "1" },
-                new Wallet() { Id = 2, Name = "Tarjeta Credito", UserId = "1" },
-                new Wallet() { Id = 3, Name = "Tarjeta De Debito", UserId = "1" }
-            };
-
-            var transactions = new List<Transaction>()
-            {
-                new Transaction
-                {
-                    Amount = 125,
-                    Date = DateTime.Parse("26/02/2026"),
-                    Type = TypeTransaction.Income,
-                    Comment = null,
-                    UserId = "1",
-                    CategoryId = 1,
-                    WalletId = 1
-                },
-                new Transaction
-                {
-                    Amount = 500,
-                    Date = DateTime.Parse("27/02/2026"),
-                    Type = TypeTransaction.Expense,
-                    Comment = "Que sueño",
-                    UserId = "1",
-                    CategoryId = 2,
-                    WalletId = 2
-                },
-                new Transaction
-                {
-                    Amount = 7500,
-                    Date = DateTime.Parse("28/02/2026"),
-                    Type = TypeTransaction.Expense,
-                    Comment = "Gastos de hoy",
-                    UserId = "1",
-                    CategoryId = 3,
-                    WalletId = 3
-                },
-                new Transaction
-                {
-                    Amount = 8500,
-                    Date = DateTime.Parse("28/02/2026"),
-                    Type = TypeTransaction.Expense,
-                    Comment = "Gastos de los otros dias",
-                    UserId = "1",
-                    CategoryId = 3,
-                    WalletId = 3
-                }
-
-            };
-
-            await _context.Categories.AddRangeAsync(categories);
-            await _context.Wallets.AddRangeAsync(wallets);
-            await _context.Transactions.AddRangeAsync(transactions);
-            await _context.SaveChangesAsync();
-
+            await SeedSearchDataAsync();
             DateTime start = DateTime.Parse("28/02/2026");
             DateTime end = DateTime.Parse("28/02/2026");
 
-
             // Act
-
-            var result = await _transactionRepository.GetByDateRangeAsync(start, end);
+            var result = await _transactionRepository.GetByDateRangeAsync(TestUserId, start, end);
 
             // Assert
-
+            Assert.NotEmpty(result);
             Assert.True(result.All(x => x.Date >= start && x.Date <= end));
         }
 
@@ -462,255 +147,104 @@ namespace WalletWise.Integration.Test.Repositories
         public async Task GetByTypeTransactionAsync_WhenTransactionsOfTypeExist_ShouldReturnListOfTransactions()
         {
             // Arrange
-
-            var categories = new List<Category>()
-            {
-                new Category {Id = 1, Name = "Comida", UserId = "1", IsDeleted = false},
-                new Category {Id = 2, Name = "Servicios", UserId = "1", IsDeleted = false},
-                new Category {Id = 3, Name = "Transporte", UserId = "1", IsDeleted = false},
-                new Category {Id = 4, Name = "Comptras", UserId = "1", IsDeleted = false}
-            };
-
-            var wallets = new List<Wallet>()
-            {
-                new Wallet() { Id = 1, Name = "Trabajo", UserId = "1" },
-                new Wallet() { Id = 2, Name = "Tarjeta Credito", UserId = "1" },
-                new Wallet() { Id = 3, Name = "Tarjeta De Debito", UserId = "1" }
-            };
-
-            var transactions = new List<Transaction>()
-            {
-                new Transaction
-                {
-                    Amount = 125,
-                    Date = DateTime.Parse("26/02/2026"),
-                    Type = TypeTransaction.Income,
-                    Comment = null,
-                    UserId = "1",
-                    CategoryId = 1,
-                    WalletId = 1
-                },
-                new Transaction
-                {
-                    Amount = 500,
-                    Date = DateTime.Parse("27/02/2026"),
-                    Type = TypeTransaction.Expense,
-                    Comment = "Que sueño",
-                    UserId = "1",
-                    CategoryId = 2,
-                    WalletId = 2
-                },
-                new Transaction
-                {
-                    Amount = 7500,
-                    Date = DateTime.Parse("28/02/2026"),
-                    Type = TypeTransaction.Expense,
-                    Comment = "Gastos de hoy",
-                    UserId = "1",
-                    CategoryId = 3,
-                    WalletId = 3
-                },
-                new Transaction
-                {
-                    Amount = 8500,
-                    Date = DateTime.Parse("28/02/2026"),
-                    Type = TypeTransaction.Expense,
-                    Comment = "Gastos de los otros dias",
-                    UserId = "1",
-                    CategoryId = 3,
-                    WalletId = 3
-                }
-
-            };
-
-            await _context.Categories.AddRangeAsync(categories);
-            await _context.Wallets.AddRangeAsync(wallets);
-            await _context.Transactions.AddRangeAsync(transactions);
-            await _context.SaveChangesAsync();
-
+            await SeedSearchDataAsync();
             var type = TypeTransaction.Income;
 
-
             // Act 
-
-            var result = await _transactionRepository.GetByTypeTransactionAsync(type);
+            var result = await _transactionRepository.GetByTypeTransactionAsync(TestUserId, type);
 
             // Assert
-
-            var isValid = result.All(x => x.Type == type);
-
-            Assert.True(isValid);
-
-
+            Assert.NotEmpty(result);
+            Assert.True(result.All(x => x.Type == type));
         }
 
         [Fact]
         public async Task GetAllTransactionsByCategoryAsync_WhenCategoryHasTransactions_ShouldReturnListOfTransactions()
         {
             // Arrange
-
-            var categories = new List<Category>()
-            {
-                new Category {Id = 1, Name = "Comida", UserId = "1", IsDeleted = false},
-                new Category {Id = 2, Name = "Servicios", UserId = "1", IsDeleted = false},
-                new Category {Id = 3, Name = "Transporte", UserId = "1", IsDeleted = false},
-                new Category {Id = 4, Name = "Comptras", UserId = "1", IsDeleted = false}
-            };
-
-            var wallets = new List<Wallet>()
-            {
-                new Wallet() { Id = 1, Name = "Trabajo", UserId = "1" },
-                new Wallet() { Id = 2, Name = "Tarjeta Credito", UserId = "1" },
-                new Wallet() { Id = 3, Name = "Tarjeta De Debito", UserId = "1" }
-            };
-
-            var transactions = new List<Transaction>()
-            {
-                new Transaction
-                {
-                    Amount = 125,
-                    Date = DateTime.Parse("26/02/2026"),
-                    Type = TypeTransaction.Income,
-                    Comment = null,
-                    UserId = "1",
-                    CategoryId = 1,
-                    WalletId = 1
-                },
-                new Transaction
-                {
-                    Amount = 500,
-                    Date = DateTime.Parse("27/02/2026"),
-                    Type = TypeTransaction.Expense,
-                    Comment = "Que sueño",
-                    UserId = "1",
-                    CategoryId = 2,
-                    WalletId = 2
-                },
-                new Transaction
-                {
-                    Amount = 7500,
-                    Date = DateTime.Parse("28/02/2026"),
-                    Type = TypeTransaction.Expense,
-                    Comment = "Gastos de hoy",
-                    UserId = "1",
-                    CategoryId = 3,
-                    WalletId = 3
-                },
-                new Transaction
-                {
-                    Amount = 8500,
-                    Date = DateTime.Parse("28/02/2026"),
-                    Type = TypeTransaction.Expense,
-                    Comment = "Gastos de los otros dias",
-                    UserId = "1",
-                    CategoryId = 3,
-                    WalletId = 3
-                }
-
-            };
-
-            await _context.Categories.AddRangeAsync(categories);
-            await _context.Wallets.AddRangeAsync(wallets);
-            await _context.Transactions.AddRangeAsync(transactions);
-            await _context.SaveChangesAsync();
-
-            var category = 2;
+            await SeedSearchDataAsync();
+            int categoryId = 2;
 
             // Act
-
-            var result = await _transactionRepository.GetAllTransactionsByCategoryAsync(category);
+            var result = await _transactionRepository.GetAllTransactionsByCategoryAsync(TestUserId, categoryId);
 
             // Assert
-
-            int count = result.Count();
-
-            Assert.Equal(1, count);
-
+            Assert.Single(result);
         }
 
         [Fact]
         public async Task ExistsTransactionByCategoryAsync_WhenCategoryHasTransactions_ShouldReturnTrue()
         {
             // Arrange
+            await SeedSearchDataAsync();
+            int categoryId = 3;
 
-            var categories = new List<Category>()
+            // Act
+            bool result = await _transactionRepository.ExistsTransactionByCategoryAsync(categoryId, TestUserId);
+
+            // Assert
+            Assert.True(result);
+        }
+
+        
+
+        private async Task SeedDataAsync()
+        {
+            var categories = new List<Category>
             {
-                new Category {Id = 1, Name = "Comida", UserId = "1", IsDeleted = false},
-                new Category {Id = 2, Name = "Servicios", UserId = "1", IsDeleted = false},
-                new Category {Id = 3, Name = "Transporte", UserId = "1", IsDeleted = false},
-                new Category {Id = 4, Name = "Comptras", UserId = "1", IsDeleted = false}
+                new Category {Id = 1, Name = "Comida", UserId = TestUserId, IsDeleted = false},
+                new Category {Id = 2, Name = "Servicios", UserId = TestUserId, IsDeleted = false},
+                new Category {Id = 3, Name = "Transporte", UserId = TestUserId, IsDeleted = false}
             };
 
-            var wallets = new List<Wallet>()
+            var wallets = new List<Wallet>
             {
-                new Wallet() { Id = 1, Name = "Trabajo", UserId = "1" },
-                new Wallet() { Id = 2, Name = "Tarjeta Credito", UserId = "1" },
-                new Wallet() { Id = 3, Name = "Tarjeta De Debito", UserId = "1" }
+                new Wallet { Id = 1, Name = "Trabajo", UserId = TestUserId },
+                new Wallet { Id = 2, Name = "Tarjeta Credito", UserId = TestUserId },
+                new Wallet { Id = 3, Name = "Tarjeta De Debito", UserId = TestUserId }
             };
 
-            var transactions = new List<Transaction>()
+            var transactions = new List<Transaction>
             {
-                new Transaction
-                {
-                    Amount = 125,
-                    Date = DateTime.Parse("26/02/2026"),
-                    Type = TypeTransaction.Income,
-                    Comment = null,
-                    UserId = "1",
-                    CategoryId = 1,
-                    WalletId = 1
-                },
-                new Transaction
-                {
-                    Amount = 500,
-                    Date = DateTime.Parse("27/02/2026"),
-                    Type = TypeTransaction.Expense,
-                    Comment = "Que sueño",
-                    UserId = "1",
-                    CategoryId = 2,
-                    WalletId = 2
-                },
-                new Transaction
-                {
-                    Amount = 7500,
-                    Date = DateTime.Parse("28/02/2026"),
-                    Type = TypeTransaction.Expense,
-                    Comment = "Gastos de hoy",
-                    UserId = "1",
-                    CategoryId = 3,
-                    WalletId = 3
-                },
-                new Transaction
-                {
-                    Amount = 8500,
-                    Date = DateTime.Parse("28/02/2026"),
-                    Type = TypeTransaction.Expense,
-                    Comment = "Gastos de los otros dias",
-                    UserId = "1",
-                    CategoryId = 3,
-                    WalletId = 3
-                }
-
+                new Transaction { Id = 1, Amount = 125, Date = DateTime.Parse("10/09/2026"), Type = TypeTransaction.Income, UserId = TestUserId, CategoryId = 1, WalletId = 1 },
+                new Transaction { Id = 2, Amount = 500, Date = DateTime.Parse("24/02/2026"), Type = TypeTransaction.Expense, UserId = TestUserId, CategoryId = 2, WalletId = 2 },
+                new Transaction { Id = 3, Amount = 7500, Date = DateTime.Parse("25/02/2026"), Type = TypeTransaction.Expense, UserId = TestUserId, CategoryId = 3, WalletId = 3 }
             };
 
             await _context.Categories.AddRangeAsync(categories);
             await _context.Wallets.AddRangeAsync(wallets);
             await _context.Transactions.AddRangeAsync(transactions);
             await _context.SaveChangesAsync();
-
-            int category = 3;
-
-            // Act
-
-            bool result = await _transactionRepository.ExistsTransactionByCategoryAsync(category);
-
-            // Assert
-
-            Assert.True(result);
         }
 
+        private async Task SeedSearchDataAsync()
+        {
+            var categories = new List<Category>
+            {
+                new Category {Id = 1, Name = "Comida", UserId = TestUserId, IsDeleted = false},
+                new Category {Id = 2, Name = "Servicios", UserId = TestUserId, IsDeleted = false},
+                new Category {Id = 3, Name = "Transporte", UserId = TestUserId, IsDeleted = false}
+            };
 
+            var wallets = new List<Wallet>
+            {
+                new Wallet { Id = 1, Name = "Trabajo", UserId = TestUserId },
+                new Wallet { Id = 2, Name = "Tarjeta Credito", UserId = TestUserId },
+                new Wallet { Id = 3, Name = "Tarjeta De Debito", UserId = TestUserId }
+            };
 
+            var transactions = new List<Transaction>
+            {
+                new Transaction { Id = 1, Amount = 125, Date = DateTime.Parse("26/02/2026"), Type = TypeTransaction.Income, UserId = TestUserId, CategoryId = 1, WalletId = 1 },
+                new Transaction { Id = 2, Amount = 500, Date = DateTime.Parse("27/02/2026"), Type = TypeTransaction.Expense, UserId = TestUserId, CategoryId = 2, WalletId = 2 },
+                new Transaction { Id = 3, Amount = 7500, Date = DateTime.Parse("28/02/2026"), Type = TypeTransaction.Expense, UserId = TestUserId, CategoryId = 3, WalletId = 3 },
+                new Transaction { Id = 4, Amount = 8500, Date = DateTime.Parse("28/02/2026"), Type = TypeTransaction.Expense, UserId = TestUserId, CategoryId = 3, WalletId = 3 }
+            };
 
+            await _context.Categories.AddRangeAsync(categories);
+            await _context.Wallets.AddRangeAsync(wallets);
+            await _context.Transactions.AddRangeAsync(transactions);
+            await _context.SaveChangesAsync();
+        }
     }
 }

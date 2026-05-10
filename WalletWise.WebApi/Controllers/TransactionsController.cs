@@ -59,6 +59,11 @@ namespace WalletWise.WebApi.Controllers
         {
             var response = await _transactionService.CreateTransactionAsync(requestDto);
 
+            if (!response.IsSuccess)
+            {
+                return UnprocessableEntity(new { error = response.Error });
+            }
+
             return CreatedAtAction(nameof(GetTransactionById), new { id = response.Value.Id }, response);
         }
 
@@ -86,13 +91,18 @@ namespace WalletWise.WebApi.Controllers
             Description = "Te permite borrar una transaccion existente")]
         [ProducesResponseType(typeof(ProblemDetails),StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
         public async Task<ActionResult> DeleteTransaction(int id)
         {
             var response = await _transactionService.DeleteTransactionAsync(id);
 
-            if (response is null)
+            if (!response.IsSuccess)
             {
-                return NotFound();
+                if (response.Error?.Contains("no existe", StringComparison.OrdinalIgnoreCase) == true)
+                {
+                    return NotFound(new { error = response.Error });
+                }
+                return UnprocessableEntity(new { error = response.Error });
             }
 
             return NoContent();

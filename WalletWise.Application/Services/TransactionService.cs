@@ -1,14 +1,13 @@
 ﻿using AutoMapper;
 using Microsoft.Extensions.Logging;
-using System.Data.Common;
-using System.Xml.Linq;
+using WalletWise.Application.Dtos.Category;
 using WalletWise.Application.Dtos.Transaction;
+using WalletWise.Application.Dtos.Wallet;
 using WalletWise.Application.Interfaces;
 using WalletWise.Domain.Common;
 using WalletWise.Domain.Common.Enums;
 using WalletWise.Domain.Entities;
 using WalletWise.Domain.Interfaces;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 
 namespace WalletWise.Application.Services
@@ -20,16 +19,52 @@ namespace WalletWise.Application.Services
         private readonly IWalletRepository _walletRepository;
         private readonly ICategoryRepository _categoryRepository;
         private readonly IClock _clock;
+        private readonly ICurrentUserService _currentUserService;
 
 
-        public TransactionService(ITransactionRepository transactionRepository, IClock clock, ILogger<Transaction> logger, IMapper mapper, IWalletRepository walletRepository, ICategoryRepository categoryRepository) : base(transactionRepository, logger, mapper)
+        public TransactionService(ITransactionRepository transactionRepository, IClock clock, ILogger<Transaction> logger, IMapper mapper, IWalletRepository walletRepository, ICategoryRepository categoryRepository, ICurrentUserService currentUserService) : base(transactionRepository, logger, mapper)
         {
             _transactionRepository = transactionRepository;
             _clock = clock;
             _walletRepository = walletRepository;
             _categoryRepository = categoryRepository;
+            _currentUserService = currentUserService;
         }
 
+        public async Task<Result<IEnumerable<TransactionResponseDto>>> GetAllTransactionsAsync()
+        {
+            try
+            {
+                var transactions = await _transactionRepository.GetAllByUserAsync(_currentUserService.UserId!);
+
+                return Result<IEnumerable<TransactionResponseDto>>.Success(_mapper.Map<IEnumerable<TransactionResponseDto>>(transactions));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "A ocurrido un fallo inesperado al obtener todas las transacciones");
+                return Result<IEnumerable<TransactionResponseDto>>.Failure("No se ha podido obtener todas las transacciones");
+            }
+        }
+
+        public async Task<Result<TransactionResponseDto?>> GetTransactionByIdAsync(int id)
+        {
+            try
+            {
+                var result = await _transactionRepository.GetByIdForUserAsync(id, _currentUserService.UserId!);
+
+                if (result is null)
+                {
+                    return Result<TransactionResponseDto?>.Failure($"La transaccion con el id {id} no existe");
+                }
+
+                return Result<TransactionResponseDto?>.Success(_mapper.Map<TransactionResponseDto>(result));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ha ocurrido un fallo inesperado al obtener la transaccion con el id {Id} ", id);
+                return Result<TransactionResponseDto?>.Failure($"No se ha podido obtener la transaccion con el id {id}");
+            }
+        }
 
         public async Task<Result<TransactionResponseDto>> CreateTransactionAsync(CreateTransactionRequestDto transactionDto)
         {
@@ -37,7 +72,6 @@ namespace WalletWise.Application.Services
             {
                 var transaction = _mapper.Map<Transaction>(transactionDto);
 
-               
 
                 if (transaction.Amount <= 0)
                 {
@@ -51,18 +85,21 @@ namespace WalletWise.Application.Services
                 }
 
 
-                var walletExists = await _walletRepository.GetByIdAsync(transaction.WalletId);
+                var walletExists = await _walletRepository.GetByIdForUserAsync(transaction.WalletId, _currentUserService.UserId!);
+
                 if (walletExists == null)
                 {
                     return Result<TransactionResponseDto>.Failure($"La wallet con ID {transaction.WalletId} no existe");
                 }
 
+                var categoryExists = await _categoryRepository.GetCategoryActiveByIdAsync(transaction.CategoryId, _currentUserService.UserId!);
 
-                var categoryExists = await _categoryRepository.GetCategoryActiveByIdAsync(transaction.CategoryId);
                 if (categoryExists == null)
                 {
                     return Result<TransactionResponseDto>.Failure($"La categoría con ID {transaction.CategoryId} no existe");
                 }
+
+                transaction.UserId = _currentUserService.UserId!;
 
                 await _transactionRepository.AddAsync(transaction);
 
@@ -80,7 +117,7 @@ namespace WalletWise.Application.Services
             try
             {
 
-                var exist = await _transactionRepository.GetByIdAsync(id);
+                var exist = await _transactionRepository.GetByIdForUserAsync(id, _currentUserService.UserId!);
 
                 if (exist is null)
                 {
@@ -104,7 +141,7 @@ namespace WalletWise.Application.Services
         {
             try
             {
-                var exist = await _transactionRepository.GetByIdAsync(id);
+                var exist = await _transactionRepository.GetByIdForUserAsync(id, _currentUserService.UserId!);
 
                 if (exist is null)
                 {
@@ -126,7 +163,7 @@ namespace WalletWise.Application.Services
         {
             try
             {
-                var transactions = await _transactionRepository.GetByDateRangeAsync(start, end);
+                var transactions = await _transactionRepository.GetByDateRangeAsync(_currentUserService.UserId!, start, end);
 
                 return Result<IEnumerable<TransactionResponseDto>>.Success(_mapper.Map<IEnumerable<TransactionResponseDto>>(transactions));
             }
@@ -143,13 +180,13 @@ namespace WalletWise.Application.Services
             try
             {
 
-                var transactions = await _transactionRepository.GetByTypeTransactionAsync(type);
+                var transactions = await _transactionRepository.GetByTypeTransactionAsync(_currentUserService.UserId!, type);
 
                 return Result<IEnumerable<TransactionResponseDto>>.Success(_mapper.Map<IEnumerable<TransactionResponseDto>>(transactions));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "No se ha podido filtar las transacciones por su tipo debido a un fallo inesperado");
+                _logger.LogError(ex, "No se ha podido filtrar las transacciones por su tipo debido a un fallo inesperado");
                 return Result<IEnumerable<TransactionResponseDto>>.Failure("No se ha podido obtener las transacciones por su tipo");
             }
 
@@ -159,7 +196,7 @@ namespace WalletWise.Application.Services
         {
             try
             {
-                var transactions = await _transactionRepository.GetAllTransactionsByCategoryAsync(id);
+                var transactions = await _transactionRepository.GetAllTransactionsByCategoryAsync(_currentUserService.UserId!, id);
 
                 return Result<IEnumerable<TransactionResponseDto>>.Success(_mapper.Map<IEnumerable<TransactionResponseDto>>(transactions));
 

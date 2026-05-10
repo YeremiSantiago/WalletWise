@@ -15,16 +15,21 @@ namespace WalletWise.Persistence.Repositories
         {
         }
 
-        public async Task<IEnumerable<Category>> GetAllCategoriesActiveAsync()
+        public async Task<IEnumerable<Category>> GetAllCategoriesActiveAsync(string userId)
         {
-            return await _context.Categories.Where(x => x.IsDeleted == false)
+            return await _context.Categories.Where(x => x.IsDeleted == false && x.UserId == userId)
                 .AsNoTracking()
                 .ToListAsync();
         }
 
-        public async Task<Category?> GetCategoryActiveByIdAsync(int id)
+        public async Task<Category?> GetCategoryActiveByIdAsync(int id, string userId)
         {
-            return await _context.Categories.FirstOrDefaultAsync(x => x.Id == id && x.IsDeleted == false);
+            return await _context.Categories.FirstOrDefaultAsync(x => x.Id == id && x.IsDeleted == false && x.UserId == userId);
+        }
+
+        public async Task<bool> ExistsByNameAsync(string name, string userId)
+        {
+            return await _context.Categories.AnyAsync(x => x.Name == name && x.UserId == userId && x.IsDeleted == false);
         }
 
     }

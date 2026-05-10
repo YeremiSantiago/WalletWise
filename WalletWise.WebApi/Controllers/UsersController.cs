@@ -15,9 +15,11 @@ namespace WalletWise.WebApi.Controllers
     public class UsersController : ControllerBase
     {
         private readonly IAuthService _authService;
-        public UsersController(IAuthService authService)
+        private readonly ICurrentUserService _currentUserService;
+        public UsersController(IAuthService authService, ICurrentUserService currentUserService)
         {
             _authService = authService;
+            _currentUserService = currentUserService;
         }
 
         [HttpGet("me")]
@@ -27,7 +29,7 @@ namespace WalletWise.WebApi.Controllers
         [ProducesResponseType(typeof(UserProfileResponseDto), StatusCodes.Status404NotFound)]
         public async Task<ActionResult<UserProfileResponseDto>> GetCurrentUserProfile()
         {
-            var userId = HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userId = _currentUserService.UserId;
 
             if (string.IsNullOrWhiteSpace(userId))
                 return NotFound();

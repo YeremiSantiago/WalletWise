@@ -5,34 +5,42 @@ using Moq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using WalletWise.Application.Dtos.Category;
+using WalletWise.Application.Interfaces;
 using WalletWise.Application.Mappings.EntityToDto;
 using WalletWise.Application.Services;
 using WalletWise.Domain.Common.Enums;
 using WalletWise.Domain.Entities;
 using WalletWise.Domain.Interfaces;
+using Xunit;
 
 namespace WalletWise.Unit.Tests.Services
 {
     public class CategoryServiceTests
     {
         private readonly Mock<ICategoryRepository> _categoryRepoMock;
-        private readonly CategoryService _categoryService;
-        private readonly Mock<ILogger<Category>> _loggerMock;
         private readonly Mock<ITransactionRepository> _transactionRepoMock;
+        private readonly Mock<ILogger<Category>> _loggerMock;
         private readonly Mock<IClock> _clockMock;
+        private readonly Mock<ICurrentUserService> _currentUserServiceMock;
+        private readonly CategoryService _categoryService;
+
+        private const string TestUserId = "1";
 
         public CategoryServiceTests()
         {
             _categoryRepoMock = new Mock<ICategoryRepository>();
-            _clockMock = new Mock<IClock>();
-            _loggerMock = new Mock<ILogger<Category>>();
             _transactionRepoMock = new Mock<ITransactionRepository>();
+            _loggerMock = new Mock<ILogger<Category>>();
+            _clockMock = new Mock<IClock>();
+            _currentUserServiceMock = new Mock<ICurrentUserService>();
+
+            
+            _currentUserServiceMock.Setup(x => x.UserId).Returns(TestUserId);
 
             var config = new MapperConfiguration(
-            cfg => cfg.AddProfile<CategoryMappingProfile>(), NullLoggerFactory.Instance
+                cfg => cfg.AddProfile<CategoryMappingProfile>(), NullLoggerFactory.Instance
             );
             var mapper = config.CreateMapper();
 
@@ -41,319 +49,171 @@ namespace WalletWise.Unit.Tests.Services
                 _transactionRepoMock.Object,
                 _loggerMock.Object,
                 _clockMock.Object,
-                mapper
+                mapper,
+                _currentUserServiceMock.Object
             );
-
         }
 
         [Fact]
-        public async Task GetAllCategoriesAsync_WhenGetALlTheCategoriesExisting_ReturnsSuccessWithValues()
+        public async Task GetAllCategoriesAsync_WhenGetAllTheCategoriesExisting_ReturnsSuccessWithValues()
         {
             // Arrange
-
-            var categories = new List<Category>()
+            var categories = new List<Category>
             {
-                new Category {Id = 1, Name = "Comida", UserId = "1", IsDeleted = false},
-                new Category {Id = 2, Name = "Servicios", UserId = "1", IsDeleted = false},
-                new Category {Id = 3, Name = "Transporte", UserId = "1", IsDeleted = false},
-                new Category {Id = 4, Name = "Comptras", UserId = "1", IsDeleted = false}
+                new Category {Id = 1, Name = "Comida", UserId = TestUserId, IsDeleted = false},
+                new Category {Id = 2, Name = "Servicios", UserId = TestUserId, IsDeleted = false},
+                new Category {Id = 3, Name = "Transporte", UserId = TestUserId, IsDeleted = false},
+                new Category {Id = 4, Name = "Compras", UserId = TestUserId, IsDeleted = false}
             };
 
-            _categoryRepoMock.Setup(r => r.GetAllAsync())
+            _categoryRepoMock.Setup(r => r.GetAllCategoriesActiveAsync(TestUserId))
                 .ReturnsAsync(categories);
 
             // Act 
-
-            var result = await _categoryService.GetAllAsync();
+            var result = await _categoryService.GetAllCategoriesAsync();
 
             // Assert
-
-            Assert.Equal(4, result.Value.Count());
             Assert.True(result.IsSuccess);
             Assert.Null(result.Error);
-            Assert.NotEmpty(result.Value);
-
-
+            Assert.NotNull(result.Value);
+            Assert.Equal(4, result.Value?.Count());
         }
 
         [Fact]
         public async Task GetCategoryByIdAsync_WhenGetCategoryExisting_ReturnCategoryWithValue()
         {
-            // Assert 
-
-            var categories = new List<Category>()
-            {
-                new Category {Id = 1, Name = "Comida", UserId = "1", IsDeleted = false},
-                new Category {Id = 2, Name = "Servicios", UserId = "1", IsDeleted = false},
-                new Category {Id = 3, Name = "Transporte", UserId = "1", IsDeleted = false},
-                new Category {Id = 4, Name = "Comptras", UserId = "1", IsDeleted = false}
-            };
-
+            // Arrange 
+            var category = new Category { Id = 3, Name = "Transporte", UserId = TestUserId, IsDeleted = false };
             int id = 3;
 
-            _categoryRepoMock.Setup(r => r.GetByIdAsync(It.Is<int>(x => x == id)))
-                .ReturnsAsync(categories[2]);
+            _categoryRepoMock.Setup(r => r.GetCategoryActiveByIdAsync(id, TestUserId))
+                .ReturnsAsync(category);
 
             // Act 
-
-            var result = await _categoryService.GetByIdAsync(id);
+            var result = await _categoryService.GetCategoryByIdAsync(id);
 
             // Assert
-
-            Assert.NotNull(result.Value);
-            Assert.Equal("Transporte", result.Value.Name);
-            Assert.Null(result.Error);
             Assert.True(result.IsSuccess);
-
+            Assert.Null(result.Error);
+            Assert.NotNull(result.Value);
+            Assert.Equal("Transporte", result.Value?.Name);
         }
 
         [Fact]
-        public async Task GetCategoryByIdAsync_whenACategoryDontExist_ReturnFailureWithError()
+        public async Task GetCategoryByIdAsync_WhenCategoryDontExist_ReturnFailureWithError()
         {
-            // Assert
-
-            var categories = new List<Category>()
-            {
-                new Category {Id = 1, Name = "Comida", UserId = "1", IsDeleted = false},
-                new Category {Id = 2, Name = "Servicios", UserId = "1", IsDeleted = false},
-                new Category {Id = 3, Name = "Transporte", UserId = "1", IsDeleted = false},
-                new Category {Id = 4, Name = "Comptras", UserId = "1", IsDeleted = false}
-            };
-
+            // Arrange
             int id = 5;
 
-            _categoryRepoMock.Setup(r => r.GetByIdAsync(It.Is<int>(x => x == id)))
-                .ReturnsAsync(default(Category));
+            _categoryRepoMock.Setup(r => r.GetCategoryActiveByIdAsync(id, TestUserId))
+                .ReturnsAsync((Category?)null);
+
+            // Act
+            var result = await _categoryService.GetCategoryByIdAsync(id);
 
             // Assert
-
-            var result = await _categoryService.GetByIdAsync(id);
-
-            // Assert
-
-            Assert.Null(result.Value);
-            Assert.NotEmpty(result.Error);
             Assert.False(result.IsSuccess);
-
-
+            Assert.NotNull(result.Error);
+            Assert.Null(result.Value);
         }
 
         [Fact]
         public async Task CreateCategoryAsync_WhenACategoryIsCreated_ReturnSuccessWithValue()
         {
             // Arrange
-
-            var categoryDto = new CreateCategoryRequestDto()
+            var categoryDto = new CreateCategoryRequestDto
             {
-                Name = "Minimo Antonio"
+                Name = "Nueva Categoria"
             };
 
-            _categoryRepoMock.Setup(r => r.AddAsync(It.Is<Category>(r => r.Name == categoryDto.Name)))
-                .ReturnsAsync((Category w) => w);
+            _categoryRepoMock.Setup(r => r.ExistsByNameAsync(categoryDto.Name, TestUserId))
+                .ReturnsAsync(false);
+
+            _categoryRepoMock.Setup(r => r.AddAsync(It.IsAny<Category>()))
+                .ReturnsAsync((Category c) => c);
 
             // Act
-
             var result = await _categoryService.CreateCategoryAsync(categoryDto);
 
             // Assert
-
-            Assert.Equal(categoryDto.Name, result.Value.Name);
             Assert.True(result.IsSuccess);
             Assert.Null(result.Error);
             Assert.NotNull(result.Value);
-
+            Assert.Equal(categoryDto.Name, result.Value?.Name);
         }
 
         [Fact]
-        public async Task UpdateCategoryAsync_WhenCategoryIsUpdated_ReturnWalletWithSuccess()
+        public async Task UpdateCategoryAsync_WhenCategoryIsUpdated_ReturnSuccess()
         {
             // Arrange
-
-            var categories = new List<Category>()
-            {
-                new Category {Id = 1, Name = "Comida", UserId = "1", IsDeleted = false},
-                new Category {Id = 2, Name = "Servicios", UserId = "1", IsDeleted = false},
-                new Category {Id = 3, Name = "Transporte", UserId = "1", IsDeleted = false},
-                new Category {Id = 4, Name = "Comptras", UserId = "1", IsDeleted = false}
-            };
-
-
-
+            int id = 1;
+            var existingCategory = new Category { Id = 1, Name = "Comida", UserId = TestUserId, IsDeleted = false };
             var categoryDto = new UpdateCategoryRequestDto
             {
-                Name = "Antonio Rodriguez"
+                Name = "Gasto Actualizado"
             };
 
-            int id = 1;
+            _categoryRepoMock.Setup(r => r.GetCategoryActiveByIdAsync(id, TestUserId))
+                .ReturnsAsync(existingCategory);
 
             _categoryRepoMock.Setup(r => r.UpdateAsync(It.IsAny<Category>()));
-            _categoryRepoMock.Setup(r => r.GetByIdAsync(It.Is<int>(x => x == id))).ReturnsAsync(categories[0]);
 
             // Act
-
             var result = await _categoryService.UpdateCategoryAsync(id, categoryDto);
 
             // Assert
-
-            Assert.Equal(id, result.Value.Id);
             Assert.True(result.IsSuccess);
             Assert.Null(result.Error);
-            Assert.Equal(categoryDto.Name, result.Value.Name);
-
+            Assert.NotNull(result.Value);
+            Assert.Equal("Gasto Actualizado", result.Value?.Name);
         }
 
         [Fact]
         public async Task DeleteCategoryAsync_WhenCategoryIsDeleted_ReturnOperationIsSuccess()
         {
             // Arrange 
-
-            var categories = new List<Category>()
-            {
-                new Category {Id = 1, Name = "Comida", UserId = "1", IsDeleted = false},
-                new Category {Id = 2, Name = "Servicios", UserId = "1", IsDeleted = false},
-                new Category {Id = 3, Name = "Transporte", UserId = "1", IsDeleted = false},
-                new Category {Id = 4, Name = "Comptras", UserId = "1", IsDeleted = false}
-            };
-
-            var transactions = new List<Transaction>()
-            {
-                new Transaction
-                {
-                    Id = 1,
-                    Amount = 125,
-                    Date = DateTime.Parse("10/09/2026"),
-                    Type = TypeTransaction.Income,
-                    Comment = null,
-                    UserId = "1",
-                    CategoryId = 1,
-                    WalletId = 1
-                },
-                new Transaction
-                {
-                    Id = 2,
-                    Amount = 500,
-                    Date = DateTime.Parse("24/02/2026"),
-                    Type = TypeTransaction.Expense,
-                    Comment = "Que sueño",
-                    UserId = "1",
-                    CategoryId = 3,
-                    WalletId = 2
-                }
-
-            };
-
-            var wallet = new List<Wallet>()
-            {
-                new Wallet
-                {
-                    Id = 1,
-                    Name = "Sueldo",
-                    UserId = "1"
-                },
-                new Wallet
-                {
-                    Id = 2,
-                    Name = "Tarjeta de credito",
-                    UserId = "1"
-                }
-            };
-
             int id = 2;
+            var category = new Category { Id = 2, Name = "Servicios", UserId = TestUserId, IsDeleted = false };
 
-            _categoryRepoMock.Setup(r => r.GetByIdAsync(It.Is<int>(x => x == id))).ReturnsAsync(categories[1]);
-            _transactionRepoMock.Setup(r => r.ExistsTransactionByCategoryAsync(It.Is<int>(x => x == id))).ReturnsAsync(false);
-            _categoryRepoMock.Setup(r => r.UpdateAsync(It.Is<Category>(r => r.Id.Equals(id))));
+            _categoryRepoMock.Setup(r => r.GetCategoryActiveByIdAsync(id, TestUserId))
+                .ReturnsAsync(category);
+
+            _transactionRepoMock.Setup(r => r.ExistsTransactionByCategoryAsync(id, TestUserId))
+                .ReturnsAsync(false);
+
+            _categoryRepoMock.Setup(r => r.UpdateAsync(It.IsAny<Category>()));
 
             // Act 
-
             var result = await _categoryService.DeleteCategoryAsync(id);
 
             // Assert
-
-            Assert.True(result.Value);
+            Assert.True(result.IsSuccess);
             Assert.Null(result.Error);
-            Assert.Equal(true, result.IsSuccess);
-            Assert.NotNull(result.Value);
-
-
+            Assert.True(result.Value);
         }
 
         [Fact]
-        public async Task DeleteCategoryAsync_WhenACategoryHasATransaction_ReturnOperationIsFailure()
+        public async Task DeleteCategoryAsync_WhenCategoryHasATransaction_ReturnOperationIsFailure()
         {
             // Arrange 
-
-            var categories = new List<Category>()
-            {
-                new Category {Id = 1, Name = "Comida", UserId = "1", IsDeleted = false},
-                new Category {Id = 2, Name = "Servicios", UserId = "1", IsDeleted = false},
-                new Category {Id = 3, Name = "Transporte", UserId = "1", IsDeleted = false},
-                new Category {Id = 4, Name = "Comptras", UserId = "1", IsDeleted = false}
-            };
-
-            var transactions = new List<Transaction>()
-            {
-                new Transaction
-                {
-                    Id = 1,
-                    Amount = 125,
-                    Date = DateTime.Parse("10/09/2026"),
-                    Type = TypeTransaction.Income,
-                    Comment = null,
-                    UserId = "1",
-                    CategoryId = 2,
-                    WalletId = 1
-                },
-                new Transaction
-                {
-                    Id = 2,
-                    Amount = 500,
-                    Date = DateTime.Parse("24/02/2026"),
-                    Type = TypeTransaction.Expense,
-                    Comment = "Que sueño",
-                    UserId = "1",
-                    CategoryId = 3,
-                    WalletId = 2
-                }
-            };
-
-            var wallet = new List<Wallet>()
-            {
-                new Wallet
-                {
-                    Id = 1,
-                    Name = "Sueldo",
-                    UserId = "1"
-                },
-                new Wallet
-                {
-                    Id = 2,
-                    Name = "Tarjeta de credito",
-                    UserId = "1"
-                }
-            };
-
             int id = 2;
+            var category = new Category { Id = 2, Name = "Servicios", UserId = TestUserId, IsDeleted = false };
 
-            _categoryRepoMock.Setup(r => r.GetByIdAsync(It.Is<int>(x => x == id))).ReturnsAsync(categories[1]);
-            _transactionRepoMock.Setup(r => r.ExistsTransactionByCategoryAsync(It.Is<int>(x => x == id))).ReturnsAsync(true);
-            _categoryRepoMock.Setup(r => r.UpdateAsync(It.Is<Category>(r => r.Id.Equals(id))));
+            _categoryRepoMock.Setup(r => r.GetCategoryActiveByIdAsync(id, TestUserId))
+                .ReturnsAsync(category);
+
+            // Simular que existen transacciones para esta categoría
+            _transactionRepoMock.Setup(r => r.ExistsTransactionByCategoryAsync(id, TestUserId))
+                .ReturnsAsync(true);
 
             // Act 
-
             var result = await _categoryService.DeleteCategoryAsync(id);
 
             // Assert
-
-            Assert.False(result.Value);
+            Assert.False(result.IsSuccess);
             Assert.NotNull(result.Error);
-            Assert.Equal(false, result.IsSuccess);
             Assert.Equal("Esta categoria tiene transacciones asociadas", result.Error);
-
-
-
+            Assert.False(result.Value);
         }
-
-
     }
 }
