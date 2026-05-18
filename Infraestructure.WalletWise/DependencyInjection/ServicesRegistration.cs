@@ -1,10 +1,12 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using WalletWise.Application.Interfaces;
@@ -51,6 +53,37 @@ namespace WalletWise.Infraestructure.DependencyInjection
                     IssuerSigningKey = new SymmetricSecurityKey(
                         Encoding.UTF8.GetBytes(jwtSettings.SecretKey)),
                     ClockSkew = TimeSpan.Zero
+                };
+
+                options.Events = new JwtBearerEvents
+                {
+                    OnTokenValidated = async context =>
+                    {
+                        var userManager = context.HttpContext.RequestServices.GetRequiredService<UserManager<IdentityUser>>();
+                        var userId = context.Principal?.FindFirstValue(ClaimTypes.NameIdentifier);
+                        var tokenStamp = context.Principal?.FindFirst("security_stamp")?.Value;
+
+                        if(string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(tokenStamp))
+                        {
+                            context.Fail("Token Inválido");
+                            return;
+                        }
+
+                        var user = await userManager.FindByIdAsync(userId);
+
+                        if(user is null)
+                        {
+                            context.Fail("Usuario no encontrado");
+                            return;
+                        }
+
+                        var currentStamp = await userManager.GetSecurityStampAsync(user);
+                            
+                        if(!string.Equals(currentStamp, tokenStamp, StringComparison.Ordinal))
+                        {
+                            context.Fail("Token revocado");
+                        }
+                    }
                 };
             });
 

@@ -13,10 +13,12 @@ namespace WalletWise.WebApi.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;
+        private readonly ICurrentUserService _currentUserService;
 
-        public AuthController(IAuthService authService)
+        public AuthController(IAuthService authService, ICurrentUserService currentUserService)
         {
             _authService = authService;
+            _currentUserService = currentUserService;
         }
 
         [HttpPost("register")]
@@ -57,6 +59,51 @@ namespace WalletWise.WebApi.Controllers
             }
 
             return Ok(result.Value);
+        }
+
+        [HttpPut("me/password")]
+        [SwaggerOperation(Summary = "Cambiar contraseña",
+            Description = "Actualiza la contraseña del usuario autenticado")]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequestDto request)
+        {
+            var userId = _currentUserService.UserId;
+
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                return NotFound();
+            }
+
+          
+
+            var result = await _authService.ChangePasswordAsync(userId, request);
+
+            if (!result.IsSuccess)
+                return BadRequest(new { error = result.Error });
+
+            return NoContent();
+        }
+
+        [Authorize]
+        [HttpPost("logout")]
+        [SwaggerOperation(Summary = "Cerrar sesión",
+            Description = "Cierra la sesión e invalida el token JWT actual")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> Logout()
+        {
+            var userId = _currentUserService.UserId;
+
+            if (string.IsNullOrWhiteSpace(userId))
+                return Unauthorized();
+
+            var result = await _authService.LogoutAsync(userId);
+
+            if (!result.IsSuccess)
+                return BadRequest(new { error = result.Error });
+
+            return NoContent();
         }
     }
 }

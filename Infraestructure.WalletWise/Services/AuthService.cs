@@ -1,5 +1,4 @@
-﻿using System.Security.Claims;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -14,6 +13,7 @@ using WalletWise.Application.Interfaces;
 using WalletWise.Domain.Common;
 using WalletWise.Domain.Setting;
 using WalletWise.Application.Dtos.Users;
+using System.Security.Claims;
 
 namespace WalletWise.Infraestructure.Services
 {
@@ -72,7 +72,7 @@ namespace WalletWise.Infraestructure.Services
 
                 _logger.LogInformation("usuario creado exitosamente");
 
-                var token = GenerateJwtToken(newUser);
+                var token = await GenerateJwtTokenAsync(newUser);
 
                 return Result<LoginResponseDto>.Success(new LoginResponseDto
                 {
@@ -117,7 +117,7 @@ namespace WalletWise.Infraestructure.Services
 
                 _logger.LogInformation("Login exitoso");
 
-                var token = GenerateJwtToken(user);
+                var token = await GenerateJwtTokenAsync(user);
 
                 return Result<LoginResponseDto>.Success(new LoginResponseDto
                 {
@@ -132,31 +132,6 @@ namespace WalletWise.Infraestructure.Services
                 _logger.LogError(ex, "Error inesperado al iniciar sesión para {Email}", login.Email);
                 return Result<LoginResponseDto>.Failure("Ha ocurrido un error al iniciar sesión");
             }
-        }
-
-        private (string Token, string Expiration) GenerateJwtToken(IdentityUser user)
-        {
-            var claims = new List<Claim>
-            {
-                new(ClaimTypes.NameIdentifier, user.Id),
-                new(ClaimTypes.Email, user.Email),
-                new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new(JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64)
-            };
-
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.SecretKey));
-            var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-            var expiration = DateTime.UtcNow.AddMinutes(_jwtSettings.DurationInMinutes);
-
-            var token = new JwtSecurityToken(
-               issuer: _jwtSettings.Issuer,
-               audience: _jwtSettings.Audience,
-               claims: claims,
-               expires: expiration,
-               signingCredentials: credentials
-           );
-
-            return (new JwtSecurityTokenHandler().WriteToken(token), expiration.ToString("O"));
         }
 
         public async Task<Result<UserProfileResponseDto>> GetCurrentUserProfile(string userId)
@@ -198,6 +173,127 @@ namespace WalletWise.Infraestructure.Services
                 _logger.LogError(ex, "Error al obtener el perfil del usuario {UserId}", userId);
                 return Result<UserProfileResponseDto>.Failure("No se pudo obtener el perfil del usuario");
             }
+        }
+
+        public async Task<Result<UserProfileResponseDto>> UpdateProfileNameAsync(string userId, UpdateUserProfileRequestDto request)
+        {
+            try
+            {
+                var user = await _userManager.FindByIdAsync(userId);
+
+                if (user is null)
+                    return Result<UserProfileResponseDto>.Failure("Usuario no encontrado");
+
+                var claims = await _userManager.GetClaimsAsync(user);
+                var currentNameClaim = claims.FirstOrDefault(c => c.Type == "profile_name");
+
+                IdentityResult result;
+
+                if (currentNameClaim is null)
+                {
+                    result = await _userManager.AddClaimAsync(user, new Claim("profile_name", request.Name));
+                }
+                else
+                {
+                    result = await _userManager.ReplaceClaimAsync(user, currentNameClaim, new Claim("profile_name", request.Name));
+                }
+
+                if (!result.Succeeded)
+                {
+                    var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                    _logger.LogWarning("Error al actualizar nombre de perfil {UserId}: {Errors}", userId, errors);
+                    return Result<UserProfileResponseDto>.Failure("No se pudo actualizar el nombre del perfil");
+                }
+
+                return await GetCurrentUserProfile(userId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al actualizar nombre de perfil {UserId}", userId);
+                return Result<UserProfileResponseDto>.Failure("No se pudo actualizar el nombre del perfil");
+            }
+        }
+
+        public async Task<Result<bool>> ChangePasswordAsync(string userId, ChangePasswordRequestDto request)
+        {
+            try
+            {
+                var user = await _userManager.FindByIdAsync(userId);
+
+                if (user is null)
+                    return Result<bool>.Failure("Usuario no encontrado");
+
+                var result = await _userManager.ChangePasswordAsync(user, request.CurrentPassword, request.NewPassword);
+
+                if (!result.Succeeded)
+                {
+                    var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                    _logger.LogWarning("Error al cambiar contraseña {UserId}: {Errors}", userId, errors);
+                    return Result<bool>.Failure(errors);
+                }
+
+                return Result<bool>.Success(true);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al cambiar contraseña {UserId}", userId);
+                return Result<bool>.Failure("No se pudo cambiar la contraseña");
+            }
+        }
+
+        public async Task<Result<bool>> LogoutAsync(string userId)
+        {
+            try
+            {
+                var user = await _userManager.FindByIdAsync(userId);
+
+                if (user is null)
+                    return Result<bool>.Failure("Usuario no encontrado");
+
+                var result = await _userManager.UpdateSecurityStampAsync(user);
+
+                if (!result.Succeeded)
+                {
+                    var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                    _logger.LogWarning("Error al cerrar sesión {UserId}: {Errors}", userId, errors);
+                    return Result<bool>.Failure("No se pudo cerrar sesión");
+                }
+
+                return Result<bool>.Success(true);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al cerrar sesión {UserId}", userId);
+                return Result<bool>.Failure("No se pudo cerrar sesión");
+            }
+        }
+
+        private async Task<(string Token, string Expiration)> GenerateJwtTokenAsync(IdentityUser user)
+        {
+            var securityStamp = await _userManager.GetSecurityStampAsync(user);
+
+            var claims = new List<Claim>
+            {
+                new(ClaimTypes.NameIdentifier, user.Id),
+                new(ClaimTypes.Email, user.Email),
+                new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new(JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64),
+                new("security_stamp", securityStamp)
+            };
+
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.SecretKey));
+            var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+            var expiration = DateTime.UtcNow.AddMinutes(_jwtSettings.DurationInMinutes);
+
+            var token = new JwtSecurityToken(
+               issuer: _jwtSettings.Issuer,
+               audience: _jwtSettings.Audience,
+               claims: claims,
+               expires: expiration,
+               signingCredentials: credentials
+           );
+
+            return (new JwtSecurityTokenHandler().WriteToken(token), expiration.ToString("O"));
         }
     }
 }

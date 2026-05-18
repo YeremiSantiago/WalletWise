@@ -43,6 +43,7 @@ namespace WalletWise.WebApi
                 });
             });
 
+
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen(options =>
             {

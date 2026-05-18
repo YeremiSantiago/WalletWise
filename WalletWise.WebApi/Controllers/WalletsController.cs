@@ -40,7 +40,7 @@ namespace WalletWise.WebApi.Controllers
         [ProducesResponseType(typeof(WalletResponseDto), StatusCodes.Status200OK)]
         public async Task<ActionResult<WalletResponseDto>> GetWalletById(int id)
         {
-            var response = await _walletService.GetByIdAsync(id);
+            var response = await _walletService.GetWalletByIdAsync(id);
 
             if(response.Value is null)
             {
@@ -59,7 +59,7 @@ namespace WalletWise.WebApi.Controllers
         {
             var response = await _walletService.CreateWalletAsync(requestDto);
 
-            return CreatedAtAction(nameof(GetWalletById), new { id = response.Value.Id }, response);
+            return CreatedAtAction(nameof(GetWalletById), new { id = response.Value.Id }, response.Value);
         }
 
         [HttpPut("{id}")]

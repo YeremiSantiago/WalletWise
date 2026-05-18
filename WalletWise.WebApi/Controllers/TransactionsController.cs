@@ -64,7 +64,7 @@ namespace WalletWise.WebApi.Controllers
                 return UnprocessableEntity(new { error = response.Error });
             }
 
-            return CreatedAtAction(nameof(GetTransactionById), new { id = response.Value.Id }, response);
+            return CreatedAtAction(nameof(GetTransactionById), new { id = response.Value.Id }, response.Value);
         }
 
         [HttpPut("{id}")]

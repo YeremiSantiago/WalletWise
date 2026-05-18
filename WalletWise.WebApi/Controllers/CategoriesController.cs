@@ -54,11 +54,17 @@ namespace WalletWise.WebApi.Controllers
             Summary = "Crear categoria",
             Description = "Permite crear categorias y te la devuelve si fue creada exitosamente")]
         [ProducesResponseType(typeof(CategoryResponseDto), StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
         public async Task<ActionResult<CategoryResponseDto>> CreateCategory([FromBody] CreateCategoryRequestDto requestDto)
         {
             var response = await _categoryService.CreateCategoryAsync(requestDto);
 
-            return CreatedAtAction(nameof(GetCategoryById), new { id = response.Value.Id }, response);
+            if (!response.IsSuccess || response.Value is null)
+            {
+                return UnprocessableEntity(new { error = response.Error });
+            }
+
+            return CreatedAtAction(nameof(GetCategoryById), new { id = response.Value.Id }, response.Value);
         }
 
         [HttpPut("{id}")]

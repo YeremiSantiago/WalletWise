@@ -87,7 +87,7 @@ namespace WalletWise.Persistence.Repositories
 
         public async Task<IEnumerable<TopCategoryReportItem>> GetTopCategoriesAsync(string userId, DateTime start, DateTime end, int top)
         {
-            return await _context.Transactions
+            var data = await _context.Transactions
                 .Include(t => t.Category)
                 .Where(t => t.UserId == userId && t.Type == TypeTransaction.Expense && t.Category!.IsDeleted == false && t.Date >= start && t.Date <= end)
                 .GroupBy(t => new { t.CategoryId, t.Category!.Name })
@@ -97,9 +97,12 @@ namespace WalletWise.Persistence.Repositories
                     CategoryName = g.Key.Name,
                     TotalAmount = g.Sum(t => t.Amount)
                 })
+                .ToListAsync();
+
+            return data
                 .OrderByDescending(x => x.TotalAmount)
                 .Take(top)
-                .ToListAsync();
+                .ToList();
         }
 
         public async Task<ComparisonReport> GetComparisonAsync(string userId, DateTime startA, DateTime endA, DateTime startB, DateTime endB)

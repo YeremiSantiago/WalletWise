@@ -10,6 +10,6 @@ namespace WalletWise.Application.Dtos.Category
     {
         public int Id { get; set; }
         public string Name { get; set; }
-        public int? UserId { get; set; } 
+        public string? UserId { get; set; } 
     }
 }
