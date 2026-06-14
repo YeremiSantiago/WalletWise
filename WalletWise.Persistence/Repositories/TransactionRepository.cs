@@ -1,10 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using WalletWise.Domain.Common.Enums;
+using WalletWise.Domain.Common.Pagination;
 using WalletWise.Domain.Entities;
 using WalletWise.Domain.Interfaces;
 using WalletWise.Persistence.Context;
@@ -60,5 +61,40 @@ namespace WalletWise.Persistence.Repositories
                 .ToListAsync();
         }
 
+        public async Task<PagedResult<Transaction>> GetPagedTransactionsAsync(string userId, TransactionFilterParams filterParams)
+        {
+            var query = _context.Transactions.Where(x => x.UserId == userId)
+                .AsNoTracking();
+
+            if (filterParams.DateFrom.HasValue)
+                query = query.Where(x => x.Date >= filterParams.DateFrom.Value);
+            if (filterParams.DateTo.HasValue)
+                query = query.Where(x => x.Date <= filterParams.DateTo.Value);
+            if (filterParams.Type.HasValue)
+                query = query.Where(x => x.Type == filterParams.Type.Value);
+            if (filterParams.CategoryId.HasValue)
+                query = query.Where(x => x.CategoryId == filterParams.CategoryId.Value);
+            if (!string.IsNullOrWhiteSpace(filterParams.Search))
+                query = query.Where(x => x.Comment != null && x.Comment.Contains(filterParams.Search));
+
+            var totalRecords = await query.CountAsync();
+            bool isDesc = filterParams.OrderDir?.ToLower() == "desc";
+            if (filterParams.OrderBy?.ToLower() == "amount")
+            {
+                query = isDesc ? query.OrderByDescending(x => x.Amount) : query.OrderBy(x => x.Amount);
+            }
+            else
+            {
+                
+                query = isDesc ? query.OrderByDescending(x => x.Date) : query.OrderBy(x => x.Date);
+            }
+            
+            var items = await query
+                .Skip((filterParams.Page - 1) * filterParams.PageSize)
+                .Take(filterParams.PageSize)
+                .ToListAsync();
+           
+            return new PagedResult<Transaction>(items, totalRecords, filterParams.Page, filterParams.PageSize);
+        }
     }
 }
