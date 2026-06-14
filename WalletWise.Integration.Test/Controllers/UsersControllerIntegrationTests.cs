@@ -4,6 +4,8 @@ using System.Net.Http.Json;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
 using WalletWise.Application.Dtos.Auth;
 using WalletWise.Application.Dtos.Users;
@@ -142,7 +144,16 @@ namespace WalletWise.Integration.Test.Controllers
             using var scope = _factory.Services.CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<IdentityAppDbContext>();
 
-            await db.Database.EnsureCreatedAsync();
+           
+            try
+            {
+                var databaseCreator = db.GetService<IRelationalDatabaseCreator>();
+                await databaseCreator.CreateTablesAsync();
+            }
+            catch
+            {
+                
+            }
 
             db.UserClaims.RemoveRange(db.UserClaims);
             db.UserLogins.RemoveRange(db.UserLogins);

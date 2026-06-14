@@ -3,10 +3,13 @@ using System.Net;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using WalletWise.Application.Dtos.Auth;
 using WalletWise.Integration.Test.Infraestructure;
 using WalletWise.Persistence.Context;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace WalletWise.Integration.Test.Controllers
 {
@@ -170,7 +173,15 @@ namespace WalletWise.Integration.Test.Controllers
             using var scope = _factory.Services.CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<IdentityAppDbContext>();
 
-            await db.Database.EnsureCreatedAsync();
+            
+            try
+            {
+                await db.Database.EnsureCreatedAsync();
+               
+            }
+            catch
+            {
+            }
 
             db.UserClaims.RemoveRange(db.UserClaims);
             db.UserLogins.RemoveRange(db.UserLogins);
@@ -181,6 +192,9 @@ namespace WalletWise.Integration.Test.Controllers
             db.Users.RemoveRange(db.Users);
 
             await db.SaveChangesAsync();
+
+            // Generame una imprimir
+
         }
     }
 }

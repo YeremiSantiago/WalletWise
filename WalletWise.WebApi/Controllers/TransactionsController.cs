@@ -1,13 +1,17 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Swashbuckle.AspNetCore.Annotations;
+using System.ComponentModel.DataAnnotations;
 using WalletWise.Application.Dtos.Transaction;
 using WalletWise.Application.Interfaces;
+using WalletWise.Domain.Common.Pagination;
 
 namespace WalletWise.WebApi.Controllers
 {
     [ApiController]
     [Route("api/transactions")]
+    [EnableRateLimiting("AuthenticatedUserApi")]
     [Authorize]
     [SwaggerTag("Proporciorna operaciones CRUD para gestionar transacciones")]
     public class TransactionsController : ControllerBase
@@ -25,9 +29,9 @@ namespace WalletWise.WebApi.Controllers
             Description = "Te devuelve todas las transacciones registradas existentes"
             )]
         [ProducesResponseType(typeof(List<TransactionResponseDto>), StatusCodes.Status200OK)]
-        public async Task<ActionResult<IEnumerable<TransactionResponseDto>>> GetAllTransactions()
+        public async Task<ActionResult<PagedResult<TransactionResponseDto>>> GetAllTransactions([FromQuery] TransactionFilterParams filterParams)
         {
-            var response = await _transactionService.GetAllAsync();
+            var response = await _transactionService.GetPagedTransactionsAsync(filterParams);
 
             return Ok(response.Value);
         }

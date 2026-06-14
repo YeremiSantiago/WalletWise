@@ -22,6 +22,7 @@ namespace WalletWise.WebApi.Controllers
         }
 
         [HttpPost("register")]
+        [EnableRateLimiting("AuthRegisterByIp")]
         [SwaggerResponse(StatusCodes.Status201Created, "Usario registrado Exitosamente", typeof(LoginResponseDto))]
         [SwaggerOperation(
             Summary = "Registar nuevo usuario",
@@ -42,7 +43,7 @@ namespace WalletWise.WebApi.Controllers
         }
 
         [HttpPost("login")]
-        [EnableRateLimiting("AuthLoginIp")]
+        [EnableRateLimiting("AuthLoginByIp")]
         [SwaggerOperation(
             Summary = "Autenticar usuario",
             Description = "Autentica el usuario ingresando el correo y contraseña y devuelve un token JWT")]

@@ -1,10 +1,11 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Microsoft.Extensions.Logging;
 using WalletWise.Application.Dtos.Category;
 using WalletWise.Application.Dtos.Transaction;
 using WalletWise.Application.Dtos.Wallet;
 using WalletWise.Application.Interfaces;
 using WalletWise.Domain.Common;
+using WalletWise.Domain.Common.Pagination;
 using WalletWise.Domain.Common.Enums;
 using WalletWise.Domain.Entities;
 using WalletWise.Domain.Interfaces;
@@ -205,6 +206,29 @@ namespace WalletWise.Application.Services
             {
                 _logger.LogError(ex, "Ha ocurrido un fallo al filtrar las transacciones por categoria");
                 return Result<IEnumerable<TransactionResponseDto>>.Failure("No se han podido obtener las transacciones por categoria");
+            }
+        }
+
+        public async Task<Result<PagedResult<TransactionResponseDto>>> GetPagedTransactionsAsync(TransactionFilterParams filterParams)
+        {
+            try
+            {
+                
+                var pagedResult = await _transactionRepository.GetPagedTransactionsAsync(_currentUserService.UserId!, filterParams);
+                
+                var dtos = _mapper.Map<List<TransactionResponseDto>>(pagedResult.Items);
+                
+                var resultDto = new PagedResult<TransactionResponseDto>(
+                    dtos, 
+                    pagedResult.TotalRecords, 
+                    pagedResult.CurrentPage, 
+                    pagedResult.PageSize);
+                return Result<PagedResult<TransactionResponseDto>>.Success(resultDto);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ha ocurrido un error inesperado al obtener las transacciones paginadas.");
+                return Result<PagedResult<TransactionResponseDto>>.Failure("No se han podido obtener las transacciones.");
             }
         }
 

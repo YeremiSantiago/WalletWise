@@ -1,9 +1,10 @@
-﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using System.Linq;
 using System.Threading.Tasks;
@@ -18,6 +19,8 @@ namespace WalletWise.Integration.Test.Infraestructure
 
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
+            builder.UseEnvironment("Testing");
+            
             _connection = CreateOpenConnection();
 
             builder.ConfigureServices(services =>
@@ -59,7 +62,11 @@ namespace WalletWise.Integration.Test.Infraestructure
         {
             using var scope = Services.CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            var identityDb = scope.ServiceProvider.GetRequiredService<IdentityAppDbContext>();
+            
             await db.Database.EnsureCreatedAsync();
+            var creator = identityDb.Database.GetService<Microsoft.EntityFrameworkCore.Storage.IRelationalDatabaseCreator>();
+            try { await creator.CreateTablesAsync(); } catch { }
         }
 
         public new async Task DisposeAsync()

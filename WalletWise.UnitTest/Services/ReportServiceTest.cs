@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
@@ -41,6 +41,7 @@ namespace WalletWise.Unit.Tests.Services
             {
                 cfg.AddProfile<CategoryMappingProfile>();
                 cfg.AddProfile<TransactionMappingProfile>();
+                cfg.AddProfile<ReportMappingProfile>();
             }, NullLoggerFactory.Instance);
 
             var mapper = config.CreateMapper();
@@ -61,6 +62,7 @@ namespace WalletWise.Unit.Tests.Services
             {
                 cfg.AddProfile<CategoryMappingProfile>();
                 cfg.AddProfile<TransactionMappingProfile>();
+                cfg.AddProfile<ReportMappingProfile>();
             }, NullLoggerFactory.Instance);
 
             var mapper = config.CreateMapper();

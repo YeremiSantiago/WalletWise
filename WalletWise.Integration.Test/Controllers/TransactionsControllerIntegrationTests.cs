@@ -1,9 +1,10 @@
-﻿using System.Net;
+using System.Net;
 using System.Net.Http.Json;
 using WalletWise.Application.Dtos.Category;
 using WalletWise.Application.Dtos.Transaction;
 using WalletWise.Application.Dtos.Wallet;
 using WalletWise.Domain.Common.Enums;
+using WalletWise.Domain.Common.Pagination;
 using WalletWise.Integration.Test.Infraestructure;
 
 namespace WalletWise.Integration.Test.Controllers
@@ -51,10 +52,12 @@ namespace WalletWise.Integration.Test.Controllers
 
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-            var result = await response.Content.ReadFromJsonAsync<IEnumerable<TransactionResponseDto>>();
+            var result = await response.Content.ReadFromJsonAsync<PagedResult<TransactionResponseDto>>();
 
             Assert.NotNull(result);
-            Assert.True(result.Any());
+            Assert.NotNull(result.Items);
+            Assert.True(result.Items.Any());
+            Assert.True(result.TotalRecords >= 3);
         }
 
         [Fact]

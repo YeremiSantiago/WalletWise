@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
@@ -61,9 +61,9 @@ namespace WalletWise.Unit.Tests.Services
             // Arrange
             var transactions = new List<Transaction>()
             {
-                new Transaction { Id = 1, Amount = 125, Date = DateTime.Parse("10/09/2026"), Type = TypeTransaction.Income, UserId = TestUserId, CategoryId = 1, WalletId = 1 },
-                new Transaction { Id = 2, Amount = 500, Date = DateTime.Parse("24/02/2026"), Type = TypeTransaction.Expense, UserId = TestUserId, CategoryId = 3, WalletId = 2 },
-                new Transaction { Id = 3, Amount = 7500, Date = DateTime.Parse("25/02/2026"), Type = TypeTransaction.Expense, UserId = TestUserId, CategoryId = 3, WalletId = 2 }
+                new Transaction { Id = 1, Amount = 125, Date = new DateTime(2026, 9, 10), Type = TypeTransaction.Income, UserId = TestUserId, CategoryId = 1, WalletId = 1 },
+                new Transaction { Id = 2, Amount = 500, Date = new DateTime(2026, 2, 24), Type = TypeTransaction.Expense, UserId = TestUserId, CategoryId = 3, WalletId = 2 },
+                new Transaction { Id = 3, Amount = 7500, Date = new DateTime(2026, 2, 25), Type = TypeTransaction.Expense, UserId = TestUserId, CategoryId = 3, WalletId = 2 }
             };
 
             _transactionRepoMock.Setup(r => r.GetAllByUserAsync(TestUserId)).ReturnsAsync(transactions);
@@ -83,7 +83,7 @@ namespace WalletWise.Unit.Tests.Services
         public async Task GetTransactionByIdAsync_WhenGetATransactionExisting_ReturnSuccessOperationWithValue()
         {
                                                                                                 // Arrange
-            var transaction = new Transaction { Id = 2, Amount = 500, Date = DateTime.Parse("24/02/2026"), Type = TypeTransaction.Expense, UserId = TestUserId, CategoryId = 3, WalletId = 2 };
+            var transaction = new Transaction { Id = 2, Amount = 500, Date = new DateTime(2026, 2, 24), Type = TypeTransaction.Expense, UserId = TestUserId, CategoryId = 3, WalletId = 2 };
             int id = 2;
 
             _transactionRepoMock.Setup(r => r.GetByIdForUserAsync(id, TestUserId)).ReturnsAsync(transaction);
@@ -125,14 +125,14 @@ namespace WalletWise.Unit.Tests.Services
             var transactionDto = new CreateTransactionRequestDto
             {
                 Amount = 15000,
-                Date = DateTime.Parse("24/02/2026"),
+                Date = new DateTime(2026, 2, 24),
                 Type = TypeTransaction.Income,
                 Comment = "Este es mi primer ingreso",
                 CategoryId = 1,
                 WalletId = 1
             };
 
-            _iClockMock.Setup(c => c.UtcNow()).Returns(DateTime.Parse("10/03/2026"));
+            _iClockMock.Setup(c => c.UtcNow()).Returns(new DateTime(2026, 3, 10));
             
             _walletRepoMock.Setup(r => r.GetByIdForUserAsync(1, TestUserId)).ReturnsAsync(wallet);
             _categoryRepoMock.Setup(r => r.GetCategoryActiveByIdAsync(1, TestUserId)).ReturnsAsync(category);
@@ -152,12 +152,12 @@ namespace WalletWise.Unit.Tests.Services
         public async Task UpdateTransactionAsync_WhenATransactionIsUpdated_ReturnOperationIsSuccessWithValue()
         {
             // Arrange
-            var transaction = new Transaction { Id = 3, Amount = 7500, Date = DateTime.Parse("25/02/2026"), Type = TypeTransaction.Expense, UserId = TestUserId, CategoryId = 3, WalletId = 2 };
+            var transaction = new Transaction { Id = 3, Amount = 7500, Date = new DateTime(2026, 2, 25), Type = TypeTransaction.Expense, UserId = TestUserId, CategoryId = 3, WalletId = 2 };
 
             var transactionDto = new UpdateTransactionRequestDto
             {
                 Amount = 2000,
-                Date = DateTime.Parse("25/02/2026"),
+                Date = new DateTime(2026, 2, 25),
                 Type = TypeTransaction.Income,
                 Comment = "Se me olvido añadir algo",
                 CategoryId = 1,
@@ -183,7 +183,7 @@ namespace WalletWise.Unit.Tests.Services
         public async Task DeleteTransactionAsync_WhenTransactionIsDeleted_ReturnOperationIsSuccess()
         {
             // Arrange
-            var transaction = new Transaction { Id = 2, Amount = 500, Date = DateTime.Parse("24/02/2026"), Type = TypeTransaction.Expense, UserId = TestUserId, CategoryId = 3, WalletId = 2 };
+            var transaction = new Transaction { Id = 2, Amount = 500, Date = new DateTime(2026, 2, 24), Type = TypeTransaction.Expense, UserId = TestUserId, CategoryId = 3, WalletId = 2 };
             int id = 2;
 
             _transactionRepoMock.Setup(r => r.GetByIdForUserAsync(id, TestUserId)).ReturnsAsync(transaction);
@@ -204,12 +204,12 @@ namespace WalletWise.Unit.Tests.Services
             // Arrange
             var transactions = new List<Transaction>()
             {
-                new Transaction { Id = 1, Amount = 125, Date = DateTime.Parse("25/02/2026"), Type = TypeTransaction.Income, UserId = TestUserId, CategoryId = 1, WalletId = 1 },
-                new Transaction { Id = 2, Amount = 500, Date = DateTime.Parse("26/02/2026"), Type = TypeTransaction.Expense, UserId = TestUserId, CategoryId = 3, WalletId = 2 }
+                new Transaction { Id = 1, Amount = 125, Date = new DateTime(2026, 2, 25), Type = TypeTransaction.Income, UserId = TestUserId, CategoryId = 1, WalletId = 1 },
+                new Transaction { Id = 2, Amount = 500, Date = new DateTime(2026, 2, 26), Type = TypeTransaction.Expense, UserId = TestUserId, CategoryId = 3, WalletId = 2 }
             };
 
-            DateTime start = DateTime.Parse("25/02/2026");
-            DateTime end = DateTime.Parse("26/02/2026");
+            DateTime start = new DateTime(2026, 2, 25);
+            DateTime end = new DateTime(2026, 2, 26);
 
             _transactionRepoMock.Setup(r => r.GetByDateRangeAsync(TestUserId, start, end))
                 .ReturnsAsync(transactions);
@@ -230,8 +230,8 @@ namespace WalletWise.Unit.Tests.Services
             // Arrange
             var transactions = new List<Transaction>()
             {
-                new Transaction { Id = 1, Amount = 125, Date = DateTime.Parse("25/02/2026"), Type = TypeTransaction.Income, UserId = TestUserId, CategoryId = 1, WalletId = 1 },
-                new Transaction { Id = 2, Amount = 500, Date = DateTime.Parse("26/02/2026"), Type = TypeTransaction.Income, UserId = TestUserId, CategoryId = 3, WalletId = 2 }
+                new Transaction { Id = 1, Amount = 125, Date = new DateTime(2026, 2, 25), Type = TypeTransaction.Income, UserId = TestUserId, CategoryId = 1, WalletId = 1 },
+                new Transaction { Id = 2, Amount = 500, Date = new DateTime(2026, 2, 26), Type = TypeTransaction.Income, UserId = TestUserId, CategoryId = 3, WalletId = 2 }
             };
 
             var type = TypeTransaction.Income;
@@ -255,9 +255,9 @@ namespace WalletWise.Unit.Tests.Services
             // Arrange
             var transactions = new List<Transaction>()
             {
-                new Transaction { Id = 1, Amount = 125, Date = DateTime.Parse("10/09/2026"), Type = TypeTransaction.Income, UserId = TestUserId, CategoryId = 2, WalletId = 1 },
-                new Transaction { Id = 2, Amount = 500, Date = DateTime.Parse("24/02/2026"), Type = TypeTransaction.Expense, UserId = TestUserId, CategoryId = 2, WalletId = 2 },
-                new Transaction { Id = 3, Amount = 7500, Date = DateTime.Parse("25/02/2026"), Type = TypeTransaction.Expense, UserId = TestUserId, CategoryId = 2, WalletId = 2 }
+                new Transaction { Id = 1, Amount = 125, Date = new DateTime(2026, 9, 10), Type = TypeTransaction.Income, UserId = TestUserId, CategoryId = 2, WalletId = 1 },
+                new Transaction { Id = 2, Amount = 500, Date = new DateTime(2026, 2, 24), Type = TypeTransaction.Expense, UserId = TestUserId, CategoryId = 2, WalletId = 2 },
+                new Transaction { Id = 3, Amount = 7500, Date = new DateTime(2026, 2, 25), Type = TypeTransaction.Expense, UserId = TestUserId, CategoryId = 2, WalletId = 2 }
             };
 
             int id = 2;

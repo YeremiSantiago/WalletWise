@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Swashbuckle.AspNetCore.Annotations;
 using WalletWise.Application.Dtos.Category;
 using WalletWise.Application.Interfaces;
@@ -9,6 +10,7 @@ namespace WalletWise.WebApi.Controllers
     [ApiController]
     [Authorize]
     [Route("api/categories")]
+    [EnableRateLimiting("AuthenticatedUserApi")]
     [SwaggerTag("Proporciona operaciones CRUD para administrar categorías de billetera.")]
     public class CategoriesController : ControllerBase
     {

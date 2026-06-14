@@ -1,4 +1,5 @@
 using Microsoft.OpenApi.Models;
+using System.Security.Claims;
 using System.Threading.RateLimiting;
 using WalletWise.Application.DependencyInjection;
 using WalletWise.Infraestructure.DependencyInjection;
@@ -25,11 +26,14 @@ namespace WalletWise.WebApi
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi();
 
+            #region Rate Limiting 
             builder.Services.AddRateLimiter(options =>
             {
                 options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
 
-                options.AddPolicy("AuthLoginIp", context =>
+
+                // Login Por Ip
+                options.AddPolicy("AuthLoginByIp", context =>
                 {
                     var ip = context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
 
@@ -41,9 +45,77 @@ namespace WalletWise.WebApi
                         AutoReplenishment = true
                     });
                 });
+
+                // Registro Por Ip
+                options.AddPolicy("AuthRegisterByIp", context =>
+                {
+                    var ip = context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+
+                    return RateLimitPartition.GetFixedWindowLimiter($"register:{ip}", _ => new FixedWindowRateLimiterOptions
+                    {
+                        PermitLimit = 3,
+                        Window = TimeSpan.FromHours(1),
+                        QueueLimit = 0,
+                        AutoReplenishment = true
+                    });
+                });
+
+                // Operaciones por usuario authenticado 
+                options.AddPolicy("AuthenticatedUserApi", context =>
+                {
+                    var userId = context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+                    var partitionKey = userId is not null
+                    ? $"user:{userId}"
+                    : $"anon:{context.Connection.RemoteIpAddress}";
+
+                    return RateLimitPartition.GetSlidingWindowLimiter(partitionKey, _ => new SlidingWindowRateLimiterOptions
+                    {
+                        PermitLimit = 60,
+                        Window = TimeSpan.FromMinutes(1),
+                        SegmentsPerWindow = 6,   
+                        QueueLimit = 0,
+                        AutoReplenishment = true
+                    });
+                });
+
+                // Para operaciones concurrentes en los endpoints de reportes
+                options.AddPolicy("ReportsEndpoint", context =>
+                {
+                    var userId = context.User?.FindFirst(ClaimTypes.NameIdentifier)?. Value
+                    ?? context.Connection.RemoteIpAddress?.ToString()
+                    ?? "unknown";
+
+                    return RateLimitPartition.GetConcurrencyLimiter($"reports:{userId}", _ => new ConcurrencyLimiterOptions
+                    {
+                        PermitLimit = 2,
+                        QueueLimit = 1,
+                        QueueProcessingOrder = QueueProcessingOrder.OldestFirst
+                    }); 
+                });
+
+                // Respuesta personalizada con Headers Informativos
+                options.OnRejected = async (context, cancellationToken) =>
+                {
+                    context.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
+                    context.HttpContext.Response.Headers["Retry-After"] = "60";
+                    context.HttpContext.Response.ContentType = "application/json";
+
+                    var response = new
+                    {
+                        type = "https://tools.ietf.org/html/rfc6585#section-4",
+                        title = "Too Many Requests",
+                        status = 429,
+                        detail = "Has superado el límite de solicitudes. Intenta nuevamente más tarde."
+
+                    };
+
+                    await context.HttpContext.Response.WriteAsJsonAsync(response, cancellationToken);
+                };
             });
+            #endregion
 
-
+            #region Swagger
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen(options =>
             {
@@ -81,6 +153,7 @@ namespace WalletWise.WebApi
                     }
                 });
             });
+            #endregion
 
             var app = builder.Build();
 
@@ -96,7 +169,7 @@ namespace WalletWise.WebApi
 
             app.UseHttpsRedirection();
 
-            app.UseRateLimiter();
+            if (!app.Environment.IsEnvironment("Testing")) { app.UseRateLimiter(); }
 
             app.UseAuthentication();
 
@@ -108,3 +181,4 @@ namespace WalletWise.WebApi
         }
     }
 }
+

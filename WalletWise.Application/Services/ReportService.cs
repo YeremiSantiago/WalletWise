@@ -39,12 +39,7 @@ namespace WalletWise.Application.Services
 
                 var summary = await _reportRepository.GetSummaryAsync(userId);
 
-                return Result<ReportSummaryDto>.Success(new ReportSummaryDto
-                {
-                    TotalIncome = summary.TotalIncome,
-                    TotalExpense = summary.TotalExpense,
-                    Balance = summary.Balance
-                });
+                return Result<ReportSummaryDto>.Success(_mapper.Map<ReportSummaryDto>(summary));
             }
             catch (Exception ex)
             {
@@ -63,16 +58,7 @@ namespace WalletWise.Application.Services
 
                 var data = await _reportRepository.GetMonthlySummaryAsync(userId, year);
 
-                var dto = data.Select(x => new MonthlySummaryDto
-                {
-                    Year = x.Year,
-                    Month = x.Month,
-                    TotalIncome = x.TotalIncome,
-                    TotalExpense = x.TotalExpense,
-                    Balance = x.Balance
-                });
-
-                return Result<IEnumerable<MonthlySummaryDto>>.Success(dto);
+                return Result<IEnumerable<MonthlySummaryDto>>.Success(_mapper.Map<IEnumerable<MonthlySummaryDto>>(data));
             }
             catch (Exception ex)
             {
@@ -92,16 +78,7 @@ namespace WalletWise.Application.Services
 
                 var data = await _reportRepository.GetByCategoryAsync(userId, start, end, type);
 
-                var dto = data.Select(x => new CategoryReportItemDto
-                {
-                    CategoryId = x.CategoryId,
-                    CategoryName = x.CategoryName,
-                    Type = x.Type,
-                    TransactionsCount = x.TransactionsCount,
-                    TotalAmount = x.TotalAmount
-                });
-
-                return Result<IEnumerable<CategoryReportItemDto>>.Success(dto);
+                return Result<IEnumerable<CategoryReportItemDto>>.Success(_mapper.Map<IEnumerable<CategoryReportItemDto>>(data));
             }
             catch (Exception ex)
             {
@@ -122,14 +99,7 @@ namespace WalletWise.Application.Services
 
                 var data = await _reportRepository.GetTopCategoriesAsync(userId, start, end, top);
 
-                var dto = data.Select(x => new TopCategoryReportItemDto
-                {
-                    CategoryId = x.CategoryId,
-                    CategoryName = x.CategoryName,
-                    TotalAmount = x.TotalAmount
-                });
-
-                return Result<IEnumerable<TopCategoryReportItemDto>>.Success(dto);
+                return Result<IEnumerable<TopCategoryReportItemDto>>.Success(_mapper.Map<IEnumerable<TopCategoryReportItemDto>>(data));
             }
             catch (Exception ex)
             {
@@ -152,22 +122,7 @@ namespace WalletWise.Application.Services
 
                 var data = await _reportRepository.GetComparisonAsync(userId, startA, endA, startB, endB);
 
-                return Result<ComparisonReportDto>.Success(new ComparisonReportDto
-                {
-                    Period1Start = data.Period1Start,
-                    Period1End = data.Period1End,
-                    Period2Start = data.Period2Start,
-                    Period2End = data.Period2End,
-                    Period1Income = data.Period1Income,
-                    Period1Expense = data.Period1Expense,
-                    Period1Balance = data.Period1Balance,
-                    Period2Income = data.Period2Income,
-                    Period2Expense = data.Period2Expense,
-                    Period2Balance = data.Period2Balance,
-                    IncomeDifference = data.IncomeDifference,
-                    ExpenseDifference = data.ExpenseDifference,
-                    BalanceDifference = data.BalanceDifference
-                });
+                return Result<ComparisonReportDto>.Success(_mapper.Map<ComparisonReportDto>(data));
             }
             catch (Exception ex)
             {

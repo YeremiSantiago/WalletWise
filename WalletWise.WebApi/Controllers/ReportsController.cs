@@ -1,5 +1,6 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Swashbuckle.AspNetCore.Annotations;
 using WalletWise.Application.Dtos.Reports;
 using WalletWise.Application.Dtos.Transaction;
@@ -10,6 +11,7 @@ namespace WalletWise.WebApi.Controllers
 {
     [Authorize]
     [Route("api/reports")]
+    [EnableRateLimiting("ReportsEndpoint")]
     [ApiController]
     [SwaggerTag("Operaciones para reportes y visualizaacion del historial financiero")]
     public class ReportsController : ControllerBase
@@ -43,7 +45,7 @@ namespace WalletWise.WebApi.Controllers
         [ProducesResponseType(typeof(IEnumerable<MonthlySummaryDto>), StatusCodes.Status200OK)]
         public async Task<ActionResult<IEnumerable<MonthlySummaryDto>>> GetMonthly([FromQuery] int year)
         {
-            var result = await _reportService.GetSummaryAsync();
+            var result = await _reportService.GetMonthlySummaryAsync(year);
 
             if (!result.IsSuccess)
             {

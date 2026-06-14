@@ -71,6 +71,19 @@ namespace WalletWise.Application.Services
         {
             try
             {
+                 
+
+
+
+
+
+
+
+
+
+
+
+
                 var userId = _currentUserService.UserId!;
                 var category = _mapper.Map<Category>(categoryDto);
 
@@ -94,6 +107,9 @@ namespace WalletWise.Application.Services
                 return Result<CategoryResponseDto>.Failure("No se ha podido crear la categoria");
             }
         }
+
+        // creame una funcion en que devuelva un string
+
 
         public async Task<Result<CategoryResponseDto>> UpdateCategoryAsync(int id, UpdateCategoryRequestDto categoryDto)
         {

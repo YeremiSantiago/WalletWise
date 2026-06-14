@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using WalletWise.Domain.Common;
 using WalletWise.Domain.Common.Enums;
+using WalletWise.Domain.Common.Pagination;
 using WalletWise.Domain.Entities;
 
 
@@ -18,6 +19,7 @@ namespace WalletWise.Domain.Interfaces
         Task<IEnumerable<Transaction>> GetByDateRangeAsync(string userId, DateTime start, DateTime end);
         Task<IEnumerable<Transaction>> GetByTypeTransactionAsync(string userId, TypeTransaction typeTransaction);
         Task<IEnumerable<Transaction>> GetAllTransactionsByCategoryAsync(string userId, int idCategory);
+        Task<PagedResult<Transaction>> GetPagedTransactionsAsync(string userId, TransactionFilterParams filterParams);
 
 
     }
