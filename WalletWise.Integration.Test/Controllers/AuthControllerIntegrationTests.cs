@@ -42,6 +42,12 @@ namespace WalletWise.Integration.Test.Controllers
 
             var response = await _client.PostAsJsonAsync("api/auth/register", request);
 
+            if (!response.IsSuccessStatusCode)
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                Assert.Fail($"Status: {response.StatusCode}. Content: {error}");
+            }
+
             Assert.Equal(HttpStatusCode.Created, response.StatusCode);
 
             var result = await response.Content.ReadFromJsonAsync<LoginResponseDto>();
@@ -136,7 +142,11 @@ namespace WalletWise.Integration.Test.Controllers
         {
             var response = await _client.PostAsJsonAsync("api/auth/register", request);
 
-            response.EnsureSuccessStatusCode();
+            if (!response.IsSuccessStatusCode)
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                throw new Exception($"RegisterUserAsync failed with status {response.StatusCode}. Content: {error}");
+            }
 
             var result = await response.Content.ReadFromJsonAsync<LoginResponseDto>();
 
