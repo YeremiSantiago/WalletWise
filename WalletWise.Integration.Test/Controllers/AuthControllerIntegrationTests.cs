@@ -91,7 +91,7 @@ namespace WalletWise.Integration.Test.Controllers
             var response = await _client.PostAsJsonAsync("api/auth/login", new LoginRequestDto
             {
                 Email = $"invalid-{Guid.NewGuid()}@test.com",
-                Password = "Passw0rd1"
+                Password = "Passw0rd1!"
             });
 
             Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
@@ -114,8 +114,8 @@ namespace WalletWise.Integration.Test.Controllers
 
             var response = await _client.PutAsJsonAsync("api/auth/me/password", new ChangePasswordRequestDto
             {
-                CurrentPassword = "Passw0rd1",
-                NewPassword = "NewPassw0rd2"
+                CurrentPassword = "Passw0rd1!",
+                NewPassword = "NewPassw0rd2!"
             });
 
             Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
@@ -127,8 +127,8 @@ namespace WalletWise.Integration.Test.Controllers
             {
                 Name = "Test User",
                 Email = $"user-{Guid.NewGuid()}@test.com",
-                Password = "Passw0rd1",
-                ConfirmPassword = "Passw0rd1"
+                Password = "Passw0rd1!",
+                ConfirmPassword = "Passw0rd1!"
             };
         }
 
@@ -163,7 +163,7 @@ namespace WalletWise.Integration.Test.Controllers
                 UserName = "test-user@walletwise.local"
             };
 
-            var result = await userManager.CreateAsync(user, "Passw0rd1");
+            var result = await userManager.CreateAsync(user, "Passw0rd1!");
 
             Assert.True(result.Succeeded);
         }

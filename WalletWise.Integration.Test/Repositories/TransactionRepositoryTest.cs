@@ -1,4 +1,4 @@
-﻿using Microsoft.Data.Sqlite;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -77,7 +77,7 @@ namespace WalletWise.Integration.Test.Repositories
             var transaction = new Transaction
             {
                 Amount = 15000,
-                Date = DateTime.Parse("26/02/2026"),
+                Date = new DateTime(2026, 2, 26),
                 Type = TypeTransaction.Income,
                 Comment = "Primera transaction",
                 UserId = TestUserId,
@@ -132,8 +132,8 @@ namespace WalletWise.Integration.Test.Repositories
         {
             // Arrange
             await SeedSearchDataAsync();
-            DateTime start = DateTime.Parse("28/02/2026");
-            DateTime end = DateTime.Parse("28/02/2026");
+            DateTime start = new DateTime(2026, 2, 28);
+            DateTime end = new DateTime(2026, 2, 28);
 
             // Act
             var result = await _transactionRepository.GetByDateRangeAsync(TestUserId, start, end);
@@ -206,9 +206,9 @@ namespace WalletWise.Integration.Test.Repositories
 
             var transactions = new List<Transaction>
             {
-                new Transaction { Id = 1, Amount = 125, Date = DateTime.Parse("10/09/2026"), Type = TypeTransaction.Income, UserId = TestUserId, CategoryId = 1, WalletId = 1 },
-                new Transaction { Id = 2, Amount = 500, Date = DateTime.Parse("24/02/2026"), Type = TypeTransaction.Expense, UserId = TestUserId, CategoryId = 2, WalletId = 2 },
-                new Transaction { Id = 3, Amount = 7500, Date = DateTime.Parse("25/02/2026"), Type = TypeTransaction.Expense, UserId = TestUserId, CategoryId = 3, WalletId = 3 }
+                new Transaction { Id = 1, Amount = 125, Date = new DateTime(2026, 9, 10), Type = TypeTransaction.Income, UserId = TestUserId, CategoryId = 1, WalletId = 1 },
+                new Transaction { Id = 2, Amount = 500, Date = new DateTime(2026, 2, 24), Type = TypeTransaction.Expense, UserId = TestUserId, CategoryId = 2, WalletId = 2 },
+                new Transaction { Id = 3, Amount = 7500, Date = new DateTime(2026, 2, 25), Type = TypeTransaction.Expense, UserId = TestUserId, CategoryId = 3, WalletId = 3 }
             };
 
             await _context.Categories.AddRangeAsync(categories);
@@ -235,10 +235,10 @@ namespace WalletWise.Integration.Test.Repositories
 
             var transactions = new List<Transaction>
             {
-                new Transaction { Id = 1, Amount = 125, Date = DateTime.Parse("26/02/2026"), Type = TypeTransaction.Income, UserId = TestUserId, CategoryId = 1, WalletId = 1 },
-                new Transaction { Id = 2, Amount = 500, Date = DateTime.Parse("27/02/2026"), Type = TypeTransaction.Expense, UserId = TestUserId, CategoryId = 2, WalletId = 2 },
-                new Transaction { Id = 3, Amount = 7500, Date = DateTime.Parse("28/02/2026"), Type = TypeTransaction.Expense, UserId = TestUserId, CategoryId = 3, WalletId = 3 },
-                new Transaction { Id = 4, Amount = 8500, Date = DateTime.Parse("28/02/2026"), Type = TypeTransaction.Expense, UserId = TestUserId, CategoryId = 3, WalletId = 3 }
+                new Transaction { Id = 1, Amount = 125, Date = new DateTime(2026, 2, 26), Type = TypeTransaction.Income, UserId = TestUserId, CategoryId = 1, WalletId = 1 },
+                new Transaction { Id = 2, Amount = 500, Date = new DateTime(2026, 2, 27), Type = TypeTransaction.Expense, UserId = TestUserId, CategoryId = 2, WalletId = 2 },
+                new Transaction { Id = 3, Amount = 7500, Date = new DateTime(2026, 2, 28), Type = TypeTransaction.Expense, UserId = TestUserId, CategoryId = 3, WalletId = 3 },
+                new Transaction { Id = 4, Amount = 8500, Date = new DateTime(2026, 2, 28), Type = TypeTransaction.Expense, UserId = TestUserId, CategoryId = 3, WalletId = 3 }
             };
 
             await _context.Categories.AddRangeAsync(categories);

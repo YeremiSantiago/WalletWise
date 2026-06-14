@@ -69,7 +69,7 @@ namespace WalletWise.Integration.Test.Controllers
             var request = new CreateTransactionRequestDto
             {
                 Amount = 500,
-                Date = DateTime.Parse("01/03/2026"),
+                Date = new DateTime(2026, 3, 1),
                 Type = TypeTransaction.Expense,
                 Comment = "Compra farmacia",
                 CategoryId = category.Id,
@@ -97,7 +97,7 @@ namespace WalletWise.Integration.Test.Controllers
             var updateRequest = new UpdateTransactionRequestDto
             {
                 Amount = 350,
-                Date = DateTime.Parse("02/03/2026"),
+                Date = new DateTime(2026, 3, 2),
                 Type = TypeTransaction.Income,
                 Comment = "Actualizado",
                 CategoryId = transaction.CategoryId,
@@ -145,7 +145,7 @@ namespace WalletWise.Integration.Test.Controllers
             var request = new CreateTransactionRequestDto
             {
                 Amount = amount,
-                Date = DateTime.Parse("01/03/2026"),
+                Date = new DateTime(2026, 3, 1),
                 Type = type,
                 Comment = "Transaccion prueba",
                 CategoryId = category.Id,
