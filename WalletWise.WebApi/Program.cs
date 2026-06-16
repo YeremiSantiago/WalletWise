@@ -2,8 +2,8 @@ using Microsoft.OpenApi.Models;
 using System.Security.Claims;
 using System.Threading.RateLimiting;
 using WalletWise.Application.DependencyInjection;
-using WalletWise.Infraestructure.DependencyInjection;
-using WalletWise.Persistence.DependencyInjection;
+using WalletWise.Infrastructure.DependencyInjection;
+using WalletWise.Infrastructure.DependencyInjection;
 using WalletWise.WebApi.Handlers;
 
 namespace WalletWise.WebApi
@@ -16,8 +16,7 @@ namespace WalletWise.WebApi
 
             // Add services to the container.
             builder.Services.AddApplicationLayerIoc().
-                AddPersistenceLayerIoc(builder.Configuration).
-                AddInfraestructureLayerIoc(builder.Configuration);
+                AddInfrastructureLayerIoc(builder.Configuration);
 
             builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
             builder.Services.AddProblemDetails();
@@ -181,4 +180,6 @@ namespace WalletWise.WebApi
         }
     }
 }
+
+
 

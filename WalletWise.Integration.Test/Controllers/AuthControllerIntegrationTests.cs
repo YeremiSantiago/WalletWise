@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using WalletWise.Application.Dtos.Auth;
 using WalletWise.Integration.Test.Infraestructure;
-using WalletWise.Persistence.Context;
+using WalletWise.Infrastructure.Context;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
 

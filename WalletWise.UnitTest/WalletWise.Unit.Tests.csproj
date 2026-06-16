@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
@@ -16,10 +16,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Infraestructure.WalletWise\WalletWise.Infraestructure.csproj" />
+    <ProjectReference Include="..\WalletWise.Infrastructure\WalletWise.Infrastructure.csproj" />
     <ProjectReference Include="..\WalletWise.Application\WalletWise.Application.csproj" />
     <ProjectReference Include="..\WalletWise.Domain\WalletWise.Domain.csproj" />
-    <ProjectReference Include="..\WalletWise.Persistence\WalletWise.Persistence.csproj" />
+    <ProjectReference Include="..\WalletWise.Infrastructure\WalletWise.Infrastructure.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -27,3 +27,4 @@
   </ItemGroup>
 
 </Project>
+

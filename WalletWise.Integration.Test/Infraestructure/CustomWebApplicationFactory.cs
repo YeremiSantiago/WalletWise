@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using System.Linq;
 using System.Threading.Tasks;
-using WalletWise.Persistence.Context;
+using WalletWise.Infrastructure.Context;
 using WalletWise.WebApi;
 
 namespace WalletWise.Integration.Test.Infraestructure
@@ -94,3 +94,4 @@ namespace WalletWise.Integration.Test.Infraestructure
         }
     }
 }
+

@@ -76,8 +76,6 @@ namespace WalletWise.WebApi.Controllers
                 return NotFound();
             }
 
-          
-
             var result = await _authService.ChangePasswordAsync(userId, request);
 
             if (!result.IsSuccess)
@@ -105,6 +103,21 @@ namespace WalletWise.WebApi.Controllers
                 return BadRequest(new { error = result.Error });
 
             return NoContent();
+        }
+
+        [HttpPost("refresh-token")]
+        [AllowAnonymous]
+        [SwaggerOperation(Summary = "Refresh Token", Description = "Genera un nuevo token de acceso para el usuario autenticado")]
+        public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequestDto requestDto)
+        {
+            var result = await _authService.RefreshTokenAsync(requestDto);
+
+            if(result.IsSuccess == false)
+            {
+                return BadRequest(new { error = result.Error });
+            }
+
+            return Ok(result.Value);
         }
     }
 }

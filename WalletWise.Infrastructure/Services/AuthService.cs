@@ -1,33 +1,34 @@
-﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using System;
-using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
+using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
 using WalletWise.Application.Dtos.Auth;
+using WalletWise.Application.Dtos.Users;
 using WalletWise.Application.Interfaces;
 using WalletWise.Domain.Common;
-using WalletWise.Domain.Setting;
-using WalletWise.Application.Dtos.Users;
-using System.Security.Claims;
+using WalletWise.Infrastructure.Context;
+using WalletWise.Infrastructure.Settings;
 
-namespace WalletWise.Infraestructure.Services
+namespace WalletWise.Infrastructure.Services
 {
     public class AuthService : IAuthService
     {
         private readonly UserManager<IdentityUser> _userManager;
         private readonly JwtSettings _jwtSettings;
         private readonly ILogger<AuthService> _logger;
+        private readonly IdentityAppDbContext _context;
 
-        public AuthService(UserManager<IdentityUser> userManager, IOptions<JwtSettings> jwtSetting, ILogger<AuthService> logger)
+        public AuthService(UserManager<IdentityUser> userManager, IOptions<JwtSettings> jwtSetting, ILogger<AuthService> logger, IdentityAppDbContext context)
         {
             _userManager = userManager;
             _jwtSettings = jwtSetting.Value;
             _logger = logger;
+            _context = context;
         }
 
         public async Task<Result<LoginResponseDto>> RegisterAsync(RegisterRequestDto register)
@@ -74,12 +75,26 @@ namespace WalletWise.Infraestructure.Services
 
                 var token = await GenerateJwtTokenAsync(newUser);
 
+                var refreshToken = new RefreshToken
+                {
+                    Token = GenerateSecureRefreshToken(),
+                    UserId = newUser.Id,
+                    CreationDate = DateTime.UtcNow,
+                    ExpiryDate = DateTime.UtcNow.AddDays(7),
+                    IsUsed = false,
+                    IsRevoked = false
+                };
+
+                await _context.RefreshTokens.AddAsync(refreshToken);
+                await _context.SaveChangesAsync();
+
                 return Result<LoginResponseDto>.Success(new LoginResponseDto
                 {
                     Email = newUser.Email,
                     User = newUser.Email,
                     Token = token.Token,
-                    Expiration = token.Expiration
+                    Expiration = token.Expiration,
+                    RefreshToken = refreshToken.Token
                 });
             }
             catch (Exception ex)
@@ -119,18 +134,32 @@ namespace WalletWise.Infraestructure.Services
 
                 var token = await GenerateJwtTokenAsync(user);
 
+                var refreshToken = new RefreshToken
+                {
+                    Token = GenerateSecureRefreshToken(),
+                    UserId = user.Id,
+                    CreationDate = DateTime.UtcNow,
+                    ExpiryDate = DateTime.UtcNow.AddDays(7),
+                    IsUsed = false,
+                    IsRevoked = false,
+                };
+
+                _context.RefreshTokens.Add(refreshToken);
+                await _context.SaveChangesAsync();
+
                 return Result<LoginResponseDto>.Success(new LoginResponseDto
                 {
                     User = user.Id,
                     Email = user.Email,
                     Token = token.Token,
-                    Expiration = token.Expiration
+                    Expiration = token.Expiration,
+                    RefreshToken = refreshToken.Token
                 });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error inesperado al iniciar sesión para {Email}", login.Email);
-                return Result<LoginResponseDto>.Failure("Ha ocurrido un error al iniciar sesión");
+                _logger.LogError(ex, "Error inesperado al iniciar sesi�n para {Email}", login.Email);
+                return Result<LoginResponseDto>.Failure("Ha ocurrido un error al iniciar sesi�n");
             }
         }
 
@@ -228,7 +257,7 @@ namespace WalletWise.Infraestructure.Services
                 if (!result.Succeeded)
                 {
                     var errors = string.Join(", ", result.Errors.Select(e => e.Description));
-                    _logger.LogWarning("Error al cambiar contraseña {UserId}: {Errors}", userId, errors);
+                    _logger.LogWarning("Error al cambiar contrase�a {UserId}: {Errors}", userId, errors);
                     return Result<bool>.Failure(errors);
                 }
 
@@ -236,8 +265,8 @@ namespace WalletWise.Infraestructure.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al cambiar contraseña {UserId}", userId);
-                return Result<bool>.Failure("No se pudo cambiar la contraseña");
+                _logger.LogError(ex, "Error al cambiar contrase�a {UserId}", userId);
+                return Result<bool>.Failure("No se pudo cambiar la contrase�a");
             }
         }
 
@@ -255,16 +284,20 @@ namespace WalletWise.Infraestructure.Services
                 if (!result.Succeeded)
                 {
                     var errors = string.Join(", ", result.Errors.Select(e => e.Description));
-                    _logger.LogWarning("Error al cerrar sesión {UserId}: {Errors}", userId, errors);
-                    return Result<bool>.Failure("No se pudo cerrar sesión");
+                    _logger.LogWarning("Error al cerrar sesi�n {UserId}: {Errors}", userId, errors);
+                    return Result<bool>.Failure("No se pudo cerrar sesi�n");
                 }
+
+                 await _context.RefreshTokens
+                    .Where(x => x.UserId == userId)
+                    .ExecuteDeleteAsync();
 
                 return Result<bool>.Success(true);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al cerrar sesión {UserId}", userId);
-                return Result<bool>.Failure("No se pudo cerrar sesión");
+                _logger.LogError(ex, "Error al cerrar sesi�n {UserId}", userId);
+                return Result<bool>.Failure("No se pudo cerrar sesi�n");
             }
         }
 
@@ -294,6 +327,82 @@ namespace WalletWise.Infraestructure.Services
            );
 
             return (new JwtSecurityTokenHandler().WriteToken(token), expiration.ToString("O"));
+        }
+
+        private string GenerateSecureRefreshToken()
+        {
+            var randomNumber = new byte[64];
+            using var rng = RandomNumberGenerator.Create();
+            rng.GetBytes(randomNumber);
+            return Convert.ToBase64String(randomNumber);
+        }
+
+        public async Task<Result<LoginResponseDto>> RefreshTokenAsync(RefreshTokenRequestDto request)
+        {
+            var storedToken = await _context.RefreshTokens
+                .Include(x => x.User)
+                .FirstOrDefaultAsync(x => x.Token == request.RefreshToken);
+
+            if (storedToken is null)
+            {
+                return Result<LoginResponseDto>.Failure("El token ingresado no existe");
+            }
+
+            if (storedToken.User is null)
+            {
+                return Result<LoginResponseDto>.Failure("El usuario asociado al token no existe o fue eliminado");
+            }
+
+            if (storedToken.IsUsed == true)
+            {
+                var tokensActives = await _context.RefreshTokens
+                    .Where(t => t.UserId == storedToken.UserId)
+                    .ToListAsync();
+
+                await _context.RefreshTokens.Where(x => x.UserId == storedToken.UserId)
+                    .ExecuteDeleteAsync();
+
+                return Result<LoginResponseDto>.Failure("Todos los token han sido removidos por seguridad");
+            }
+
+            if (storedToken.IsRevoked == true)
+            {
+                return Result<LoginResponseDto>.Failure("Este token es invalido");
+            }
+
+            if (storedToken.IsExpired == true)
+            {
+                return Result<LoginResponseDto>.Failure("Este token ya expiro. Debes loguearte nuevamente");
+
+            }
+
+            storedToken.IsUsed = true;
+            _context.RefreshTokens.Update(storedToken);
+
+            var jwt = await GenerateJwtTokenAsync(storedToken.User);
+
+            var refreshToken = new RefreshToken
+            {
+                Token = GenerateSecureRefreshToken(),
+                UserId = storedToken.User.Id,
+                CreationDate = DateTime.UtcNow,
+                ExpiryDate = DateTime.UtcNow.AddDays(7),
+                IsUsed = false,
+                IsRevoked = false,
+            };
+
+            await _context.RefreshTokens.AddAsync(refreshToken);
+
+            await _context.SaveChangesAsync();
+
+            return Result<LoginResponseDto>.Success(new LoginResponseDto
+            {
+                User = storedToken.User.Id,
+                Email = storedToken.User.Email,
+                Token = jwt.Token,
+                Expiration = jwt.Expiration,
+                RefreshToken = refreshToken.Token
+            });
         }
     }
 }

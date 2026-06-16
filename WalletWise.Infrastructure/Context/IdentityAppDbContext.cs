@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -6,14 +6,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using WalletWise.Infrastructure.Settings;
 
-namespace WalletWise.Persistence.Context
+namespace WalletWise.Infrastructure.Context
 {
     public class IdentityAppDbContext : IdentityDbContext<IdentityUser>
     {
         public IdentityAppDbContext(DbContextOptions<IdentityAppDbContext> options) : base(options)
         {
         }
+
+        public DbSet<RefreshToken> RefreshTokens {get; set;}
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -27,9 +30,8 @@ namespace WalletWise.Persistence.Context
             builder.Entity<IdentityRoleClaim<string>>().ToTable("RoleClaims");
             builder.Entity<IdentityUserToken<string>>().ToTable("UserTokens");
 
-
         }
-
         
     }
 }
+

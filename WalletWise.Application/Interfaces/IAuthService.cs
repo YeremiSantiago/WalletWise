@@ -17,5 +17,6 @@ namespace WalletWise.Application.Interfaces
         Task<Result<UserProfileResponseDto>> UpdateProfileNameAsync(string userId, UpdateUserProfileRequestDto request);
         Task<Result<bool>> ChangePasswordAsync(string userId, ChangePasswordRequestDto request);
         Task<Result<bool>> LogoutAsync(string userId);
+        Task<Result<LoginResponseDto>> RefreshTokenAsync(RefreshTokenRequestDto request);
     }
 }

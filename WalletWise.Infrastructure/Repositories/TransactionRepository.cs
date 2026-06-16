@@ -8,8 +8,8 @@ using WalletWise.Domain.Common.Enums;
 using WalletWise.Domain.Common.Pagination;
 using WalletWise.Domain.Entities;
 using WalletWise.Domain.Interfaces;
-using WalletWise.Persistence.Context;
-namespace WalletWise.Persistence.Repositories
+using WalletWise.Infrastructure.Context;
+namespace WalletWise.Infrastructure.Repositories
 {
     public class TransactionRepository : GenericRepository<Transaction>, ITransactionRepository
     {
@@ -98,3 +98,4 @@ namespace WalletWise.Persistence.Repositories
         }
     }
 }
+

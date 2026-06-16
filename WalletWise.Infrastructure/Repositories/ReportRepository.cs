@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,9 +7,9 @@ using WalletWise.Domain.Common.Enums;
 using WalletWise.Domain.Entities;
 using WalletWise.Domain.Interfaces;
 using WalletWise.Domain.Reports;
-using WalletWise.Persistence.Context;
+using WalletWise.Infrastructure.Context;
 
-namespace WalletWise.Persistence.Repositories
+namespace WalletWise.Infrastructure.Repositories
 {
     public class ReportRepository : IReportRepository
     {
@@ -158,3 +158,4 @@ namespace WalletWise.Persistence.Repositories
         }
     }
 }
+

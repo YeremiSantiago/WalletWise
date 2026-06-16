@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System;
 using System.Collections.Generic;
@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using WalletWise.Domain.Entities;
 
-namespace WalletWise.Persistence.EntityConfigurations
+namespace WalletWise.Infrastructure.EntityConfigurations
 {
     public class CategoryEntityConfiguration : IEntityTypeConfiguration<Category>
     {
@@ -33,3 +33,4 @@ namespace WalletWise.Persistence.EntityConfigurations
         }
     }
 }
+

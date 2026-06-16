@@ -1,4 +1,4 @@
-﻿using Microsoft.Data.Sqlite;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -7,8 +7,8 @@ using System.Threading.Tasks;
 using WalletWise.Domain.Common.Enums;
 using WalletWise.Domain.Entities;
 using WalletWise.Domain.Interfaces;
-using WalletWise.Persistence.Context;
-using WalletWise.Persistence.Repositories;
+using WalletWise.Infrastructure.Context;
+using WalletWise.Infrastructure.Repositories;
 using Xunit;
 
 namespace WalletWise.Integration.Test.Repositories
@@ -254,3 +254,4 @@ namespace WalletWise.Integration.Test.Repositories
         }
     }
 }
+

@@ -10,7 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 using WalletWise.Application.Dtos.Auth;
 using WalletWise.Application.Dtos.Users;
 using WalletWise.Integration.Test.Infraestructure;
-using WalletWise.Persistence.Context;
+using WalletWise.Infrastructure.Context;
 
 namespace WalletWise.Integration.Test.Controllers
 {

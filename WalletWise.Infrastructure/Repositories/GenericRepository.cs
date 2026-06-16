@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,9 +6,9 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using WalletWise.Domain.Interfaces;
-using WalletWise.Persistence.Context;
+using WalletWise.Infrastructure.Context;
 
-namespace WalletWise.Persistence.Repositories
+namespace WalletWise.Infrastructure.Repositories
 {
     public class GenericRepository<T> : IGenericRepository<T> where T : class
     {
@@ -70,3 +70,4 @@ namespace WalletWise.Persistence.Repositories
 
     }
 }
+

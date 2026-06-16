@@ -1,26 +1,62 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Claims;
 using System.Text;
-using System.Threading.Tasks;
 using WalletWise.Application.Interfaces;
 using WalletWise.Domain.Interfaces;
-using WalletWise.Domain.Setting;
-using WalletWise.Infraestructure.Services;
-using WalletWise.Infraestructure.Time;
+using WalletWise.Infrastructure.Settings;
+using WalletWise.Infrastructure.Services;
+using WalletWise.Infrastructure.Time;
+using WalletWise.Infrastructure.Context;
+using WalletWise.Infrastructure.Repositories;
 
-namespace WalletWise.Infraestructure.DependencyInjection
+namespace WalletWise.Infrastructure.DependencyInjection
 {
     public static class ServicesRegistration
     {
-        public static IServiceCollection AddInfraestructureLayerIoc(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection AddInfrastructureLayerIoc(this IServiceCollection services, IConfiguration configuration)
         {
+            // PERSISTENCE 
+            services.AddDbContext<AppDbContext>(options => options.UseSqlServer(
+                configuration.GetConnectionString("DefaultConnection"),
+                sqlOptions => sqlOptions.MigrationsAssembly(typeof(AppDbContext).Assembly.FullName)
+            ));
+
+            services.AddDbContext<IdentityAppDbContext>(options => options.UseSqlServer(
+                configuration.GetConnectionString("IdentityConnection"),
+                sqlOptions => sqlOptions.MigrationsAssembly(typeof(IdentityAppDbContext).Assembly.FullName)
+            ));
+
+            services.Configure<IdentityOptions>(options =>
+            {
+                options.Password.RequireDigit = true;
+                options.Password.RequireLowercase = true;
+                options.Password.RequireUppercase = true;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequiredLength = 8;
+
+                options.User.RequireUniqueEmail = true;
+
+                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+                options.Lockout.MaxFailedAccessAttempts = 5;
+            });
+
+            services.AddIdentity<IdentityUser, IdentityRole>()
+                .AddEntityFrameworkStores<IdentityAppDbContext>()
+                .AddDefaultTokenProviders();
+
+            services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+            services.AddScoped<ITransactionRepository, TransactionRepository>();
+            services.AddScoped<IWalletRepository, WalletRepository>();
+            services.AddScoped<ICategoryRepository, CategoryRepository>();
+            services.AddScoped<IReportRepository, ReportRepository>();
+
+            // INFRASTRUCTURE & AUTH 
             services.AddSingleton<IClock, ClockSystem>();
             services.AddScoped<ICurrentUserService, CurrentUserService>();
 
@@ -65,7 +101,7 @@ namespace WalletWise.Infraestructure.DependencyInjection
 
                         if(string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(tokenStamp))
                         {
-                            context.Fail("Token Inválido");
+                            context.Fail("Token Invalido");
                             return;
                         }
 
@@ -90,7 +126,6 @@ namespace WalletWise.Infraestructure.DependencyInjection
             services.AddScoped<IAuthService, AuthService>();
 
             return services;
-
         }
     }
 }
