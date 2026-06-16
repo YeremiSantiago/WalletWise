@@ -30,6 +30,8 @@ namespace WalletWise.Infrastructure.Context
             builder.Entity<IdentityRoleClaim<string>>().ToTable("RoleClaims");
             builder.Entity<IdentityUserToken<string>>().ToTable("UserTokens");
 
+            builder.ApplyConfiguration(new WalletWise.Infrastructure.EntityConfigurations.RefreshTokenConfiguration());
+
         }
         
     }

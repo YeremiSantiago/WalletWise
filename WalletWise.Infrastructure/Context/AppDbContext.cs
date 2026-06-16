@@ -22,7 +22,9 @@ namespace WalletWise.Infrastructure.Context
         {
 
             base.OnModelCreating(modelBuilder);
-            modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+            modelBuilder.ApplyConfigurationsFromAssembly(
+                Assembly.GetExecutingAssembly(), 
+                t => t.Name != "RefreshTokenConfiguration");
 
         }
     }

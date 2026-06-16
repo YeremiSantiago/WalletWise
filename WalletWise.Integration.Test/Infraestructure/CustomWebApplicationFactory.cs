@@ -66,7 +66,7 @@ namespace WalletWise.Integration.Test.Infraestructure
             
             await db.Database.EnsureCreatedAsync();
             var creator = identityDb.Database.GetService<Microsoft.EntityFrameworkCore.Storage.IRelationalDatabaseCreator>();
-            try { await creator.CreateTablesAsync(); } catch { }
+            await creator.CreateTablesAsync();
         }
 
         public new async Task DisposeAsync()
