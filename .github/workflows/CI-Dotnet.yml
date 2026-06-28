@@ -29,6 +29,8 @@ jobs:
           - name: Build
             run: dotnet build --no-restore --configuration release
 
+          - name: Check locale
+            run: locale
           - name: Run unit tests
             run: dotnet test WalletWise.UnitTest/WalletWise.Unit.Tests.csproj --configuration Release
 
@@ -37,8 +39,6 @@ jobs:
               JwtSettings__SecretKey: ${{ secrets.JWT_SECRET_KEY }}
             run: dotnet test WalletWise.Integration.Test/WalletWise.Integration.Test.csproj --configuration Release
 
-          - name: Check locale
-            run: locale
           
 
 
