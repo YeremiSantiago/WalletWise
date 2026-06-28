@@ -1,4 +1,4 @@
-using AutoMapper;
+ï»¿using AutoMapper;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -62,8 +62,8 @@ namespace WalletWise.Application.Services
             }
             catch (Exception ex) when (ex is not WalletWise.Application.Exceptions.NotFoundException && ex is not WalletWise.Application.Exceptions.ForbiddenAccessException)
             {
-                _logger.LogError(ex, "Error al obtener el resumen mensual para el año {Year}", year);
-                return Result<IEnumerable<MonthlySummaryDto>>.Failure($"No se pudo obtener el resumen del año {year}");
+                _logger.LogError(ex, "Error al obtener el resumen mensual para el aÃ±o {Year}", year);
+                return Result<IEnumerable<MonthlySummaryDto>>.Failure($"No se pudo obtener el resumen del aÃ±o {year}");
             }
         }
 
@@ -92,7 +92,7 @@ namespace WalletWise.Application.Services
             try
             {
                 if (start > end) return Result<IEnumerable<TopCategoryReportItemDto>>.Failure("La fecha inicial no puede ser posterior a la fecha final");
-                if (top <= 0) return Result<IEnumerable<TopCategoryReportItemDto>>.Failure("El límite debe ser mayor a 0");
+                if (top <= 0) return Result<IEnumerable<TopCategoryReportItemDto>>.Failure("El lÃ­mite debe ser mayor a 0");
 
                 var userId = _currentUserService.UserId;
                 if (string.IsNullOrWhiteSpace(userId)) return Result<IEnumerable<TopCategoryReportItemDto>>.Failure("Usuario no autenticado");
@@ -107,6 +107,7 @@ namespace WalletWise.Application.Services
                 return Result<IEnumerable<TopCategoryReportItemDto>>.Failure("No se pudo cargar el Top de categorias");
             }
         }
+
 
         public async Task<Result<ComparisonReportDto>> GetComparisonAsync(DateTime startA, DateTime endA, DateTime startB, DateTime endB)
         {
