@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +13,8 @@ namespace WalletWise.Application.Mappings.EntityToDto
     {
         public CategoryMappingProfile()
         {
-            CreateMap<Category, CategoryResponseDto>();
+            CreateMap<Category, CategoryResponseDto>()
+                .ForMember(dest => dest.TransactionCount, opt => opt.MapFrom(src => src.Transactions != null ? src.Transactions.Count() : 0));
 
             CreateMap<UpdateCategoryRequestDto, Category>()
                 .ForMember(des => des.Name, opt => opt.MapFrom(s => s.Name))

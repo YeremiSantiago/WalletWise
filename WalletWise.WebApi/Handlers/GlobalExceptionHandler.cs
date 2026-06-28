@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
 namespace WalletWise.WebApi.Handlers
@@ -12,34 +12,43 @@ namespace WalletWise.WebApi.Handlers
             _logger = logger;
         }
 
+
         public async ValueTask<bool> TryHandleAsync(
             HttpContext httpContext,
             Exception exception,
             CancellationToken cancellationToken)
         {
-            _logger.LogError(exception, "Unhandler exception ocurred");
-
-            var statusCode = exception switch
+            var (statusCode, errorCode, message) = exception switch
             {
-                KeyNotFoundException => StatusCodes.Status404NotFound,
-                UnauthorizedAccessException => StatusCodes.Status401Unauthorized,
-                ArgumentException => StatusCodes.Status400BadRequest,
-                _ => StatusCodes.Status500InternalServerError
+                WalletWise.Application.Exceptions.NotFoundException => 
+                    (StatusCodes.Status404NotFound, WalletWise.Application.Common.BusinessErrorCodes.ERR_NOT_FOUND, exception.Message ?? "El recurso solicitado no fue encontrado."),
+                WalletWise.Application.Exceptions.ForbiddenAccessException => 
+                    (StatusCodes.Status403Forbidden, WalletWise.Application.Common.BusinessErrorCodes.ERR_FORBIDDEN, "No tienes permisos para acceder a este recurso."),
+                _ => 
+                    (StatusCodes.Status500InternalServerError, WalletWise.Application.Common.BusinessErrorCodes.ERR_UNEXPECTED, "Ha ocurrido un error inesperado.")
             };
 
-            var problemDetails = new ProblemDetails
+            if (statusCode == StatusCodes.Status500InternalServerError)
+            {
+                _logger.LogError(exception, "Unhandled exception occurred");
+            }
+            else
+            {
+                _logger.LogWarning(exception, "Domain exception occurred");
+            }
+
+            var apiErrorResponse = new WalletWise.Application.Common.ApiErrorResponse
             {
                 Status = statusCode,
-                Title = "Se produjo un error",
-                Detail = exception.Message,
-                Instance = httpContext.Request.Path
-            };
-
-            problemDetails.Extensions["traceId"] = httpContext.TraceIdentifier;
+                Error = errorCode,
+                Message = message,
+                TraceId = httpContext.TraceIdentifier,
+                Timestamp = DateTime.UtcNow
+            };   
 
             httpContext.Response.StatusCode = statusCode;
 
-            await httpContext.Response.WriteAsJsonAsync(problemDetails, cancellationToken);
+            await httpContext.Response.WriteAsJsonAsync(apiErrorResponse, cancellationToken);
 
             return true;
         }

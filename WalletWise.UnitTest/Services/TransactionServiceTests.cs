@@ -105,21 +105,15 @@ namespace WalletWise.Unit.Tests.Services
             int id = 10;
             _transactionRepoMock.Setup(r => r.GetByIdForUserAsync(id, TestUserId)).ReturnsAsync((Transaction?)null);
 
-            // Act
-            var result = await _transactionService.GetTransactionByIdAsync(id);
-
-            // Assert
-            Assert.False(result.IsSuccess);
-            Assert.NotNull(result.Error);
-            Assert.Null(result.Value);
-            Assert.Equal($"La transaccion con el id {id} no existe", result.Error); 
+            // Act & Assert
+            await Assert.ThrowsAsync<WalletWise.Application.Exceptions.NotFoundException>(() => _transactionService.GetTransactionByIdAsync(id)); 
         }
 
         [Fact]
         public async Task CreateTransactionAsync_WhenCreatedATransaction_ReturnOperationIsSuccessWithValue()
         {
             // Arrange
-            var category = new Category {Id = 1, Name = "Comida", UserId = TestUserId, IsDeleted = false};
+            var category = new Category {Id = 1, Name = "Comida", UserId = TestUserId, IsDeleted = false, Type = TypeTransaction.Income};
             var wallet = new Wallet { Id = 1, Name = "Maximo", UserId = TestUserId };
 
             var transactionDto = new CreateTransactionRequestDto
@@ -166,7 +160,10 @@ namespace WalletWise.Unit.Tests.Services
 
             int id = 3;
 
+            var category = new Category { Id = 1, Name = "Sueldo", UserId = TestUserId, IsDeleted = false, Type = TypeTransaction.Income };
+
             _transactionRepoMock.Setup(r => r.GetByIdForUserAsync(id, TestUserId)).ReturnsAsync(transaction);
+            _categoryRepoMock.Setup(r => r.GetCategoryActiveByIdAsync(1, TestUserId)).ReturnsAsync(category);
             _transactionRepoMock.Setup(r => r.UpdateAsync(It.IsAny<Transaction>()));
 
             // Act  

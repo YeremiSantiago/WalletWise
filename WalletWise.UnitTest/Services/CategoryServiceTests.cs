@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
@@ -60,10 +60,10 @@ namespace WalletWise.Unit.Tests.Services
             // Arrange
             var categories = new List<Category>
             {
-                new Category {Id = 1, Name = "Comida", UserId = TestUserId, IsDeleted = false},
-                new Category {Id = 2, Name = "Servicios", UserId = TestUserId, IsDeleted = false},
-                new Category {Id = 3, Name = "Transporte", UserId = TestUserId, IsDeleted = false},
-                new Category {Id = 4, Name = "Compras", UserId = TestUserId, IsDeleted = false}
+                new Category {Id = 1, Name = "Comida", UserId = TestUserId, IsDeleted = false, Type = TypeTransaction.Expense},
+                new Category {Id = 2, Name = "Servicios", UserId = TestUserId, IsDeleted = false, Type = TypeTransaction.Expense},
+                new Category {Id = 3, Name = "Transporte", UserId = TestUserId, IsDeleted = false, Type = TypeTransaction.Expense},
+                new Category {Id = 4, Name = "Compras", UserId = TestUserId, IsDeleted = false, Type = TypeTransaction.Expense}
             };
 
             _categoryRepoMock.Setup(r => r.GetAllCategoriesActiveAsync(TestUserId))
@@ -83,7 +83,7 @@ namespace WalletWise.Unit.Tests.Services
         public async Task GetCategoryByIdAsync_WhenGetCategoryExisting_ReturnCategoryWithValue()
         {
             // Arrange 
-            var category = new Category { Id = 3, Name = "Transporte", UserId = TestUserId, IsDeleted = false };
+            var category = new Category { Id = 3, Name = "Transporte", UserId = TestUserId, IsDeleted = false, Type = TypeTransaction.Expense };
             int id = 3;
 
             _categoryRepoMock.Setup(r => r.GetCategoryActiveByIdAsync(id, TestUserId))
@@ -108,13 +108,8 @@ namespace WalletWise.Unit.Tests.Services
             _categoryRepoMock.Setup(r => r.GetCategoryActiveByIdAsync(id, TestUserId))
                 .ReturnsAsync((Category?)null);
 
-            // Act
-            var result = await _categoryService.GetCategoryByIdAsync(id);
-
-            // Assert
-            Assert.False(result.IsSuccess);
-            Assert.NotNull(result.Error);
-            Assert.Null(result.Value);
+            // Act & Assert
+            await Assert.ThrowsAsync<WalletWise.Application.Exceptions.NotFoundException>(() => _categoryService.GetCategoryByIdAsync(id));
         }
 
         [Fact]
@@ -147,7 +142,7 @@ namespace WalletWise.Unit.Tests.Services
         {
             // Arrange
             int id = 1;
-            var existingCategory = new Category { Id = 1, Name = "Comida", UserId = TestUserId, IsDeleted = false };
+            var existingCategory = new Category { Id = 1, Name = "Comida", UserId = TestUserId, IsDeleted = false, Type = TypeTransaction.Expense };
             var categoryDto = new UpdateCategoryRequestDto
             {
                 Name = "Gasto Actualizado"
@@ -173,7 +168,7 @@ namespace WalletWise.Unit.Tests.Services
         {
             // Arrange 
             int id = 2;
-            var category = new Category { Id = 2, Name = "Servicios", UserId = TestUserId, IsDeleted = false };
+            var category = new Category { Id = 2, Name = "Servicios", UserId = TestUserId, IsDeleted = false, Type = TypeTransaction.Expense };
 
             _categoryRepoMock.Setup(r => r.GetCategoryActiveByIdAsync(id, TestUserId))
                 .ReturnsAsync(category);
@@ -197,7 +192,7 @@ namespace WalletWise.Unit.Tests.Services
         {
             // Arrange 
             int id = 2;
-            var category = new Category { Id = 2, Name = "Servicios", UserId = TestUserId, IsDeleted = false };
+            var category = new Category { Id = 2, Name = "Servicios", UserId = TestUserId, IsDeleted = false, Type = TypeTransaction.Expense };
 
             _categoryRepoMock.Setup(r => r.GetCategoryActiveByIdAsync(id, TestUserId))
                 .ReturnsAsync(category);

@@ -66,7 +66,7 @@ namespace WalletWise.Integration.Test.Controllers
 
             var response = await _client.PostAsJsonAsync("api/auth/register", request);
 
-            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+            Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
         }
 
         [Fact]

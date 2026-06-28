@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging;
 using WalletWise.Application.Dtos.Category;
 using WalletWise.Application.Interfaces;
 using WalletWise.Domain.Common;
@@ -39,7 +39,7 @@ namespace WalletWise.Application.Services
 
                 return Result<IEnumerable<CategoryResponseDto>>.Success(_mapper.Map<IEnumerable<CategoryResponseDto>>(categories));
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not WalletWise.Application.Exceptions.NotFoundException && ex is not WalletWise.Application.Exceptions.ForbiddenAccessException)
             {
                 _logger.LogError(ex, "A ocurrido un fallo inesperado al obtener todas las categories");
                 return Result<IEnumerable<CategoryResponseDto>>.Failure("No se ha podido obtener todas las categorias");
@@ -55,12 +55,12 @@ namespace WalletWise.Application.Services
 
                 if (result is null)
                 {
-                    return Result<CategoryResponseDto?>.Failure($"La category con el id {id} no existe");
+                    throw new WalletWise.Application.Exceptions.NotFoundException($"La category con el id {id} no existe");
                 }
 
                 return Result<CategoryResponseDto?>.Success(_mapper.Map<CategoryResponseDto>(result));
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not WalletWise.Application.Exceptions.NotFoundException && ex is not WalletWise.Application.Exceptions.ForbiddenAccessException)
             {
                 _logger.LogError(ex, "Ha ocurrido un fallo inesperado al obtener la categoria con el id {Id} ", id);
                 return Result<CategoryResponseDto?>.Failure($"No se ha podido obtener la categoria con el id {id}");
@@ -71,18 +71,6 @@ namespace WalletWise.Application.Services
         {
             try
             {
-                 
-
-
-
-
-
-
-
-
-
-
-
 
                 var userId = _currentUserService.UserId!;
                 var category = _mapper.Map<Category>(categoryDto);
@@ -101,7 +89,7 @@ namespace WalletWise.Application.Services
 
                 return Result<CategoryResponseDto>.Success(_mapper.Map<CategoryResponseDto>(response));
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not WalletWise.Application.Exceptions.NotFoundException && ex is not WalletWise.Application.Exceptions.ForbiddenAccessException)
             {
                 _logger.LogError(ex, "Ha ocurrido un fallo al crear la categoria");
                 return Result<CategoryResponseDto>.Failure("No se ha podido crear la categoria");
@@ -120,7 +108,7 @@ namespace WalletWise.Application.Services
 
                 if (exist == null)
                 {
-                    return Result<CategoryResponseDto>.Failure($"La Categoria con el id {id} no existe");
+                    throw new WalletWise.Application.Exceptions.NotFoundException($"La Categoria con el id {id} no existe");
                 }
 
                 _mapper.Map(categoryDto, exist);
@@ -131,7 +119,7 @@ namespace WalletWise.Application.Services
 
                 return Result<CategoryResponseDto>.Success(_mapper.Map<CategoryResponseDto>(exist));
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not WalletWise.Application.Exceptions.NotFoundException && ex is not WalletWise.Application.Exceptions.ForbiddenAccessException)
             {
                 _logger.LogError(ex, "Ha ocurrido un error inesperado al actualizar la categoria {Id}", id);
                 return Result<CategoryResponseDto>.Failure("No se ha podido actualizar la categoria");
@@ -147,7 +135,7 @@ namespace WalletWise.Application.Services
 
                 if (category == null)
                 {
-                    return Result<bool>.Failure($"La categoria con id {id} no pudo ser encontrada");
+                    throw new WalletWise.Application.Exceptions.NotFoundException($"La categoria con id {id} no pudo ser encontrada");
                 }
 
                 var exists = await _transactionRepository.ExistsTransactionByCategoryAsync(category.Id, userId);
@@ -164,7 +152,7 @@ namespace WalletWise.Application.Services
 
                 return Result<bool>.Success(true);
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not WalletWise.Application.Exceptions.NotFoundException && ex is not WalletWise.Application.Exceptions.ForbiddenAccessException)
             {
                 _logger.LogError(ex, "Ha ocurrido un fallo al borrar la categoria id {Id}", id);
                 return Result<bool>.Failure("No se ha podido eliminar la categoria");

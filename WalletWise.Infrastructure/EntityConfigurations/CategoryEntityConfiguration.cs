@@ -23,9 +23,17 @@ namespace WalletWise.Infrastructure.EntityConfigurations
             builder.Property(x => x.UserId)
                 .IsRequired();
 
+            builder.Property(x => x.Type)
+                .IsRequired()
+                .HasConversion<string>();
+
+            builder.Property(x => x.Description)
+                .HasMaxLength(250)
+                .IsRequired(false);
+
             //Index
 
-            builder.HasIndex(x => x.Name).
+            builder.HasIndex( o => new {o.Name, o.UserId}).
                 HasDatabaseName("IDX_Category_Name")
                 .IsUnique()
                 .HasFilter("[IsDeleted] = 0");

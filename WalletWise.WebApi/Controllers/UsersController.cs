@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
@@ -6,6 +6,7 @@ using System.Security.Claims;
 using WalletWise.Application.Dtos.Auth;
 using WalletWise.Application.Dtos.Users;
 using WalletWise.Application.Interfaces;
+using WalletWise.WebApi.Common;
 
 namespace WalletWise.WebApi.Controllers
 {
@@ -33,14 +34,11 @@ namespace WalletWise.WebApi.Controllers
             var userId = _currentUserService.UserId;
 
             if (string.IsNullOrWhiteSpace(userId))
-                return NotFound();
+                return Unauthorized();
 
             var result = await _authService.GetCurrentUserProfile(userId);
 
-            if (result.IsSuccess == false || result.Value is null)
-                return NotFound(new { error = result.Error });
-
-            return Ok(result.Value);
+            return result.ToOkResult(HttpContext);
         }
 
         [HttpPut("me")]
@@ -53,34 +51,12 @@ namespace WalletWise.WebApi.Controllers
             var userId = _currentUserService.UserId;
 
             if (string.IsNullOrWhiteSpace(userId))
-                return NotFound();
+                return Unauthorized();
 
             var result = await _authService.UpdateProfileNameAsync(userId, request);
 
-            if (!result.IsSuccess || result.Value is null)
-                return BadRequest(new { error = result.Error });
-
-            return Ok(result.Value);
+            return result.ToOkResult(HttpContext);
         }
 
-        [HttpPut("me/password")]
-        [SwaggerOperation(Summary = "Cambiar contraseña",
-            Description = "Actualiza la contraseña del usuario autenticado")]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequestDto request)
-        {
-            var userId = _currentUserService.UserId;
-
-            if (string.IsNullOrWhiteSpace(userId))
-                return NotFound();
-
-            var result = await _authService.ChangePasswordAsync(userId, request);
-
-            if (!result.IsSuccess)
-                return BadRequest(new { error = result.Error });
-
-            return NoContent();
-        }
     }
 }

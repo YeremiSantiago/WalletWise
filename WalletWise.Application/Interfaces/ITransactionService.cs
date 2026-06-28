@@ -18,5 +18,6 @@ namespace WalletWise.Application.Interfaces
         Task<Result<IEnumerable<TransactionResponseDto>>> GetByTypeTransactionAsync(TypeTransaction typeTransaction);
         Task<Result<IEnumerable<TransactionResponseDto>>> GetAllTransactionsByCategoryAsync(int idCategory);
         Task<Result<PagedResult<TransactionResponseDto>>> GetPagedTransactionsAsync(TransactionFilterParams filterParams);
+        Task<Result<TransactionSummaryResponseDto>> GetSummaryAsync(TransactionFilterParams filterParams);
     }
 }

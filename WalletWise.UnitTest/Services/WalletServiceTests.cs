@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
@@ -87,14 +87,8 @@ namespace WalletWise.Unit.Tests.Services
             int id = 10;
             _repoMock.Setup(r => r.GetByIdForUserAsync(id, TestUserId)).ReturnsAsync((Wallet?)null);
 
-            // Act
-            var result = await _walletService.GetWalletByIdAsync(id);
-
-            // Assert
-            Assert.False(result.IsSuccess);
-            Assert.NotNull(result.Error);
-            Assert.Null(result.Value);
-            Assert.Equal($"La category con el id {id} no existe", result.Error);
+            // Act & Assert
+            await Assert.ThrowsAsync<WalletWise.Application.Exceptions.NotFoundException>(() => _walletService.GetWalletByIdAsync(id));
         }
 
         [Fact]

@@ -26,7 +26,7 @@ namespace WalletWise.Infrastructure.EntityConfigurations
 
             // Index
 
-            builder.HasIndex(x => x.Name)
+            builder.HasIndex(x => new {x.Name, x.UserId})
                 .HasDatabaseName("IDX_Wallet_Name")
                 .IsUnique();
 

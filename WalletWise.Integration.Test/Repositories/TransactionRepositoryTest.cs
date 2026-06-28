@@ -67,7 +67,7 @@ namespace WalletWise.Integration.Test.Repositories
         public async Task AddTransactionAsync_WhenTransactionIsAdded_ShouldBeCreatedYRetunValue()
         {
             // Arrange
-            var category = new Category { Name = "Comida", UserId = TestUserId };
+            var category = new Category { Name = "Comida", UserId = TestUserId, Type = TypeTransaction.Expense };
             var wallet = new Wallet { Id = 1, Name = "Trabajo", UserId = TestUserId };
 
             await _context.Categories.AddAsync(category);
@@ -192,9 +192,9 @@ namespace WalletWise.Integration.Test.Repositories
         {
             var categories = new List<Category>
             {
-                new Category {Id = 1, Name = "Comida", UserId = TestUserId, IsDeleted = false},
-                new Category {Id = 2, Name = "Servicios", UserId = TestUserId, IsDeleted = false},
-                new Category {Id = 3, Name = "Transporte", UserId = TestUserId, IsDeleted = false}
+                new Category {Id = 1, Name = "Comida", UserId = TestUserId, IsDeleted = false, Type = TypeTransaction.Expense},
+                new Category {Id = 2, Name = "Servicios", UserId = TestUserId, IsDeleted = false, Type = TypeTransaction.Expense},
+                new Category {Id = 3, Name = "Transporte", UserId = TestUserId, IsDeleted = false, Type = TypeTransaction.Expense}
             };
 
             var wallets = new List<Wallet>
@@ -221,9 +221,9 @@ namespace WalletWise.Integration.Test.Repositories
         {
             var categories = new List<Category>
             {
-                new Category {Id = 1, Name = "Comida", UserId = TestUserId, IsDeleted = false},
-                new Category {Id = 2, Name = "Servicios", UserId = TestUserId, IsDeleted = false},
-                new Category {Id = 3, Name = "Transporte", UserId = TestUserId, IsDeleted = false}
+                new Category {Id = 1, Name = "Comida", UserId = TestUserId, IsDeleted = false, Type = TypeTransaction.Expense},
+                new Category {Id = 2, Name = "Servicios", UserId = TestUserId, IsDeleted = false, Type = TypeTransaction.Expense},
+                new Category {Id = 3, Name = "Transporte", UserId = TestUserId, IsDeleted = false, Type = TypeTransaction.Expense}
             };
 
             var wallets = new List<Wallet>

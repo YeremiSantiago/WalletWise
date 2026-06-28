@@ -6,6 +6,7 @@ using System.ComponentModel.DataAnnotations;
 using WalletWise.Application.Dtos.Transaction;
 using WalletWise.Application.Interfaces;
 using WalletWise.Domain.Common.Pagination;
+using WalletWise.WebApi.Common;
 
 namespace WalletWise.WebApi.Controllers
 {
@@ -13,7 +14,7 @@ namespace WalletWise.WebApi.Controllers
     [Route("api/transactions")]
     [EnableRateLimiting("AuthenticatedUserApi")]
     [Authorize]
-    [SwaggerTag("Proporciorna operaciones CRUD para gestionar transacciones")]
+    [SwaggerTag("Proporciorna operaciones para gestionar transacciones")]
     public class TransactionsController : ControllerBase
     {
         private readonly ITransactionService _transactionService;
@@ -21,6 +22,17 @@ namespace WalletWise.WebApi.Controllers
         public TransactionsController(ITransactionService transactionService)
         {
             _transactionService = transactionService;
+        }
+
+        [HttpGet("summary")]
+        [SwaggerOperation(
+            Summary = "Obtener el resumen de las transacciones",
+            Description = "Te devuelve: total ingresos, gastos y balance de las transacciones filtradas.")]
+        public async Task<ActionResult<TransactionSummaryResponseDto>> GetSummary([FromQuery] TransactionFilterParams filterParams)
+        {
+            var response = await _transactionService.GetSummaryAsync(filterParams);
+
+            return response.ToOkResult(HttpContext);
         }
 
         [HttpGet]
@@ -33,7 +45,7 @@ namespace WalletWise.WebApi.Controllers
         {
             var response = await _transactionService.GetPagedTransactionsAsync(filterParams);
 
-            return Ok(response.Value);
+            return response.ToOkResult(HttpContext);
         }
 
         [HttpGet("{id}")]
@@ -44,14 +56,9 @@ namespace WalletWise.WebApi.Controllers
         [ProducesResponseType(typeof(TransactionResponseDto),StatusCodes.Status200OK)]
         public async Task<ActionResult<TransactionResponseDto>> GetTransactionById(int id)
         {
-            var response = await _transactionService.GetByIdAsync(id);
+            var response = await _transactionService.GetTransactionByIdAsync(id);
 
-            if (response.Value is null)
-            {
-                return NotFound();
-            }
-
-            return Ok(response.Value);
+            return response.ToOkResult(HttpContext);
         }
 
         [HttpPost]
@@ -63,12 +70,7 @@ namespace WalletWise.WebApi.Controllers
         {
             var response = await _transactionService.CreateTransactionAsync(requestDto);
 
-            if (!response.IsSuccess)
-            {
-                return UnprocessableEntity(new { error = response.Error });
-            }
-
-            return CreatedAtAction(nameof(GetTransactionById), new { id = response.Value.Id }, response.Value);
+            return response.ToCreatedResult(HttpContext, nameof(GetTransactionById), new { id = response.Value?.Id });
         }
 
         [HttpPut("{id}")]
@@ -81,12 +83,7 @@ namespace WalletWise.WebApi.Controllers
         {
             var response = await _transactionService.UpdateTransactionAsync(id, requestDto);
 
-            if (response.Value is null)
-            {
-                return NotFound();
-            }
-
-            return Ok(response.Value);
+            return response.ToOkResult(HttpContext);
         }
 
         [HttpDelete("{id}")]
@@ -100,16 +97,7 @@ namespace WalletWise.WebApi.Controllers
         {
             var response = await _transactionService.DeleteTransactionAsync(id);
 
-            if (!response.IsSuccess)
-            {
-                if (response.Error?.Contains("no existe", StringComparison.OrdinalIgnoreCase) == true)
-                {
-                    return NotFound(new { error = response.Error });
-                }
-                return UnprocessableEntity(new { error = response.Error });
-            }
-
-            return NoContent();
+            return response.ToNoContentResult(HttpContext);
         }
     }
 }

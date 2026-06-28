@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -43,7 +43,7 @@ namespace WalletWise.Application.Services
                 return Result<ResDto?>.Success(_mapper.Map<ResDto>(entity));
 
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not WalletWise.Application.Exceptions.NotFoundException && ex is not WalletWise.Application.Exceptions.ForbiddenAccessException)
             {
                 _logger.LogError(ex, "Ha ocurrido un error al obtener la entidad {T} con id {Id}", typeof(T).Name, id);
                 return Result<ResDto?>.Failure("No se ha podido obtener la entidad");
@@ -61,7 +61,7 @@ namespace WalletWise.Application.Services
 
                 return Result<IEnumerable<ResDto>>.Success(a);
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not WalletWise.Application.Exceptions.NotFoundException && ex is not WalletWise.Application.Exceptions.ForbiddenAccessException)
             {
                 _logger.LogError(ex, "A ocurrido un error al obtener todas entidades");
                 return Result<IEnumerable<ResDto>>.Failure("No se a podido listar todas las entidades");
@@ -78,7 +78,7 @@ namespace WalletWise.Application.Services
 
                 return Result<ResDto>.Success(_mapper.Map<ResDto>(values));
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not WalletWise.Application.Exceptions.NotFoundException && ex is not WalletWise.Application.Exceptions.ForbiddenAccessException)
             {
                 _logger.LogError(ex, "A ocurrido un error inesperado al crear una entidad {T}", typeof(T).Name);
                 return Result<ResDto>.Failure("No se a podido crear la entidad");
@@ -103,7 +103,7 @@ namespace WalletWise.Application.Services
 
                 return Result<ResDto>.Success(_mapper.Map<ResDto>(entity));
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not WalletWise.Application.Exceptions.NotFoundException && ex is not WalletWise.Application.Exceptions.ForbiddenAccessException)
             {
                 _logger.LogError(ex, "Fallo al actualizar la entidad {T}", typeof(T).Name);
                 return Result<ResDto>.Failure("No se a podido actualizar la entidad");
@@ -124,7 +124,7 @@ namespace WalletWise.Application.Services
                 await _repository.RemoveAsync(id);
                 return Result<bool>.Success(true);
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not WalletWise.Application.Exceptions.NotFoundException && ex is not WalletWise.Application.Exceptions.ForbiddenAccessException)
             {
                 _logger.LogError(ex, "A ocurrido un fallo al borrar la entidad con el id {Id}", id);
                 return Result<bool>.Failure("No se ha podido eliminar la entidad");

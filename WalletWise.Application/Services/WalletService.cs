@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -32,7 +32,7 @@ namespace WalletWise.Application.Services
 
                 return Result<IEnumerable<WalletResponseDto>>.Success(_mapper.Map<IEnumerable<WalletResponseDto>>(wallets));
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not WalletWise.Application.Exceptions.NotFoundException && ex is not WalletWise.Application.Exceptions.ForbiddenAccessException)
             {
                 _logger.LogError(ex, "A ocurrido un fallo inesperado al obtener todas las wallets");
                 return Result<IEnumerable<WalletResponseDto>>.Failure("No se ha podido obtener todas las wallets");
@@ -47,13 +47,13 @@ namespace WalletWise.Application.Services
 
                 if (result is null)
                 {
-                    return Result<WalletResponseDto?>.Failure($"La category con el id {id} no existe");
+                    throw new WalletWise.Application.Exceptions.NotFoundException($"La category con el id {id} no existe");
                 }
 
                 return Result<WalletResponseDto?>.Success(_mapper.Map<WalletResponseDto>(result));
 
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not WalletWise.Application.Exceptions.NotFoundException && ex is not WalletWise.Application.Exceptions.ForbiddenAccessException)
             {
                 _logger.LogError(ex, "Ha ocurrido un fallo inesperado al obtener la wallet con el id {Id} ", id);
                 return Result<WalletResponseDto?>.Failure($"No se ha podido obtener la wallet con el id {id}");
@@ -71,7 +71,7 @@ namespace WalletWise.Application.Services
 
                 return Result<WalletResponseDto>.Success(_mapper.Map<WalletResponseDto>(walletR));
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not WalletWise.Application.Exceptions.NotFoundException && ex is not WalletWise.Application.Exceptions.ForbiddenAccessException)
             {
                 _logger.LogError(ex, "Ha ocurrido un fallo al crear la wallet");
                 return Result<WalletResponseDto>.Failure("No se ha podido crear la wallet");
@@ -87,7 +87,7 @@ namespace WalletWise.Application.Services
 
                 if (exist == null)
                 {
-                    return Result<WalletResponseDto>.Failure($"La wallet con el id {id} no pudo ser encontrada");
+                    throw new WalletWise.Application.Exceptions.NotFoundException("$La wallet con el id {id} no pudo ser encontrada");
                 }
 
                 _mapper.Map(walletDto, exist);
@@ -96,7 +96,7 @@ namespace WalletWise.Application.Services
 
                 return Result<WalletResponseDto>.Success(_mapper.Map<WalletResponseDto>(exist));
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not WalletWise.Application.Exceptions.NotFoundException && ex is not WalletWise.Application.Exceptions.ForbiddenAccessException)
             {
                 _logger.LogError(ex, "Ha ocurrido un fallo al actualizar la wallet con id {Id}", id);
                 return Result<WalletResponseDto>.Failure("No se ha podido actualizar la wallet");
@@ -111,14 +111,14 @@ namespace WalletWise.Application.Services
 
                 if (exist == null)
                 {
-                    return Result<bool>.Failure($"La wallet con el id {id} no pudo ser encontrada");
+                     throw new WalletWise.Application.Exceptions.NotFoundException($"La wallet con el id {id} no pudo ser encontrada");
                 }
 
                 await _walletRepository.RemoveAsync(id);
 
                 return Result<bool>.Success(true);
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not WalletWise.Application.Exceptions.NotFoundException && ex is not WalletWise.Application.Exceptions.ForbiddenAccessException)
             {
                 _logger.LogError(ex, "Ha ocurrido un error inesperado al eliminar la wallet con el id {Id}", id);
                 return Result<bool>.Failure("No se ha podido eliminar la wallet");

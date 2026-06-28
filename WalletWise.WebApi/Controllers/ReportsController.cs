@@ -6,6 +6,7 @@ using WalletWise.Application.Dtos.Reports;
 using WalletWise.Application.Dtos.Transaction;
 using WalletWise.Application.Interfaces;
 using WalletWise.Domain.Common.Enums;
+using WalletWise.WebApi.Common;
 
 namespace WalletWise.WebApi.Controllers
 {
@@ -31,12 +32,7 @@ namespace WalletWise.WebApi.Controllers
         {
             var result = await _reportService.GetSummaryAsync();
 
-            if (!result.IsSuccess)
-            {
-                return UnprocessableEntity(new { error = result.Error });
-            }
-
-            return Ok(result.Value);
+            return result.ToOkResult(HttpContext);
         }
 
         [HttpGet("monthly")]
@@ -47,12 +43,7 @@ namespace WalletWise.WebApi.Controllers
         {
             var result = await _reportService.GetMonthlySummaryAsync(year);
 
-            if (!result.IsSuccess)
-            {
-                return UnprocessableEntity(new { error = result.Error });
-            }
-
-            return Ok(result.Value);
+            return result.ToOkResult(HttpContext);
         }
 
         [HttpGet("by-category")]
@@ -64,13 +55,7 @@ namespace WalletWise.WebApi.Controllers
         {
             var result = await _reportService.GetByCategoryAsync(start, end, type);
 
-            if (!result.IsSuccess)
-                return UnprocessableEntity(new { error = result.Error });
-
-            if (result.Value == null || !result.Value.Any())
-                return Ok(new { message = "No hay transacciones registradas para este periodo y los criterios aplicados.", data = result.Value });
-
-            return Ok(result.Value);
+            return result.ToOkResult(HttpContext);
         }
 
         [HttpGet("top-categories")]
@@ -83,14 +68,13 @@ namespace WalletWise.WebApi.Controllers
             var result = await _reportService.GetTopCategoriesAsync(start, end, top);
 
             if (!result.IsSuccess)
-                return UnprocessableEntity(new { error = result.Error });
+                return result.ToOkResult(HttpContext);
 
             if (result.Value == null || !result.Value.Any())
                 return Ok(new { message = "No hay datos de gastos en las categorías para el periodo de tiempo ingresado.", data = result.Value });
 
             return Ok(result.Value);
         }
-
         [HttpGet("comparison")]
         [SwaggerOperation(
             Summary = "Comparación Financiera",
@@ -102,10 +86,7 @@ namespace WalletWise.WebApi.Controllers
         {
             var result = await _reportService.GetComparisonAsync(startA, endA, startB, endB);
 
-            if (!result.IsSuccess)
-                return UnprocessableEntity(new { error = result.Error });
-
-            return Ok(result.Value);
+            return result.ToOkResult(HttpContext);
         }
 
         [HttpGet("export")]
@@ -121,7 +102,7 @@ namespace WalletWise.WebApi.Controllers
             var result = await _reportService.ExportAsync(start, end, type, categoryId, search);
 
             if (!result.IsSuccess)
-                return UnprocessableEntity(new { error = result.Error });
+                return result.ToOkResult(HttpContext);
 
             if (result.Value == null || !result.Value.Any())
                 return Ok(new { message = "No existen datos para exportar con los parámetros dados." });

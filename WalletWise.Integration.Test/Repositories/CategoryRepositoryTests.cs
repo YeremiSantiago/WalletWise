@@ -9,6 +9,7 @@ using WalletWise.Domain.Entities;
 using WalletWise.Domain.Interfaces;
 using WalletWise.Infrastructure.Context;
 using WalletWise.Infrastructure.Repositories;
+using WalletWise.Domain.Common.Enums;
 
 namespace WalletWise.Integration.Test.Repositories
 {
@@ -39,20 +40,23 @@ namespace WalletWise.Integration.Test.Repositories
             // Arrange 
             var Categories = new List<Category>()
             {
-                new Category()
+                new Category 
                 {
+                    Type = TypeTransaction.Expense,
                     Id = 1,
                     Name = "Comida",
                     UserId = "1"
                 },
-                new Category()
+                new Category 
                 {
+                    Type = TypeTransaction.Expense,
                     Id = 2,
                     Name = "Compras",
                     UserId = "1"
                 },
-                new Category()
+                new Category 
                 {
+                    Type = TypeTransaction.Expense,
                     Id = 3,
                     Name = "Servicios",
                     UserId = "1"
@@ -83,20 +87,23 @@ namespace WalletWise.Integration.Test.Repositories
             // Arrange
             var Categories = new List<Category>()
             {
-                new Category()
+                new Category 
                 {
+                    Type = TypeTransaction.Expense,
                     Id = 1,
                     Name = "Ropa",
                     UserId = "1"
                 },
-                new Category()
+                new Category 
                 {
+                    Type = TypeTransaction.Expense,
                     Id = 2,
                     Name = "Telecomunicaciones",
                     UserId = "1"
                 },
-                new Category()
+                new Category 
                 {
+                    Type = TypeTransaction.Expense,
                     Id = 3,
                     Name = "Servicios",
                     UserId = "1"
@@ -126,8 +133,9 @@ namespace WalletWise.Integration.Test.Repositories
         {
             // Arrange 
 
-            var Category = new Category
+            var Category = new Category 
             {
+                Type = TypeTransaction.Expense,
                 Name = "Antonio",
                 UserId = "1"
             };
@@ -151,20 +159,23 @@ namespace WalletWise.Integration.Test.Repositories
 
             var Categories = new List<Category>()
             {
-                new Category()
+                new Category 
                 {
+                    Type = TypeTransaction.Expense,
                     Id = 1,
                     Name = "Comida",
                     UserId = "1"
                 },
-                new Category()
+                new Category 
                 {
+                    Type = TypeTransaction.Expense,
                     Id = 2,
                     Name = "Ropa",
                     UserId = "1"
                 },
-                new Category()
+                new Category 
                 {
+                    Type = TypeTransaction.Expense,
                     Id = 3,
                     Name = "traje",
                     UserId = "1"
@@ -202,20 +213,23 @@ namespace WalletWise.Integration.Test.Repositories
 
             var Categories = new List<Category>()
             {
-                new Category()
+                new Category 
                 {
+                    Type = TypeTransaction.Expense,
                     Id = 1,
                     Name = "Ropa",
                     UserId = "1"
                 },
-                new Category()
+                new Category 
                 {
+                    Type = TypeTransaction.Expense,
                     Id = 2,
                     Name = "Comida",
                     UserId = "1"
                 },
-                new Category()
+                new Category 
                 {
+                    Type = TypeTransaction.Expense,
                     Id = 3,
                     Name = "Ahorro",
                     UserId = "1"
@@ -247,20 +261,23 @@ namespace WalletWise.Integration.Test.Repositories
 
             var Categories = new List<Category>()
             {
-                new Category()
+                new Category 
                 {
+                    Type = TypeTransaction.Expense,
                     Id = 1,
                     Name = "Comida",
                     UserId = "1"
                 },
-                new Category()
+                new Category 
                 {
+                    Type = TypeTransaction.Expense,
                     Id = 2,
                     Name = "Ropa",
                     UserId = "1"
                 },
-                new Category()
+                new Category 
                 {
+                    Type = TypeTransaction.Expense,
                     Id = 3,
                     Name = "Traje",
                     UserId = "1"

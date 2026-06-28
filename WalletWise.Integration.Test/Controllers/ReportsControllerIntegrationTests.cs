@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -63,13 +63,14 @@ namespace WalletWise.Integration.Test.Controllers
         public async Task GetMonthly_WhenTransactionsExisting_ReturnsMonthlySummaryList()
         {
             // Arrange
-            var category = await CreateCategoryAsync("Categoria-Monthly");
+            var categoryIncome = await CreateCategoryAsync("Categoria-Income", TypeTransaction.Income);
+            var categoryExpense = await CreateCategoryAsync("Categoria-Expense", TypeTransaction.Expense);
             var wallet = await CreateWalletAsync("Wallet-Monthly");
             var year = ReportYear;
 
-            await CreateTransactionAsync(1000, TypeTransaction.Income, new DateTime(year, 1, 15), category.Id, wallet.Id);
-            await CreateTransactionAsync(400, TypeTransaction.Expense, new DateTime(year, 1, 16), category.Id, wallet.Id);
-            await CreateTransactionAsync(2000, TypeTransaction.Income, new DateTime(year, 2, 20), category.Id, wallet.Id);
+            await CreateTransactionAsync(1000, TypeTransaction.Income, new DateTime(year, 1, 15), categoryIncome.Id, wallet.Id);
+            await CreateTransactionAsync(400, TypeTransaction.Expense, new DateTime(year, 1, 16), categoryExpense.Id, wallet.Id);
+            await CreateTransactionAsync(2000, TypeTransaction.Income, new DateTime(year, 2, 20), categoryIncome.Id, wallet.Id);
 
             // Act
             var response = await _client.GetAsync($"api/reports/monthly?year={year}");
@@ -120,7 +121,8 @@ namespace WalletWise.Integration.Test.Controllers
 
             var payload = await response.Content.ReadFromJsonAsync<JsonElement>();
 
-            Assert.True(payload.TryGetProperty("message", out _));
+            Assert.Equal(JsonValueKind.Array, payload.ValueKind);
+            Assert.Empty(payload.EnumerateArray());
         }
 
         [Fact]
@@ -191,15 +193,16 @@ namespace WalletWise.Integration.Test.Controllers
         public async Task GetComparison_WhenValidPeriods_ReturnsComparison()
         {
             // Arrange
-            var category = await CreateCategoryAsync("Comparacion");
+            var categoryIncome = await CreateCategoryAsync("Comparacion-Inc", TypeTransaction.Income);
+            var categoryExpense = await CreateCategoryAsync("Comparacion-Exp", TypeTransaction.Expense);
             var wallet = await CreateWalletAsync("Comparacion");
             var year = ReportYear;
 
-            await CreateTransactionAsync(1000, TypeTransaction.Income, new DateTime(year, 1, 10), category.Id, wallet.Id);
-            await CreateTransactionAsync(200, TypeTransaction.Expense, new DateTime(year, 1, 11), category.Id, wallet.Id);
+            await CreateTransactionAsync(1000, TypeTransaction.Income, new DateTime(year, 1, 10), categoryIncome.Id, wallet.Id);
+            await CreateTransactionAsync(200, TypeTransaction.Expense, new DateTime(year, 1, 11), categoryExpense.Id, wallet.Id);
 
-            await CreateTransactionAsync(2000, TypeTransaction.Income, new DateTime(year, 2, 10), category.Id, wallet.Id);
-            await CreateTransactionAsync(500, TypeTransaction.Expense, new DateTime(year, 2, 11), category.Id, wallet.Id);
+            await CreateTransactionAsync(2000, TypeTransaction.Income, new DateTime(year, 2, 10), categoryIncome.Id, wallet.Id);
+            await CreateTransactionAsync(500, TypeTransaction.Expense, new DateTime(year, 2, 11), categoryExpense.Id, wallet.Id);
 
             // Act
             var response = await _client.GetAsync($"api/reports/comparison?startA={year}-01-01&endA={year}-01-31&startB={year}-02-01&endB={year}-02-28");
@@ -270,7 +273,7 @@ namespace WalletWise.Integration.Test.Controllers
             int? walletId = null,
             string? comment = null)
         {
-            var resolvedCategoryId = categoryId ?? (await CreateCategoryAsync($"Categoria-{Guid.NewGuid()}")).Id;
+            var resolvedCategoryId = categoryId ?? (await CreateCategoryAsync($"Categoria-{Guid.NewGuid()}", type)).Id;
             var resolvedWalletId = walletId ?? (await CreateWalletAsync($"Wallet-{Guid.NewGuid()}")).Id;
 
             var request = new CreateTransactionRequestDto
@@ -307,9 +310,9 @@ namespace WalletWise.Integration.Test.Controllers
             return created;
         }
 
-        private async Task<CategoryResponseDto> CreateCategoryAsync(string name)
+        private async Task<CategoryResponseDto> CreateCategoryAsync(string name, TypeTransaction type = TypeTransaction.Expense)
         {
-            var response = await _client.PostAsJsonAsync("api/categories", new CreateCategoryRequestDto { Name = name });
+            var response = await _client.PostAsJsonAsync("api/categories", new CreateCategoryRequestDto { Name = name, Type = type });
 
             response.EnsureSuccessStatusCode();
 

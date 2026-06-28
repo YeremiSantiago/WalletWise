@@ -1,8 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using WalletWise.Domain.Common.Enums;
 
 namespace WalletWise.Application.Dtos.Category
 {
@@ -11,5 +12,8 @@ namespace WalletWise.Application.Dtos.Category
         public int Id { get; set; }
         public string Name { get; set; }
         public string? UserId { get; set; } 
+        public TypeTransaction Type { get; set; }
+        public string? Description { get; set; }
+        public int TransactionCount { get; set; }
     }
 }

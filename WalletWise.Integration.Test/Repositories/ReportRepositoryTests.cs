@@ -136,7 +136,7 @@ namespace WalletWise.Integration.Test.Repositories
             await ClearDataAsync();
 
             var wallet = new Wallet { Id = 1, Name = "Principal", UserId = TestUserId };
-            var category = new Category { Id = 1, Name = "General", UserId = TestUserId };
+            var category = new Category { Id = 1, Name = "General", UserId = TestUserId, Type = TypeTransaction.Expense };
 
             var transactions = new List<Transaction>
             {
@@ -157,7 +157,7 @@ namespace WalletWise.Integration.Test.Repositories
             await ClearDataAsync();
 
             var wallet = new Wallet { Id = 1, Name = "Principal", UserId = TestUserId };
-            var category = new Category { Id = 1, Name = "General", UserId = TestUserId };
+            var category = new Category { Id = 1, Name = "General", UserId = TestUserId, Type = TypeTransaction.Expense };
 
             var transactions = new List<Transaction>
             {
@@ -178,9 +178,9 @@ namespace WalletWise.Integration.Test.Repositories
 
             var categories = new List<Category>
             {
-                new Category { Id = 1, Name = "Comida", UserId = TestUserId, IsDeleted = false },
-                new Category { Id = 2, Name = "Servicios", UserId = TestUserId, IsDeleted = false },
-                new Category { Id = 3, Name = "Oculta", UserId = TestUserId, IsDeleted = true }
+                new Category { Id = 1, Name = "Comida", UserId = TestUserId, IsDeleted = false, Type = TypeTransaction.Expense },
+                new Category { Id = 2, Name = "Servicios", UserId = TestUserId, IsDeleted = false, Type = TypeTransaction.Expense },
+                new Category { Id = 3, Name = "Oculta", UserId = TestUserId, IsDeleted = true, Type = TypeTransaction.Expense }
             };
 
             var wallet = new Wallet { Id = 1, Name = "Principal", UserId = TestUserId };
@@ -204,7 +204,7 @@ namespace WalletWise.Integration.Test.Repositories
             await ClearDataAsync();
 
             var wallet = new Wallet { Id = 1, Name = "Principal", UserId = TestUserId };
-            var category = new Category { Id = 1, Name = "General", UserId = TestUserId };
+            var category = new Category { Id = 1, Name = "General", UserId = TestUserId, Type = TypeTransaction.Expense };
 
             var transactions = new List<Transaction>
             {
@@ -226,8 +226,8 @@ namespace WalletWise.Integration.Test.Repositories
 
             var categories = new List<Category>
             {
-                new Category { Id = 1, Name = "General", UserId = TestUserId, IsDeleted = false },
-                new Category { Id = 2, Name = "Cafe", UserId = TestUserId, IsDeleted = false }
+                new Category { Id = 1, Name = "General", UserId = TestUserId, IsDeleted = false, Type = TypeTransaction.Expense },
+                new Category { Id = 2, Name = "Cafe", UserId = TestUserId, IsDeleted = false, Type = TypeTransaction.Expense }
             };
 
             var wallet = new Wallet { Id = 1, Name = "Principal", UserId = TestUserId };

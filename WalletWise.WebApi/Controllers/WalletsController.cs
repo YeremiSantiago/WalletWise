@@ -1,9 +1,10 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using WalletWise.Application.Dtos.Wallet;
 using WalletWise.Application.Interfaces;
 using WalletWise.Domain.Entities;
+using WalletWise.WebApi.Common;
 
 namespace WalletWise.WebApi.Controllers
 {
@@ -27,9 +28,9 @@ namespace WalletWise.WebApi.Controllers
         [ProducesResponseType(typeof(List<WalletResponseDto>),StatusCodes.Status200OK)]
         public async Task<ActionResult<IEnumerable<WalletResponseDto>>> GetAllWallets()
         {
-            var wallets = await _walletService.GetAllAsync();
+            var wallets = await _walletService.GetAllWalletsAsync();
 
-            return Ok(wallets.Value);
+            return wallets.ToOkResult(HttpContext);
         }
 
         [HttpGet("{id}")]
@@ -42,12 +43,7 @@ namespace WalletWise.WebApi.Controllers
         {
             var response = await _walletService.GetWalletByIdAsync(id);
 
-            if(response.Value is null)
-            {
-                return NotFound(response);
-            }
-
-            return Ok(response.Value);
+            return response.ToOkResult(HttpContext);
         }
 
         [HttpPost]
@@ -59,7 +55,7 @@ namespace WalletWise.WebApi.Controllers
         {
             var response = await _walletService.CreateWalletAsync(requestDto);
 
-            return CreatedAtAction(nameof(GetWalletById), new { id = response.Value.Id }, response.Value);
+            return response.ToCreatedResult(HttpContext, nameof(GetWalletById), new { id = response.Value?.Id });
         }
 
         [HttpPut("{id}")]
@@ -72,12 +68,7 @@ namespace WalletWise.WebApi.Controllers
         {
             var response = await _walletService.UpdateWalletAsync(id, requestDto);
 
-            if(response.Value == null)
-            {
-                return NotFound(response);
-            }
-
-            return Ok(response.Value);
+            return response.ToOkResult(HttpContext);
         }
 
         [HttpDelete("{id}")]
@@ -90,12 +81,7 @@ namespace WalletWise.WebApi.Controllers
         {
             var response = await _walletService.DeleteWalletAsync(id);
 
-            if(response is null)
-            {
-                return NotFound(response);
-            }
-
-            return NoContent();
+            return response.ToNoContentResult(HttpContext);
         }
 
     }

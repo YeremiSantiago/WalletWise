@@ -1,9 +1,10 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Swashbuckle.AspNetCore.Annotations;
 using WalletWise.Application.Dtos.Auth;
 using WalletWise.Application.Interfaces;
+using WalletWise.WebApi.Common;
 
 namespace WalletWise.WebApi.Controllers
 {
@@ -23,7 +24,7 @@ namespace WalletWise.WebApi.Controllers
 
         [HttpPost("register")]
         [EnableRateLimiting("AuthRegisterByIp")]
-        [SwaggerResponse(StatusCodes.Status201Created, "Usario registrado Exitosamente", typeof(LoginResponseDto))]
+        [SwaggerResponse(StatusCodes.Status201Created, "Usuario registrado Exitosamente", typeof(LoginResponseDto))]
         [SwaggerOperation(
             Summary = "Registar nuevo usuario",
             Description="Crea una cuenta de usuario y devuelve un token JWT." +
@@ -34,12 +35,7 @@ namespace WalletWise.WebApi.Controllers
         {
             var result = await _authService.RegisterAsync(request);
 
-            if (!result.IsSuccess)
-            {
-                return BadRequest(new { error = result.Error });
-            }
-
-            return Created(string.Empty, result.Value);
+            return result.ToCreatedResult(HttpContext, string.Empty, null!);
         }
 
         [HttpPost("login")]
@@ -54,12 +50,7 @@ namespace WalletWise.WebApi.Controllers
         {
             var result = await _authService.LoginAsync(request);
 
-            if (!result.IsSuccess)
-            {
-                return Unauthorized(new { error = result.Error });
-            }
-
-            return Ok(result.Value);
+            return result.ToOkResult(HttpContext);
         }
 
         [HttpPut("me/password")]
@@ -78,10 +69,7 @@ namespace WalletWise.WebApi.Controllers
 
             var result = await _authService.ChangePasswordAsync(userId, request);
 
-            if (!result.IsSuccess)
-                return BadRequest(new { error = result.Error });
-
-            return NoContent();
+            return result.ToNoContentResult(HttpContext);
         }
 
         [Authorize]
@@ -99,10 +87,7 @@ namespace WalletWise.WebApi.Controllers
 
             var result = await _authService.LogoutAsync(userId);
 
-            if (!result.IsSuccess)
-                return BadRequest(new { error = result.Error });
-
-            return NoContent();
+            return result.ToNoContentResult(HttpContext);
         }
 
         [HttpPost("refresh-token")]
@@ -112,12 +97,7 @@ namespace WalletWise.WebApi.Controllers
         {
             var result = await _authService.RefreshTokenAsync(requestDto);
 
-            if(result.IsSuccess == false)
-            {
-                return BadRequest(new { error = result.Error });
-            }
-
-            return Ok(result.Value);
+            return result.ToOkResult(HttpContext);
         }
     }
 }

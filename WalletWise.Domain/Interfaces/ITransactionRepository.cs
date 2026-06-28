@@ -20,7 +20,7 @@ namespace WalletWise.Domain.Interfaces
         Task<IEnumerable<Transaction>> GetByTypeTransactionAsync(string userId, TypeTransaction typeTransaction);
         Task<IEnumerable<Transaction>> GetAllTransactionsByCategoryAsync(string userId, int idCategory);
         Task<PagedResult<Transaction>> GetPagedTransactionsAsync(string userId, TransactionFilterParams filterParams);
-
+        Task<(decimal TotalIncome, decimal TotalExpense, decimal Balance)> GetSummaryAsync(string userId, TransactionFilterParams filterParams);
 
     }
 }

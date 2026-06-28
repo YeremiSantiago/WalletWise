@@ -63,7 +63,7 @@ namespace WalletWise.Integration.Test.Controllers
         [Fact]
         public async Task CreateTransaction_WhenValid_ReturnsCreatedTransaction()
         {
-            var category = await CreateCategoryAsync("Salud");
+            var category = await CreateCategoryAsync("Salud", TypeTransaction.Expense);
             var wallet = await CreateWalletAsync("Personal");
 
             var request = new CreateTransactionRequestDto
@@ -139,7 +139,7 @@ namespace WalletWise.Integration.Test.Controllers
 
         private async Task<TransactionResponseDto> CreateTransactionAsync(decimal amount, TypeTransaction type)
         {
-            var category = await CreateCategoryAsync($"Categoria-{Guid.NewGuid()}");
+            var category = await CreateCategoryAsync($"Categoria-{Guid.NewGuid()}", type);
             var wallet = await CreateWalletAsync($"Wallet-{Guid.NewGuid()}");
 
             var request = new CreateTransactionRequestDto
@@ -176,9 +176,9 @@ namespace WalletWise.Integration.Test.Controllers
             return created;
         }
 
-        private async Task<CategoryResponseDto> CreateCategoryAsync(string name)
+        private async Task<CategoryResponseDto> CreateCategoryAsync(string name, TypeTransaction type = TypeTransaction.Expense)
         {
-            var response = await _client.PostAsJsonAsync("api/categories", new CreateCategoryRequestDto { Name = name });
+            var response = await _client.PostAsJsonAsync("api/categories", new CreateCategoryRequestDto { Name = name, Type = type });
 
             response.EnsureSuccessStatusCode();
 

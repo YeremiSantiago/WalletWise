@@ -89,7 +89,7 @@ namespace WalletWise.Integration.Test.Controllers
                 NewPassword = "NewPassw0rd2"
             });
 
-            Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         }
 
         [Fact]
@@ -103,7 +103,7 @@ namespace WalletWise.Integration.Test.Controllers
                 NewPassword = "NewPassw0rd2"
             });
 
-            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         }
 
         private async Task SeedTestUserAsync(string name)

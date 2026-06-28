@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -7,6 +7,9 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using WalletWise.Application.Dtos.Category;
+using WalletWise.Application.Dtos.Wallet;
+using WalletWise.Domain.Common.Pagination;
+using WalletWise.Domain.Common.Enums;
 using WalletWise.Integration.Test.Infraestructure;
 
 namespace WalletWise.Integration.Test.Controllers
@@ -74,7 +77,7 @@ namespace WalletWise.Integration.Test.Controllers
         [Fact]
         public async Task CreateCategory_WhenDataIsValid_CreatesCategorySuccessfully()
         {
-            var request = await _client.PostAsJsonAsync("api/categories", new CreateCategoryRequestDto { Name = "Electricidad" });
+            var request = await _client.PostAsJsonAsync("api/categories", new CreateCategoryRequestDto { Name = "Electricidad", Type = TypeTransaction.Expense });
 
             Assert.Equal(HttpStatusCode.Created, request.StatusCode);
 
@@ -125,7 +128,7 @@ namespace WalletWise.Integration.Test.Controllers
         private async Task<CategoryResponseDto> CreateCategory(string nombre)
         {
 
-            var data = new CreateCategoryRequestDto { Name = nombre };
+            var data = new CreateCategoryRequestDto { Name = nombre, Type = TypeTransaction.Expense };
 
             var serielize = JsonSerializer.Serialize(data);
 

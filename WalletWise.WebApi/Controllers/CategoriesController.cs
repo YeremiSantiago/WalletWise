@@ -1,9 +1,10 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Swashbuckle.AspNetCore.Annotations;
 using WalletWise.Application.Dtos.Category;
 using WalletWise.Application.Interfaces;
+using WalletWise.WebApi.Common;
 
 namespace WalletWise.WebApi.Controllers
 {
@@ -30,7 +31,7 @@ namespace WalletWise.WebApi.Controllers
         {
             var result = await _categoryService.GetAllCategoriesAsync();
 
-            return Ok(result.Value);
+            return result.ToOkResult(HttpContext);
         }
 
         [HttpGet("{id}")]
@@ -43,12 +44,7 @@ namespace WalletWise.WebApi.Controllers
         {
             var response = await _categoryService.GetCategoryByIdAsync(id);
 
-            if (response.Value is null)
-            {
-                return NotFound();
-            }
-
-            return Ok(response.Value);
+            return response.ToOkResult(HttpContext);
         }
 
         [HttpPost]
@@ -61,12 +57,7 @@ namespace WalletWise.WebApi.Controllers
         {
             var response = await _categoryService.CreateCategoryAsync(requestDto);
 
-            if (!response.IsSuccess || response.Value is null)
-            {
-                return UnprocessableEntity(new { error = response.Error });
-            }
-
-            return CreatedAtAction(nameof(GetCategoryById), new { id = response.Value.Id }, response.Value);
+            return response.ToCreatedResult(HttpContext, nameof(GetCategoryById), new { id = response.Value?.Id });
         }
 
         [HttpPut("{id}")]
@@ -79,12 +70,7 @@ namespace WalletWise.WebApi.Controllers
         {
             var response = await _categoryService.UpdateCategoryAsync(id, requestDto);
 
-            if (response.Value is null)
-            {
-                return NotFound();
-            }
-
-            return Ok(response.Value);
+            return response.ToOkResult(HttpContext);
         }
 
         [HttpDelete("{id}")]
@@ -97,13 +83,7 @@ namespace WalletWise.WebApi.Controllers
         {
             var response = await _categoryService.DeleteCategoryAsync(id);
 
-            if (response is null)
-            {
-                return NotFound();
-            }
-
-            return NoContent();
-
+            return response.ToNoContentResult(HttpContext);
         }
 
     }

@@ -1,12 +1,11 @@
 using AutoMapper;
 using Microsoft.Extensions.Logging;
-using WalletWise.Application.Dtos.Category;
+using WalletWise.Application.Common;
 using WalletWise.Application.Dtos.Transaction;
-using WalletWise.Application.Dtos.Wallet;
 using WalletWise.Application.Interfaces;
 using WalletWise.Domain.Common;
-using WalletWise.Domain.Common.Pagination;
 using WalletWise.Domain.Common.Enums;
+using WalletWise.Domain.Common.Pagination;
 using WalletWise.Domain.Entities;
 using WalletWise.Domain.Interfaces;
 
@@ -40,7 +39,7 @@ namespace WalletWise.Application.Services
 
                 return Result<IEnumerable<TransactionResponseDto>>.Success(_mapper.Map<IEnumerable<TransactionResponseDto>>(transactions));
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not WalletWise.Application.Exceptions.NotFoundException && ex is not WalletWise.Application.Exceptions.ForbiddenAccessException)
             {
                 _logger.LogError(ex, "A ocurrido un fallo inesperado al obtener todas las transacciones");
                 return Result<IEnumerable<TransactionResponseDto>>.Failure("No se ha podido obtener todas las transacciones");
@@ -55,12 +54,12 @@ namespace WalletWise.Application.Services
 
                 if (result is null)
                 {
-                    return Result<TransactionResponseDto?>.Failure($"La transaccion con el id {id} no existe");
+                    throw new WalletWise.Application.Exceptions.NotFoundException($"La transaccion con el id {id} no existe");
                 }
 
                 return Result<TransactionResponseDto?>.Success(_mapper.Map<TransactionResponseDto>(result));
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not WalletWise.Application.Exceptions.NotFoundException && ex is not WalletWise.Application.Exceptions.ForbiddenAccessException)
             {
                 _logger.LogError(ex, "Ha ocurrido un fallo inesperado al obtener la transaccion con el id {Id} ", id);
                 return Result<TransactionResponseDto?>.Failure($"No se ha podido obtener la transaccion con el id {id}");
@@ -100,13 +99,18 @@ namespace WalletWise.Application.Services
                     return Result<TransactionResponseDto>.Failure($"La categoría con ID {transaction.CategoryId} no existe");
                 }
 
+                if (categoryExists.Type != transaction.Type)
+                {
+                    return Result<TransactionResponseDto>.Failure(BusinessErrorCodes.ERR_CATEGORY_TYPE_MISMATCH);
+                }
+
                 transaction.UserId = _currentUserService.UserId!;
 
                 await _transactionRepository.AddAsync(transaction);
 
                 return Result<TransactionResponseDto>.Success(_mapper.Map<TransactionResponseDto>(transaction));
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not WalletWise.Application.Exceptions.NotFoundException && ex is not WalletWise.Application.Exceptions.ForbiddenAccessException)
             {
                 _logger.LogError(ex, "Ha ocurrido un fallo a la hora de crear una transaccion");
                 return Result<TransactionResponseDto>.Failure("No se ha podido crear la transaccion");
@@ -122,7 +126,18 @@ namespace WalletWise.Application.Services
 
                 if (exist is null)
                 {
-                    return Result<TransactionResponseDto>.Failure($"La transaction con el id {id} no existe");
+                    throw new WalletWise.Application.Exceptions.NotFoundException($"La transaction con el id {id} no existe");
+                }
+
+                var categoryExists = await _categoryRepository.GetCategoryActiveByIdAsync(transactionDto.CategoryId, _currentUserService.UserId!);
+                if (categoryExists == null)
+                {
+                    return Result<TransactionResponseDto>.Failure($"La categoría con ID {transactionDto.CategoryId} no existe");
+                }
+
+                if (categoryExists.Type != transactionDto.Type)
+                {
+                    return Result<TransactionResponseDto>.Failure(BusinessErrorCodes.ERR_CATEGORY_TYPE_MISMATCH);
                 }
 
                 _mapper.Map(transactionDto, exist);
@@ -131,7 +146,7 @@ namespace WalletWise.Application.Services
 
                 return Result<TransactionResponseDto>.Success(_mapper.Map<TransactionResponseDto>(exist));
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not WalletWise.Application.Exceptions.NotFoundException && ex is not WalletWise.Application.Exceptions.ForbiddenAccessException)
             {
                 _logger.LogError(ex, "Ha ocurrido un error inesperado al actualizar la transaccion {Id}", id);
                 return Result<TransactionResponseDto>.Failure("No se ha podido actualizar la transaccion con el id" + id);
@@ -146,14 +161,14 @@ namespace WalletWise.Application.Services
 
                 if (exist is null)
                 {
-                    return Result<bool>.Failure($"La transaction con el id {id} no existe");
+                    throw new WalletWise.Application.Exceptions.NotFoundException($"La transaction con el id {id} no existe");
                 }
 
                 await _transactionRepository.RemoveAsync(id);
 
                 return Result<bool>.Success(true);
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not WalletWise.Application.Exceptions.NotFoundException && ex is not WalletWise.Application.Exceptions.ForbiddenAccessException)
             {
                 _logger.LogError(ex, "Ha ocurrido un error inespesperado al borrar la transaccion con el id {Id}", id);
                 return Result<bool>.Failure($"No se ha podido eliminar la transaccion con el id {id} ");
@@ -168,7 +183,7 @@ namespace WalletWise.Application.Services
 
                 return Result<IEnumerable<TransactionResponseDto>>.Success(_mapper.Map<IEnumerable<TransactionResponseDto>>(transactions));
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not WalletWise.Application.Exceptions.NotFoundException && ex is not WalletWise.Application.Exceptions.ForbiddenAccessException)
             {
                 _logger.LogError(ex, "No se han podido filtar las transacciones por fecha debido a un error inesperado");
                 return Result<IEnumerable<TransactionResponseDto>>.Failure("No se ha podido obtener las transacciones filtradas por fecha");
@@ -185,7 +200,7 @@ namespace WalletWise.Application.Services
 
                 return Result<IEnumerable<TransactionResponseDto>>.Success(_mapper.Map<IEnumerable<TransactionResponseDto>>(transactions));
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not WalletWise.Application.Exceptions.NotFoundException && ex is not WalletWise.Application.Exceptions.ForbiddenAccessException)
             {
                 _logger.LogError(ex, "No se ha podido filtrar las transacciones por su tipo debido a un fallo inesperado");
                 return Result<IEnumerable<TransactionResponseDto>>.Failure("No se ha podido obtener las transacciones por su tipo");
@@ -202,7 +217,7 @@ namespace WalletWise.Application.Services
                 return Result<IEnumerable<TransactionResponseDto>>.Success(_mapper.Map<IEnumerable<TransactionResponseDto>>(transactions));
 
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not WalletWise.Application.Exceptions.NotFoundException && ex is not WalletWise.Application.Exceptions.ForbiddenAccessException)
             {
                 _logger.LogError(ex, "Ha ocurrido un fallo al filtrar las transacciones por categoria");
                 return Result<IEnumerable<TransactionResponseDto>>.Failure("No se han podido obtener las transacciones por categoria");
@@ -213,24 +228,48 @@ namespace WalletWise.Application.Services
         {
             try
             {
-                
+
                 var pagedResult = await _transactionRepository.GetPagedTransactionsAsync(_currentUserService.UserId!, filterParams);
-                
+
                 var dtos = _mapper.Map<List<TransactionResponseDto>>(pagedResult.Items);
-                
+
                 var resultDto = new PagedResult<TransactionResponseDto>(
-                    dtos, 
-                    pagedResult.TotalRecords, 
-                    pagedResult.CurrentPage, 
+                    dtos,
+                    pagedResult.TotalRecords,
+                    pagedResult.CurrentPage,
                     pagedResult.PageSize);
                 return Result<PagedResult<TransactionResponseDto>>.Success(resultDto);
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not WalletWise.Application.Exceptions.NotFoundException && ex is not WalletWise.Application.Exceptions.ForbiddenAccessException)
             {
                 _logger.LogError(ex, "Ha ocurrido un error inesperado al obtener las transacciones paginadas.");
                 return Result<PagedResult<TransactionResponseDto>>.Failure("No se han podido obtener las transacciones.");
             }
         }
 
+        public async Task<Result<TransactionSummaryResponseDto>> GetSummaryAsync(TransactionFilterParams filterParams)
+        {
+            try
+            {
+                var userId = _currentUserService.UserId;
+
+                if (userId == null)
+                    return Result<TransactionSummaryResponseDto>.Failure("Usuario no autenticado");
+
+                var (totalIncome, totalExpense, balance) = await _transactionRepository.GetSummaryAsync(userId, filterParams);
+
+                return Result<TransactionSummaryResponseDto>.Success(new TransactionSummaryResponseDto
+                {
+                    TotalIncome = totalIncome,
+                    TotalExpense = totalExpense,
+                    Balance = balance
+                });
+            }
+            catch (Exception ex) when (ex is not WalletWise.Application.Exceptions.NotFoundException && ex is not WalletWise.Application.Exceptions.ForbiddenAccessException)
+            {
+                _logger.LogError(ex, "Ha ocurrido un fallo inesperado al obtener el resumen de transacciones");
+                return Result<TransactionSummaryResponseDto>.Failure("No se ha podido obtener los resumen de las transacciones");
+            }
+        }
     }
 }

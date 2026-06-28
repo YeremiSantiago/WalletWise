@@ -1,4 +1,4 @@
-using Microsoft.OpenApi.Models;
+ï»¿using Microsoft.OpenApi.Models;
 using System.Security.Claims;
 using System.Threading.RateLimiting;
 using WalletWise.Application.DependencyInjection;
@@ -21,7 +21,7 @@ namespace WalletWise.WebApi
             builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
             builder.Services.AddProblemDetails();
 
-            builder.Services.AddControllers();
+            builder.Services.AddControllers().ConfigureApiBehaviorOptions(options => { options.InvalidModelStateResponseFactory = context => { var apiError = new WalletWise.Application.Common.ApiErrorResponse { Status = StatusCodes.Status400BadRequest, Error = WalletWise.Application.Common.BusinessErrorCodes.ERR_VALIDATION, Message = "Errores de validaciÃ³n encontrados.", TraceId = context.HttpContext.TraceIdentifier, Timestamp = DateTime.UtcNow }; return new Microsoft.AspNetCore.Mvc.BadRequestObjectResult(apiError); }; });
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi();
 
@@ -105,7 +105,7 @@ namespace WalletWise.WebApi
                         type = "https://tools.ietf.org/html/rfc6585#section-4",
                         title = "Too Many Requests",
                         status = 429,
-                        detail = "Has superado el límite de solicitudes. Intenta nuevamente más tarde."
+                        detail = "Has superado el lï¿½mite de solicitudes. Intenta nuevamente mï¿½s tarde."
 
                     };
 
@@ -124,7 +124,7 @@ namespace WalletWise.WebApi
                 {
                     Title = "WalletWise API",
                     Version = "v1",
-                    Description = "API para gestión de finanzas personales. Permite administrar wallets, transacciones y categorías."
+                    Description = "API para gestiï¿½n de finanzas personales. Permite administrar wallets, transacciones y categorï¿½as."
                 });
 
                 options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
