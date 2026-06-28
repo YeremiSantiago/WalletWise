@@ -36,7 +36,9 @@ jobs:
             env:
               JwtSettings__SecretKey: ${{ secrets.JWT_SECRET_KEY }}
             run: dotnet test WalletWise.Integration.Test/WalletWise.Integration.Test.csproj --configuration Release
-          
+
+          - name: Check locale
+            run: locale
           
 
 
