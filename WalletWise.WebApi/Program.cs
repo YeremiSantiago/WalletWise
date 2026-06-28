@@ -23,6 +23,7 @@ namespace WalletWise.WebApi
 
             builder.Services.AddControllers().ConfigureApiBehaviorOptions(options => { options.InvalidModelStateResponseFactory = context => { var apiError = new WalletWise.Application.Common.ApiErrorResponse { Status = StatusCodes.Status400BadRequest, Error = WalletWise.Application.Common.BusinessErrorCodes.ERR_VALIDATION, Message = "Errores de validación encontrados.", TraceId = context.HttpContext.TraceIdentifier, Timestamp = DateTime.UtcNow }; return new Microsoft.AspNetCore.Mvc.BadRequestObjectResult(apiError); }; });
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+
             builder.Services.AddOpenApi();
 
             #region Rate Limiting 
@@ -72,7 +73,7 @@ namespace WalletWise.WebApi
                     {
                         PermitLimit = 60,
                         Window = TimeSpan.FromMinutes(1),
-                        SegmentsPerWindow = 6,   
+                        SegmentsPerWindow = 6,
                         QueueLimit = 0,
                         AutoReplenishment = true
                     });
@@ -81,7 +82,7 @@ namespace WalletWise.WebApi
                 // Para operaciones concurrentes en los endpoints de reportes
                 options.AddPolicy("ReportsEndpoint", context =>
                 {
-                    var userId = context.User?.FindFirst(ClaimTypes.NameIdentifier)?. Value
+                    var userId = context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value
                     ?? context.Connection.RemoteIpAddress?.ToString()
                     ?? "unknown";
 
@@ -90,7 +91,7 @@ namespace WalletWise.WebApi
                         PermitLimit = 2,
                         QueueLimit = 1,
                         QueueProcessingOrder = QueueProcessingOrder.OldestFirst
-                    }); 
+                    });
                 });
 
                 // Respuesta personalizada con Headers Informativos
@@ -111,6 +112,18 @@ namespace WalletWise.WebApi
 
                     await context.HttpContext.Response.WriteAsJsonAsync(response, cancellationToken);
                 };
+            });
+            #endregion
+
+            #region CORS
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("Allow everything", policy =>
+                {
+                    policy.AllowAnyOrigin()
+                          .AllowAnyMethod()
+                          .AllowAnyHeader();
+                });
             });
             #endregion
 
@@ -167,6 +180,8 @@ namespace WalletWise.WebApi
             app.UseExceptionHandler();
 
             app.UseHttpsRedirection();
+
+            app.UseCors("Allow everything");
 
             if (!app.Environment.IsEnvironment("Testing")) { app.UseRateLimiter(); }
 
