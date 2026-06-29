@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using WalletWise.Application.Common;
 
 namespace WalletWise.WebApi.Handlers
 {
@@ -21,11 +22,11 @@ namespace WalletWise.WebApi.Handlers
             var (statusCode, errorCode, message) = exception switch
             {
                 WalletWise.Application.Exceptions.NotFoundException => 
-                    (StatusCodes.Status404NotFound, WalletWise.Application.Common.BusinessErrorCodes.ERR_NOT_FOUND, exception.Message ?? "El recurso solicitado no fue encontrado."),
+                    (StatusCodes.Status404NotFound, BusinessErrorCodes.ERR_NOT_FOUND, exception.Message ?? "El recurso solicitado no fue encontrado."),
                 WalletWise.Application.Exceptions.ForbiddenAccessException => 
-                    (StatusCodes.Status403Forbidden, WalletWise.Application.Common.BusinessErrorCodes.ERR_FORBIDDEN, "No tienes permisos para acceder a este recurso."),
+                    (StatusCodes.Status403Forbidden, BusinessErrorCodes.ERR_FORBIDDEN, "No tienes permisos para acceder a este recurso."),
                 _ => 
-                    (StatusCodes.Status500InternalServerError, WalletWise.Application.Common.BusinessErrorCodes.ERR_UNEXPECTED, "Ha ocurrido un error inesperado.")
+                    (StatusCodes.Status500InternalServerError,BusinessErrorCodes.ERR_UNEXPECTED, "Ha ocurrido un error inesperado.")
             };
 
             if (statusCode == StatusCodes.Status500InternalServerError)
@@ -37,7 +38,7 @@ namespace WalletWise.WebApi.Handlers
                 _logger.LogWarning(exception, "Domain exception occurred");
             }
 
-            var apiErrorResponse = new WalletWise.Application.Common.ApiErrorResponse
+            var apiErrorResponse = new ApiErrorResponse
             {
                 Status = statusCode,
                 Error = errorCode,

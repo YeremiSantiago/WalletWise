@@ -207,7 +207,7 @@ namespace WalletWise.Unit.Tests.Services
             // Assert
             Assert.False(result.IsSuccess);
             Assert.NotNull(result.Error);
-            Assert.Equal("Esta categoria tiene transacciones asociadas", result.Error);
+            Assert.Equal(WalletWise.Application.Common.BusinessErrorCodes.ERR_CATEGORY_HAS_TRANSACTIONS, result.Error);
             Assert.False(result.Value);
         }
     }

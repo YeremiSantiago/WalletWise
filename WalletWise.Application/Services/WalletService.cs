@@ -12,6 +12,8 @@ using WalletWise.Domain.Common;
 using WalletWise.Domain.Entities;
 using WalletWise.Domain.Interfaces;
 
+using WalletWise.Application.Common;
+
 namespace WalletWise.Application.Services
 {
     public class WalletService : GenericService<Wallet, WalletResponseDto, CreateWalletRequestDto, UpdateWalletRequestDto>, IWalletService
@@ -26,105 +28,68 @@ namespace WalletWise.Application.Services
 
         public async Task<Result<IEnumerable<WalletResponseDto>>> GetAllWalletsAsync()
         {
-            try
-            {
-                var wallets = await _walletRepository.GetAllByUserAsync(_currentUserService.UserId!);
+            var wallets = await _walletRepository.GetAllByUserAsync(_currentUserService.UserId!);
 
-                return Result<IEnumerable<WalletResponseDto>>.Success(_mapper.Map<IEnumerable<WalletResponseDto>>(wallets));
-            }
-            catch (Exception ex) when (ex is not WalletWise.Application.Exceptions.NotFoundException && ex is not WalletWise.Application.Exceptions.ForbiddenAccessException)
-            {
-                _logger.LogError(ex, "A ocurrido un fallo inesperado al obtener todas las wallets");
-                return Result<IEnumerable<WalletResponseDto>>.Failure("No se ha podido obtener todas las wallets");
-            }
+            return Result<IEnumerable<WalletResponseDto>>.Success(_mapper.Map<IEnumerable<WalletResponseDto>>(wallets));
         }
 
         public async Task<Result<WalletResponseDto?>> GetWalletByIdAsync(int id)
         {
-            try
+            var result = await _walletRepository.GetByIdForUserAsync(id, _currentUserService.UserId!);
+
+            if (result is null)
             {
-                var result = await _walletRepository.GetByIdForUserAsync(id, _currentUserService.UserId!);
-
-                if (result is null)
-                {
-                    throw new WalletWise.Application.Exceptions.NotFoundException($"La category con el id {id} no existe");
-                }
-
-                return Result<WalletResponseDto?>.Success(_mapper.Map<WalletResponseDto>(result));
-
+                throw new WalletWise.Application.Exceptions.NotFoundException($"La category con el id {id} no existe");
             }
-            catch (Exception ex) when (ex is not WalletWise.Application.Exceptions.NotFoundException && ex is not WalletWise.Application.Exceptions.ForbiddenAccessException)
-            {
-                _logger.LogError(ex, "Ha ocurrido un fallo inesperado al obtener la wallet con el id {Id} ", id);
-                return Result<WalletResponseDto?>.Failure($"No se ha podido obtener la wallet con el id {id}");
-            }
+
+            return Result<WalletResponseDto?>.Success(_mapper.Map<WalletResponseDto>(result));
         }
 
         public async Task<Result<WalletResponseDto>> CreateWalletAsync(CreateWalletRequestDto walletDto)
         {
+            var wallet = _mapper.Map<Wallet>(walletDto);
+
+            wallet.UserId = _currentUserService.UserId!;
+
             try
             {
-                var wallet = _mapper.Map<Wallet>(walletDto);
-
-                wallet.UserId = _currentUserService.UserId!;
                 var walletR = await _walletRepository.AddAsync(wallet);
-
                 return Result<WalletResponseDto>.Success(_mapper.Map<WalletResponseDto>(walletR));
             }
-            catch (Exception ex) when (ex is not WalletWise.Application.Exceptions.NotFoundException && ex is not WalletWise.Application.Exceptions.ForbiddenAccessException)
+            catch (Exception ex) when (ex.GetType().Name == "DbUpdateException")
             {
-                _logger.LogError(ex, "Ha ocurrido un fallo al crear la wallet");
-                return Result<WalletResponseDto>.Failure("No se ha podido crear la wallet");
+                return Result<WalletResponseDto>.Failure(BusinessErrorCodes.ERR_WALLET_NAME_EXISTS, "Ya existe una Wallet con ese mismo nombre");
             }
         }
 
         public async Task<Result<WalletResponseDto>> UpdateWalletAsync(int id, UpdateWalletRequestDto walletDto) 
         {
-            try
+            var exist = await _walletRepository.GetByIdForUserAsync(id, _currentUserService.UserId!);
+
+            if (exist == null)
             {
-
-                var exist = await _walletRepository.GetByIdForUserAsync(id, _currentUserService.UserId!);
-
-                if (exist == null)
-                {
-                    throw new WalletWise.Application.Exceptions.NotFoundException("$La wallet con el id {id} no pudo ser encontrada");
-                }
-
-                _mapper.Map(walletDto, exist);
-
-                await _walletRepository.UpdateAsync(exist);
-
-                return Result<WalletResponseDto>.Success(_mapper.Map<WalletResponseDto>(exist));
+                throw new WalletWise.Application.Exceptions.NotFoundException($"La wallet con el id {id} no pudo ser encontrada");
             }
-            catch (Exception ex) when (ex is not WalletWise.Application.Exceptions.NotFoundException && ex is not WalletWise.Application.Exceptions.ForbiddenAccessException)
-            {
-                _logger.LogError(ex, "Ha ocurrido un fallo al actualizar la wallet con id {Id}", id);
-                return Result<WalletResponseDto>.Failure("No se ha podido actualizar la wallet");
-            }
+
+            _mapper.Map(walletDto, exist);
+
+            await _walletRepository.UpdateAsync(exist);
+
+            return Result<WalletResponseDto>.Success(_mapper.Map<WalletResponseDto>(exist));
         }
 
         public async Task<Result<bool>> DeleteWalletAsync(int id)
         {
-            try
+            var exist = await _walletRepository.GetByIdForUserAsync(id, _currentUserService.UserId!);
+
+            if (exist == null)
             {
-                var exist = await _walletRepository.GetByIdForUserAsync(id, _currentUserService.UserId!);
-
-                if (exist == null)
-                {
-                     throw new WalletWise.Application.Exceptions.NotFoundException($"La wallet con el id {id} no pudo ser encontrada");
-                }
-
-                await _walletRepository.RemoveAsync(id);
-
-                return Result<bool>.Success(true);
+                 throw new WalletWise.Application.Exceptions.NotFoundException($"La wallet con el id {id} no pudo ser encontrada");
             }
-            catch (Exception ex) when (ex is not WalletWise.Application.Exceptions.NotFoundException && ex is not WalletWise.Application.Exceptions.ForbiddenAccessException)
-            {
-                _logger.LogError(ex, "Ha ocurrido un error inesperado al eliminar la wallet con el id {Id}", id);
-                return Result<bool>.Failure("No se ha podido eliminar la wallet");
-            }
+
+            await _walletRepository.RemoveAsync(id);
+
+            return Result<bool>.Success(true);
         }
-
-        
     }
 }

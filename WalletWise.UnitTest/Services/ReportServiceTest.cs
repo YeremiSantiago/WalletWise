@@ -88,7 +88,7 @@ namespace WalletWise.Unit.Tests.Services
 
             // Assert
             Assert.False(result.IsSuccess);
-            Assert.Equal("Usuario no autenticado", result.Error);
+            Assert.Equal(WalletWise.Application.Common.BusinessErrorCodes.ERR_UNAUTHORIZED, result.Error);
             Assert.Null(result.Value);
         }
 
@@ -123,7 +123,7 @@ namespace WalletWise.Unit.Tests.Services
             var result = await _reportService.GetMonthlySummaryAsync(2025);
 
             Assert.False(result.IsSuccess);
-            Assert.Equal("Usuario no autenticado", result.Error);
+            Assert.Equal(WalletWise.Application.Common.BusinessErrorCodes.ERR_UNAUTHORIZED, result.Error);
             Assert.Null(result.Value);
         }
 
@@ -157,7 +157,7 @@ namespace WalletWise.Unit.Tests.Services
             var result = await _reportService.GetByCategoryAsync(start, end, TypeTransaction.Expense);
 
             Assert.False(result.IsSuccess);
-            Assert.Equal("La fecha inicial no puede ser posterior a la fecha final", result.Error);
+            Assert.Equal(WalletWise.Application.Common.BusinessErrorCodes.ERR_INVALID_DATE_RANGE, result.Error);
             Assert.Null(result.Value);
         }
 
@@ -169,7 +169,7 @@ namespace WalletWise.Unit.Tests.Services
             var result = await _reportService.GetByCategoryAsync(DateTime.Today, DateTime.Today, null);
 
             Assert.False(result.IsSuccess);
-            Assert.Equal("Usuario no autenticado", result.Error);
+            Assert.Equal(WalletWise.Application.Common.BusinessErrorCodes.ERR_UNAUTHORIZED, result.Error);
             Assert.Null(result.Value);
         }
 
@@ -205,7 +205,7 @@ namespace WalletWise.Unit.Tests.Services
             var result = await _reportService.GetTopCategoriesAsync(start, end, 5);
 
             Assert.False(result.IsSuccess);
-            Assert.Equal("La fecha inicial no puede ser posterior a la fecha final", result.Error);
+            Assert.Equal(WalletWise.Application.Common.BusinessErrorCodes.ERR_INVALID_DATE_RANGE, result.Error);
             Assert.Null(result.Value);
         }
 
@@ -218,7 +218,7 @@ namespace WalletWise.Unit.Tests.Services
             var result = await _reportService.GetTopCategoriesAsync(start, end, 0);
 
             Assert.False(result.IsSuccess);
-            Assert.Equal("El límite debe ser mayor a 0", result.Error);
+            Assert.Equal(WalletWise.Application.Common.BusinessErrorCodes.ERR_INVALID_LIMIT, result.Error);
             Assert.Null(result.Value);
         }
 
@@ -256,7 +256,7 @@ namespace WalletWise.Unit.Tests.Services
             );
 
             Assert.False(result.IsSuccess);
-            Assert.Equal("Las fechas iniciales no pueden ser posteriores a las finales", result.Error);
+            Assert.Equal(WalletWise.Application.Common.BusinessErrorCodes.ERR_INVALID_DATE_RANGE, result.Error);
             Assert.Null(result.Value);
         }
 
@@ -271,7 +271,7 @@ namespace WalletWise.Unit.Tests.Services
             );
 
             Assert.False(result.IsSuccess);
-            Assert.Equal("Los periodos a comparar no deben superponerse", result.Error);
+            Assert.Equal(WalletWise.Application.Common.BusinessErrorCodes.ERR_OVERLAPPING_PERIODS, result.Error);
             Assert.Null(result.Value);
         }
 
@@ -288,7 +288,7 @@ namespace WalletWise.Unit.Tests.Services
             );
 
             Assert.False(result.IsSuccess);
-            Assert.Equal("Usuario no autenticado", result.Error);
+            Assert.Equal(WalletWise.Application.Common.BusinessErrorCodes.ERR_UNAUTHORIZED, result.Error);
             Assert.Null(result.Value);
         }
 
@@ -343,7 +343,7 @@ namespace WalletWise.Unit.Tests.Services
             var result = await _reportService.ExportAsync(start, end, null, null, null);
 
             Assert.False(result.IsSuccess);
-            Assert.Equal("Rango de fechas invalido", result.Error);
+            Assert.Equal(WalletWise.Application.Common.BusinessErrorCodes.ERR_INVALID_DATE_RANGE, result.Error);
             Assert.Null(result.Value);
         }
 
@@ -355,7 +355,7 @@ namespace WalletWise.Unit.Tests.Services
             var result = await _reportService.ExportAsync(null, null, null, null, null);
 
             Assert.False(result.IsSuccess);
-            Assert.Equal("Usuario no autenticado", result.Error);
+            Assert.Equal(WalletWise.Application.Common.BusinessErrorCodes.ERR_UNAUTHORIZED, result.Error);
             Assert.Null(result.Value);
         }
 
