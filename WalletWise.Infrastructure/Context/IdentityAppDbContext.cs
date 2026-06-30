@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using WalletWise.Infrastructure.Settings;
+using WalletWise.Infrastructure.EntityConfigurations;
 
 namespace WalletWise.Infrastructure.Context
 {
@@ -30,7 +31,7 @@ namespace WalletWise.Infrastructure.Context
             builder.Entity<IdentityRoleClaim<string>>().ToTable("RoleClaims");
             builder.Entity<IdentityUserToken<string>>().ToTable("UserTokens");
 
-            builder.ApplyConfiguration(new WalletWise.Infrastructure.EntityConfigurations.RefreshTokenConfiguration());
+            builder.ApplyConfiguration(new RefreshTokenConfiguration());
 
         }
         

@@ -44,7 +44,7 @@ namespace WalletWise.Application.Services
 
             if (result is null)
             {
-                throw new WalletWise.Application.Exceptions.NotFoundException($"La transaccion con el id {id} no existe");
+                throw new Exceptions.NotFoundException($"La transaccion con el id {id} no existe");
             }
 
             return Result<TransactionResponseDto?>.Success(_mapper.Map<TransactionResponseDto>(result));
@@ -100,7 +100,7 @@ namespace WalletWise.Application.Services
 
             if (exist is null)
             {
-                throw new WalletWise.Application.Exceptions.NotFoundException($"La transaction con el id {id} no existe");
+                throw new Exceptions.NotFoundException($"La transaction con el id {id} no existe");
             }
 
             var categoryExists = await _categoryRepository.GetCategoryActiveByIdAsync(transactionDto.CategoryId, _currentUserService.UserId!);
@@ -127,7 +127,7 @@ namespace WalletWise.Application.Services
 
             if (exist is null)
             {
-                throw new WalletWise.Application.Exceptions.NotFoundException($"La transaction con el id {id} no existe");
+                throw new Exceptions.NotFoundException($"La transaction con el id {id} no existe");
             }
 
             await _transactionRepository.RemoveAsync(id);

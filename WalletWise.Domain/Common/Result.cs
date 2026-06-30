@@ -10,7 +10,7 @@ namespace WalletWise.Domain.Common
     {
         public bool IsSuccess { get;}
         /// <summary>
-        /// SIEMPRE un código de BusinessErrorCodes, nunca texto libre.
+        /// siempre un código de BusinessErrorCodes, nunca texto libre.
         /// </summary>
         public string? Error { get;}
         public string? Message { get; }

@@ -5,6 +5,7 @@ using WalletWise.Application.DependencyInjection;
 using WalletWise.Infrastructure.DependencyInjection;
 using WalletWise.Infrastructure.DependencyInjection;
 using WalletWise.WebApi.Handlers;
+using WalletWise.Application.Common;
 
 namespace WalletWise.WebApi
 {
@@ -21,7 +22,7 @@ namespace WalletWise.WebApi
             builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
             builder.Services.AddProblemDetails();
 
-            builder.Services.AddControllers().ConfigureApiBehaviorOptions(options => { options.InvalidModelStateResponseFactory = context => { var apiError = new WalletWise.Application.Common.ApiErrorResponse { Status = StatusCodes.Status400BadRequest, Error = WalletWise.Application.Common.BusinessErrorCodes.ERR_VALIDATION, Message = "Errores de validación encontrados.", TraceId = context.HttpContext.TraceIdentifier, Timestamp = DateTime.UtcNow }; return new Microsoft.AspNetCore.Mvc.BadRequestObjectResult(apiError); }; });
+            builder.Services.AddControllers().ConfigureApiBehaviorOptions(options => { options.InvalidModelStateResponseFactory = context => { var apiError = new ApiErrorResponse { Status = StatusCodes.Status400BadRequest, Error = BusinessErrorCodes.ERR_VALIDATION, Message = "Errores de validación encontrados.", TraceId = context.HttpContext.TraceIdentifier, Timestamp = DateTime.UtcNow }; return new Microsoft.AspNetCore.Mvc.BadRequestObjectResult(apiError); }; });
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 
             builder.Services.AddOpenApi();
@@ -137,7 +138,7 @@ namespace WalletWise.WebApi
                 {
                     Title = "WalletWise API",
                     Version = "v1",
-                    Description = "API para gesti�n de finanzas personales. Permite administrar wallets, transacciones y categor�as."
+                    Description = "API para gestion de finanzas personales. Permite administrar wallets, transacciones y categorias."
                 });
 
                 options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme

@@ -1,11 +1,5 @@
 using AutoMapper;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using WalletWise.Application.Common;
 using WalletWise.Application.Interfaces;
 using WalletWise.Domain.Common;
 using WalletWise.Domain.Interfaces;
@@ -35,7 +29,7 @@ namespace WalletWise.Application.Services
 
             if (entity == null)
             {
-                throw new WalletWise.Application.Exceptions.NotFoundException($"La entidad con el Id {id} no existe");
+                throw new Exceptions.NotFoundException($"La entidad con el Id {id} no existe");
             }
 
             return Result<ResDto?>.Success(_mapper.Map<ResDto>(entity));
@@ -66,7 +60,7 @@ namespace WalletWise.Application.Services
 
             if (exist == null)
             {
-                throw new WalletWise.Application.Exceptions.NotFoundException($"La entidad con el Id {id} no existe");
+                throw new Exceptions.NotFoundException($"La entidad con el Id {id} no existe");
             }
 
             T entity = _mapper.Map<T>(dtoRequest);
@@ -82,7 +76,7 @@ namespace WalletWise.Application.Services
 
             if (exist == null)
             {
-                throw new WalletWise.Application.Exceptions.NotFoundException($"La entidad con el Id {id} no pudo ser encontrada");
+                throw new Exceptions.NotFoundException($"La entidad con el Id {id} no pudo ser encontrada");
             }
 
             await _repository.RemoveAsync(id);

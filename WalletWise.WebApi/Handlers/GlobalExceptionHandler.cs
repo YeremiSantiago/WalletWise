@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using WalletWise.Application.Common;
+using WalletWise.Application.Exceptions;
 
 namespace WalletWise.WebApi.Handlers
 {
@@ -21,9 +22,9 @@ namespace WalletWise.WebApi.Handlers
         {
             var (statusCode, errorCode, message) = exception switch
             {
-                WalletWise.Application.Exceptions.NotFoundException => 
+                NotFoundException => 
                     (StatusCodes.Status404NotFound, BusinessErrorCodes.ERR_NOT_FOUND, exception.Message ?? "El recurso solicitado no fue encontrado."),
-                WalletWise.Application.Exceptions.ForbiddenAccessException => 
+                ForbiddenAccessException => 
                     (StatusCodes.Status403Forbidden, BusinessErrorCodes.ERR_FORBIDDEN, "No tienes permisos para acceder a este recurso."),
                 _ => 
                     (StatusCodes.Status500InternalServerError,BusinessErrorCodes.ERR_UNEXPECTED, "Ha ocurrido un error inesperado.")
