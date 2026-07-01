@@ -6,6 +6,8 @@ using WalletWise.Infrastructure.DependencyInjection;
 using WalletWise.Infrastructure.DependencyInjection;
 using WalletWise.WebApi.Handlers;
 using WalletWise.Application.Common;
+using WalletWise.WebApi.Common;
+using Microsoft.AspNetCore.Mvc;
 
 namespace WalletWise.WebApi
 {
@@ -22,7 +24,7 @@ namespace WalletWise.WebApi
             builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
             builder.Services.AddProblemDetails();
 
-            builder.Services.AddControllers().ConfigureApiBehaviorOptions(options => { options.InvalidModelStateResponseFactory = context => { var apiError = new ApiErrorResponse { Status = StatusCodes.Status400BadRequest, Error = BusinessErrorCodes.ERR_VALIDATION, Message = "Errores de validación encontrados.", TraceId = context.HttpContext.TraceIdentifier, Timestamp = DateTime.UtcNow }; return new Microsoft.AspNetCore.Mvc.BadRequestObjectResult(apiError); }; });
+            builder.Services.AddControllers().ConfigureApiBehaviorOptions(options => { options.InvalidModelStateResponseFactory = context => { var apiError = new ApiErrorResponse { Status = StatusCodes.Status400BadRequest, Error = BusinessErrorCodes.ERR_VALIDATION, Message = "Errores de validación encontrados.", TraceId = context.HttpContext.TraceIdentifier, Timestamp = DateTime.UtcNow }; return new BadRequestObjectResult(apiError); }; });
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 
             builder.Services.AddOpenApi();

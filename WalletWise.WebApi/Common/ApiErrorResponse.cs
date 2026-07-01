@@ -1,6 +1,6 @@
 using System;
 
-namespace WalletWise.Application.Common
+namespace WalletWise.WebApi.Common
 {
     public class ApiErrorResponse
     {

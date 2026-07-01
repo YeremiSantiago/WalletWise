@@ -1,11 +1,12 @@
+using AutoMapper;
 using Microsoft.Extensions.Logging;
+using WalletWise.Application.Common;
 using WalletWise.Application.Dtos.Category;
+using WalletWise.Application.Exceptions;
 using WalletWise.Application.Interfaces;
 using WalletWise.Domain.Common;
 using WalletWise.Domain.Entities;
 using WalletWise.Domain.Interfaces;
-using AutoMapper;
-using WalletWise.Application.Common;
 
 namespace WalletWise.Application.Services
 {
@@ -46,7 +47,7 @@ namespace WalletWise.Application.Services
 
             if (result is null)
             {
-                throw new Exceptions.NotFoundException($"La category con el id {id} no existe");
+                throw new NotFoundException($"La category con el id {id} no existe");
             }
 
             return Result<CategoryResponseDto?>.Success(_mapper.Map<CategoryResponseDto>(result));
@@ -72,7 +73,7 @@ namespace WalletWise.Application.Services
                 var response = await _categoryRepository.AddAsync(category);
                 return Result<CategoryResponseDto>.Success(_mapper.Map<CategoryResponseDto>(response));
             }
-            catch (Exception ex) when (ex.GetType().Name == "DbUpdateException")
+            catch (UniqueConstraintViolationException ex)
             {
                 return Result<CategoryResponseDto>.Failure(BusinessErrorCodes.ERR_CATEGORY_NAME_EXISTS, "Ya existe una categoría con ese mismo nombre");
             }
@@ -85,7 +86,7 @@ namespace WalletWise.Application.Services
 
             if (exist == null)
             {
-                throw new Exceptions.NotFoundException($"La Categoria con el id {id} no existe");
+                throw new NotFoundException($"La Categoria con el id {id} no existe");
             }
 
             _mapper.Map(categoryDto, exist);
@@ -104,7 +105,7 @@ namespace WalletWise.Application.Services
 
             if (category == null)
             {
-                throw new Exceptions.NotFoundException($"La categoria con id {id} no pudo ser encontrada");
+                throw new NotFoundException($"La categoria con id {id} no pudo ser encontrada");
             }
 
             var exists = await _transactionRepository.ExistsTransactionByCategoryAsync(category.Id, userId);

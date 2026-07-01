@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using WalletWise.Application.Common;
 using WalletWise.Application.Exceptions;
+using WalletWise.WebApi.Common;
 
 namespace WalletWise.WebApi.Handlers
 {
