@@ -69,7 +69,7 @@ namespace WalletWise.Application.Services
 
             if (exist == null)
             {
-                throw new .NotFoundException($"La wallet con el id {id} no pudo ser encontrada");
+                throw new NotFoundException($"La wallet con el id {id} no pudo ser encontrada");
             }
 
             _mapper.Map(walletDto, exist);
