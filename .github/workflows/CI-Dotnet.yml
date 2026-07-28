@@ -1,0 +1,45 @@
+name: CI
+
+on:
+    push:
+        branches:
+            - dev
+    pull_request:
+        branches:
+            - main
+            - dev
+
+jobs:
+    build-and-test:
+        name: Build y Test
+        runs-on: ubuntu-latest
+    
+        steps:
+          - name: Checkout code
+            uses: actions/checkout@v4
+
+          - name: Setup .Net
+            uses: actions/setup-dotnet@v4
+            with:
+              dotnet-version: "9.0.x"
+
+          - name: Restore dependencies
+            run: dotnet restore
+
+          - name: Build
+            run: dotnet build --no-restore --configuration release
+
+          - name: Check locale
+            run: locale
+          
+          - name: Run unit tests
+            run: dotnet test WalletWise.UnitTest/WalletWise.Unit.Tests.csproj --configuration Release
+
+          - name: Run integration tests
+            env:
+              JwtSettings__SecretKey: ${{ secrets.JWT_SECRET_KEY }}
+            run: dotnet test WalletWise.Integration.Test/WalletWise.Integration.Test.csproj --configuration Release
+
+          
+
+

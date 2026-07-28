@@ -7,6 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="15.1.3" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.12" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.12" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\WalletWise.Domain\WalletWise.Domain.csproj" />
   </ItemGroup>
 
