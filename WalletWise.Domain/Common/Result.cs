@@ -9,9 +9,6 @@ namespace WalletWise.Domain.Common
     public class Result<T>
     {
         public bool IsSuccess { get;}
-        /// <summary>
-        /// siempre un código de BusinessErrorCodes, nunca texto libre.
-        /// </summary>
         public string? Error { get;}
         public string? Message { get; }
         public T? Value { get; }

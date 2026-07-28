@@ -18,5 +18,7 @@ namespace WalletWise.Domain.Reports
         public decimal IncomeDifference { get; set; }
         public decimal ExpenseDifference { get; set; }
         public decimal BalanceDifference { get; set; }
+
+
     }
 }

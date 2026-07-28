@@ -23,12 +23,12 @@ namespace WalletWise.Infrastructure.DependencyInjection
         {
             // PERSISTENCE 
             services.AddDbContext<AppDbContext>(options => options.UseSqlServer(
-                configuration.GetConnectionString("DefaultConnection"),
+                configuration.GetConnectionString("WalletWiseConnection"),
                 sqlOptions => sqlOptions.MigrationsAssembly(typeof(AppDbContext).Assembly.FullName)
             ));
 
             services.AddDbContext<IdentityAppDbContext>(options => options.UseSqlServer(
-                configuration.GetConnectionString("IdentityConnection"),
+                configuration.GetConnectionString("WalletWiseIdentityConnection"),
                 sqlOptions => sqlOptions.MigrationsAssembly(typeof(IdentityAppDbContext).Assembly.FullName)
             ));
 
