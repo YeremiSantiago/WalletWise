@@ -340,9 +340,6 @@ Durante el desarrollo se detectó que ambos contextos podían entrar en conflict
 
 [![GitHub](https://img.shields.io/badge/GitHub-YeremiSantiago-181717?style=for-the-badge&logo=github)](https://github.com/YeremiSantiago)
 
-> 💡 Agrega aquí tus enlaces a LinkedIn y portafolio personal.
-
----
 
 ## 📄 Licencia
 
