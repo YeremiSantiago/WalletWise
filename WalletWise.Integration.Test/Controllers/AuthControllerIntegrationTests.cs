@@ -10,6 +10,7 @@ using WalletWise.Integration.Test.Infraestructure;
 using WalletWise.Infrastructure.Context;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.EntityFrameworkCore;
 
 namespace WalletWise.Integration.Test.Controllers
 {
