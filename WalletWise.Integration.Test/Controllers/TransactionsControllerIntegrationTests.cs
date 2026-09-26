@@ -9,7 +9,8 @@ using WalletWise.Integration.Test.Infraestructure;
 
 namespace WalletWise.Integration.Test.Controllers
 {
-    public class TransactionsControllerIntegrationTests : IClassFixture<CustomWebApplicationFactory>
+    [Collection("WebApi")]
+    public class TransactionsControllerIntegrationTests
     {
         private readonly HttpClient _client;
 

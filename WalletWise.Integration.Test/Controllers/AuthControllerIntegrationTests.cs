@@ -13,7 +13,8 @@ using Microsoft.EntityFrameworkCore.Storage;
 
 namespace WalletWise.Integration.Test.Controllers
 {
-    public class AuthControllerIntegrationTests : IClassFixture<CustomWebApplicationFactory>, IAsyncLifetime
+    [Collection("WebApi")]
+    public class AuthControllerIntegrationTests : IAsyncLifetime
     {
         private readonly HttpClient _client;
         private readonly CustomWebApplicationFactory _factory;

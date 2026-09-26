@@ -1,4 +1,3 @@
-using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -9,27 +8,38 @@ using WalletWise.Domain.Entities;
 using WalletWise.Domain.Interfaces;
 using WalletWise.Infrastructure.Context;
 using WalletWise.Infrastructure.Repositories;
+using WalletWise.Integration.Test.Infraestructure;
 
 namespace WalletWise.Integration.Test.Repositories
 {
-    public class WalletRepositoryTests
+    [Collection("Database")]
+    public class WalletRepositoryTests : IAsyncLifetime
     {
-        private readonly IWalletRepository _walletRepository;
-        private readonly AppDbContext _context;
+        private IWalletRepository _walletRepository;
+        private AppDbContext _context;
+        private readonly DatabaseFixture _fixture;
 
-        public WalletRepositoryTests()
+
+        public WalletRepositoryTests(DatabaseFixture fixture)
         {
-            var connection = new SqliteConnection("DataSource=:memory:");
-            connection.Open();
+            _fixture = fixture;
+        }
 
-            var options = new DbContextOptionsBuilder<AppDbContext>()
-                .UseSqlite(connection)
-                .Options;
+        public async Task InitializeAsync()
+        {
+            _context = _fixture.CreateDbContext();
+            await _context.Database.EnsureCreatedAsync();
 
-            _context = new AppDbContext(options);
-            _context.Database.EnsureCreated();
-
+            _context.Transactions.RemoveRange(_context.Transactions);
+            _context.Categories.RemoveRange(_context.Categories);
+            _context.Wallets.RemoveRange(_context.Wallets);
+            await _context.SaveChangesAsync();
             _walletRepository = new WalletRepository(_context);
+        }
+
+        public async Task DisposeAsync()
+        {
+            await _context.DisposeAsync();
         }
 
         [Fact]
@@ -40,30 +50,26 @@ namespace WalletWise.Integration.Test.Repositories
             {
                 new Wallet()
                 {
-                    Id = 1,
                     Name = "Trabajo",
                     UserId = "1"
                 },
                 new Wallet()
                 {
-                    Id = 2,
                     Name = "Tarjeta Credito",
                     UserId = "1"
                 },
                 new Wallet()
                 {
-                    Id = 3,
                     Name = "Tarjeta De Debito",
                     UserId = "1"
                 }
             };
 
-            int id = 1;
-
             await _context.Wallets.AddRangeAsync(Wallets);
 
             await _context.SaveChangesAsync();
 
+            int id = Wallets[0].Id;
 
             // Act 
 
@@ -84,29 +90,26 @@ namespace WalletWise.Integration.Test.Repositories
             {
                 new Wallet()
                 {
-                    Id = 1,
                     Name = "Trabajo",
                     UserId = "1"
                 },
                 new Wallet()
                 {
-                    Id = 2,
                     Name = "Tarjeta Credito",
                     UserId = "1"
                 },
                 new Wallet()
                 {
-                    Id = 3,
                     Name = "Tarjeta De Debito",
                     UserId = "1"
                 }
             };
 
-            int id = 2;
-
             await _context.Wallets.AddRangeAsync(Wallets);
 
             await _context.SaveChangesAsync();
+
+            int id = Wallets[1].Id;
 
             // Act 
 
@@ -152,19 +155,16 @@ namespace WalletWise.Integration.Test.Repositories
             {
                 new Wallet()
                 {
-                    Id = 1,
                     Name = "Trabajo",
                     UserId = "1"
                 },
                 new Wallet()
                 {
-                    Id = 2,
                     Name = "Tarjeta Credito",
                     UserId = "1"
                 },
                 new Wallet()
                 {
-                    Id = 3,
                     Name = "Tarjeta De Debito",
                     UserId = "1"
                 }
@@ -174,7 +174,7 @@ namespace WalletWise.Integration.Test.Repositories
 
             await _context.SaveChangesAsync();
 
-            int id = 1;
+            int id = Wallets[0].Id;
 
            var walletTrack = await _context.Wallets.FindAsync(id);
 
@@ -203,19 +203,16 @@ namespace WalletWise.Integration.Test.Repositories
             {
                 new Wallet()
                 {
-                    Id = 1,
                     Name = "Trabajo",
                     UserId = "1"
                 },
                 new Wallet()
                 {
-                    Id = 2,
                     Name = "Tarjeta Credito",
                     UserId = "1"
                 },
                 new Wallet()
                 {
-                    Id = 3,
                     Name = "Tarjeta De Debito",
                     UserId = "1"
                 }
@@ -225,7 +222,7 @@ namespace WalletWise.Integration.Test.Repositories
 
             await _context.SaveChangesAsync();
 
-            int id = 2;
+            int id = Wallets[1].Id;
 
             // Act 
 
@@ -248,19 +245,16 @@ namespace WalletWise.Integration.Test.Repositories
             {
                 new Wallet()
                 {
-                    Id = 1,
                     Name = "Trabajo",
                     UserId = "1"
                 },
                 new Wallet()
                 {
-                    Id = 2,
                     Name = "Tarjeta Credito",
                     UserId = "1"
                 },
                 new Wallet()
                 {
-                    Id = 3,
                     Name = "Tarjeta De Debito",
                     UserId = "1"
                 }

@@ -8,6 +8,8 @@ using WalletWise.WebApi.Handlers;
 using WalletWise.Application.Common;
 using WalletWise.WebApi.Common;
 using Microsoft.AspNetCore.Mvc;
+using WalletWise.Infrastructure.Context;
+using Microsoft.EntityFrameworkCore;
 
 namespace WalletWise.WebApi
 {
@@ -20,6 +22,8 @@ namespace WalletWise.WebApi
             // Add services to the container.
             builder.Services.AddApplicationLayerIoc().
                 AddInfrastructureLayerIoc(builder.Configuration);
+
+
 
             builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
             builder.Services.AddProblemDetails();
@@ -171,6 +175,17 @@ namespace WalletWise.WebApi
             #endregion
 
             var app = builder.Build();
+
+            #region Migrations
+            using (var scope = app.Services.CreateScope())
+            {
+                var appDbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                appDbContext.Database.Migrate();
+
+                var identityDbContext = scope.ServiceProvider.GetRequiredService<IdentityAppDbContext>();
+                identityDbContext.Database.Migrate();
+            }
+            #endregion
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())

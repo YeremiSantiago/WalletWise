@@ -2,12 +2,11 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using System.Linq;
 using System.Threading.Tasks;
+using Testcontainers.MsSql;
 using WalletWise.Infrastructure.Context;
 using WalletWise.WebApi;
 
@@ -15,13 +14,17 @@ namespace WalletWise.Integration.Test.Infraestructure
 {
     public class CustomWebApplicationFactory : WebApplicationFactory<Program>, IAsyncLifetime
     {
-        private SqliteConnection _connection = null!;
+        private readonly MsSqlContainer _dbContainer = new MsSqlBuilder()
+            .WithImage("mcr.microsoft.com/mssql/server:2022-latest")
+            .WithCreateParameterModifier(parameters =>
+            {
+                parameters.HostConfig.ShmSize = 1_073_741_824; 
+            })
+            .Build();
 
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
             builder.UseEnvironment("Testing");
-            
-            _connection = CreateOpenConnection();
 
             builder.ConfigureServices(services =>
             {
@@ -36,10 +39,10 @@ namespace WalletWise.Integration.Test.Infraestructure
                     services.Remove(d);
 
                 services.AddDbContext<AppDbContext>(options =>
-                    options.UseSqlite(_connection));
+                options.UseSqlServer(_dbContainer.GetConnectionString()));
 
                 services.AddDbContext<IdentityAppDbContext>(options =>
-                options.UseSqlite(_connection));
+                options.UseSqlServer(_dbContainer.GetConnectionString()));
 
                 services.AddAuthentication(options =>
                 {
@@ -60,18 +63,20 @@ namespace WalletWise.Integration.Test.Infraestructure
 
         public async Task InitializeAsync()
         {
+            await _dbContainer.StartAsync();
+
             using var scope = Services.CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
             var identityDb = scope.ServiceProvider.GetRequiredService<IdentityAppDbContext>();
-            
-            await db.Database.EnsureCreatedAsync();
-            var creator = identityDb.Database.GetService<Microsoft.EntityFrameworkCore.Storage.IRelationalDatabaseCreator>();
-            await creator.CreateTablesAsync();
+
+            await db.Database.MigrateAsync();
+            await identityDb.Database.MigrateAsync();
+
         }
 
         public new async Task DisposeAsync()
         {
-            await _connection.DisposeAsync();
+            await _dbContainer.DisposeAsync();
         }
 
         public async Task ResetDatabaseAsync()
@@ -86,12 +91,7 @@ namespace WalletWise.Integration.Test.Infraestructure
             await db.SaveChangesAsync();
         }
 
-        private static SqliteConnection CreateOpenConnection()
-        {
-            var connection = new SqliteConnection("DataSource=:memory:");
-            connection.Open();
-            return connection;
-        }
+       
     }
 }
 

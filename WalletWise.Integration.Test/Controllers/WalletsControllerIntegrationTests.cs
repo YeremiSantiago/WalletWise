@@ -6,7 +6,8 @@ using WalletWise.Integration.Test.Infraestructure;
 
 namespace WalletWise.Integration.Test.Controllers
 {
-    public class WalletsControllerIntegrationTests : IClassFixture<CustomWebApplicationFactory>
+    [Collection("WebApi")]
+    public class WalletsControllerIntegrationTests
     {
         private readonly HttpClient _client;
 

@@ -107,12 +107,8 @@ namespace WalletWise.Infrastructure.Repositories
 
         public async Task<ComparisonReport> GetComparisonAsync(string userId, DateTime startA, DateTime endA, DateTime startB, DateTime endB)
         {
-            var p1Task = GetSummaryInRangeAsync(userId, startA, endA);
-            var p2Task = GetSummaryInRangeAsync(userId, startB, endB);
-
-            await Task.WhenAll(p1Task, p2Task);
-            var p1 = p1Task.Result;
-            var p2 = p2Task.Result;
+            var p1 = await GetSummaryInRangeAsync(userId, startA, endA);
+            var p2 = await GetSummaryInRangeAsync(userId, startB, endB);
 
             return new ComparisonReport
             {

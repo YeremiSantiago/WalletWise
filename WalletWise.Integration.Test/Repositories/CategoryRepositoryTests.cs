@@ -1,4 +1,3 @@
-using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -10,28 +9,37 @@ using WalletWise.Domain.Interfaces;
 using WalletWise.Infrastructure.Context;
 using WalletWise.Infrastructure.Repositories;
 using WalletWise.Domain.Common.Enums;
+using WalletWise.Integration.Test.Infraestructure;
 
 namespace WalletWise.Integration.Test.Repositories
 {
-    public class CategoryRepositoryTests
+    [Collection("Database")]
+    public class CategoryRepositoryTests : IAsyncLifetime
     {
-        private readonly ICategoryRepository _categoryRepository;
-        private readonly AppDbContext _context;
+        private ICategoryRepository _categoryRepository;
+        private AppDbContext _context;
+        private readonly DatabaseFixture _fixture;
 
-        public CategoryRepositoryTests()
+        public CategoryRepositoryTests(DatabaseFixture fixture)
         {
-            var connection = new SqliteConnection("DataSource=:memory:");
-            connection.Open();
+            _fixture = fixture;
+        }
 
-            var options = new DbContextOptionsBuilder<AppDbContext>()
-                .UseSqlite(connection)
-                .Options;
+        public async Task InitializeAsync()
+        {
+            _context = _fixture.CreateDbContext();
+            await _context.Database.EnsureCreatedAsync();
+           
 
-            _context = new AppDbContext(options);
-
-            _context.Database.EnsureCreated();
-
+            _context.Transactions.RemoveRange(_context.Transactions);
+            _context.Categories.RemoveRange(_context.Categories);
+            _context.Wallets.RemoveRange(_context.Wallets);
+            await _context.SaveChangesAsync();
             _categoryRepository = new CategoryRepository(_context);
+        }
+        public async Task DisposeAsync()
+        {
+            await _context.DisposeAsync();
         }
 
         [Fact]
@@ -43,32 +51,28 @@ namespace WalletWise.Integration.Test.Repositories
                 new Category 
                 {
                     Type = TypeTransaction.Expense,
-                    Id = 1,
                     Name = "Comida",
                     UserId = "1"
                 },
                 new Category 
                 {
                     Type = TypeTransaction.Expense,
-                    Id = 2,
                     Name = "Compras",
                     UserId = "1"
                 },
                 new Category 
                 {
                     Type = TypeTransaction.Expense,
-                    Id = 3,
                     Name = "Servicios",
                     UserId = "1"
                 }
             };
 
-            int id = 1;
-
             await _context.Categories.AddRangeAsync(Categories);
 
             await _context.SaveChangesAsync();
 
+            int id = Categories[0].Id;
 
             // Act 
 
@@ -90,31 +94,28 @@ namespace WalletWise.Integration.Test.Repositories
                 new Category 
                 {
                     Type = TypeTransaction.Expense,
-                    Id = 1,
                     Name = "Ropa",
                     UserId = "1"
                 },
                 new Category 
                 {
                     Type = TypeTransaction.Expense,
-                    Id = 2,
                     Name = "Telecomunicaciones",
                     UserId = "1"
                 },
                 new Category 
                 {
                     Type = TypeTransaction.Expense,
-                    Id = 3,
                     Name = "Servicios",
                     UserId = "1"
                 }
             };
 
-            int id = 2;
-
             await _context.Categories.AddRangeAsync(Categories);
 
             await _context.SaveChangesAsync();
+
+            int id = Categories[1].Id;
 
             // Act 
 
@@ -162,21 +163,18 @@ namespace WalletWise.Integration.Test.Repositories
                 new Category 
                 {
                     Type = TypeTransaction.Expense,
-                    Id = 1,
                     Name = "Comida",
                     UserId = "1"
                 },
                 new Category 
                 {
                     Type = TypeTransaction.Expense,
-                    Id = 2,
                     Name = "Ropa",
                     UserId = "1"
                 },
                 new Category 
                 {
                     Type = TypeTransaction.Expense,
-                    Id = 3,
                     Name = "traje",
                     UserId = "1"
                 }
@@ -186,7 +184,7 @@ namespace WalletWise.Integration.Test.Repositories
 
             await _context.SaveChangesAsync();
 
-            int id = 1;
+            int id = Categories[0].Id;
 
             var categoryTrack = await _context.Categories.FindAsync(id);
 
@@ -216,21 +214,18 @@ namespace WalletWise.Integration.Test.Repositories
                 new Category 
                 {
                     Type = TypeTransaction.Expense,
-                    Id = 1,
                     Name = "Ropa",
                     UserId = "1"
                 },
                 new Category 
                 {
                     Type = TypeTransaction.Expense,
-                    Id = 2,
                     Name = "Comida",
                     UserId = "1"
                 },
                 new Category 
                 {
                     Type = TypeTransaction.Expense,
-                    Id = 3,
                     Name = "Ahorro",
                     UserId = "1"
                 }
@@ -240,7 +235,7 @@ namespace WalletWise.Integration.Test.Repositories
 
             await _context.SaveChangesAsync();
 
-            int id = 2;
+            int id = Categories[1].Id;
 
             // Act 
 
@@ -264,21 +259,18 @@ namespace WalletWise.Integration.Test.Repositories
                 new Category 
                 {
                     Type = TypeTransaction.Expense,
-                    Id = 1,
                     Name = "Comida",
                     UserId = "1"
                 },
                 new Category 
                 {
                     Type = TypeTransaction.Expense,
-                    Id = 2,
                     Name = "Ropa",
                     UserId = "1"
                 },
                 new Category 
                 {
                     Type = TypeTransaction.Expense,
-                    Id = 3,
                     Name = "Traje",
                     UserId = "1"
                 }

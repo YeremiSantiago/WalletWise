@@ -15,7 +15,8 @@ using WalletWise.Integration.Test.Infraestructure;
 
 namespace WalletWise.Integration.Test.Controllers
 {
-    public class ReportsControllerIntegrationTests : IClassFixture<CustomWebApplicationFactory>, IAsyncLifetime
+    [Collection("WebApi")]
+    public class ReportsControllerIntegrationTests : IAsyncLifetime
     {
         private readonly HttpClient _client;
         private readonly CustomWebApplicationFactory _factory;

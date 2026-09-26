@@ -1,4 +1,3 @@
-using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -9,29 +8,39 @@ using WalletWise.Domain.Entities;
 using WalletWise.Domain.Interfaces;
 using WalletWise.Infrastructure.Context;
 using WalletWise.Infrastructure.Repositories;
+using WalletWise.Integration.Test.Infraestructure;
 using Xunit;
 
 namespace WalletWise.Integration.Test.Repositories
 {
-    public class ReportRepositoryTests
+    [Collection("Database")]
+    public class ReportRepositoryTests : IAsyncLifetime
     {
-        private readonly IReportRepository _reportRepository;
-        private readonly AppDbContext _context;
+        private IReportRepository _reportRepository;
+        private AppDbContext _context;
         private const string TestUserId = "1";
+        private readonly DatabaseFixture _fixture;
 
-        public ReportRepositoryTests()
+        public ReportRepositoryTests(DatabaseFixture fixture)
         {
-            var connection = new SqliteConnection("DataSource=:memory:");
-            connection.Open();
+            _fixture = fixture;
+        }
 
-            var options = new DbContextOptionsBuilder<AppDbContext>()
-                .UseSqlite(connection)
-                .Options;
+        public async Task InitializeAsync()
+        {
+            _context = _fixture.CreateDbContext();
+            await _context.Database.EnsureCreatedAsync();
 
-            _context = new AppDbContext(options);
-            _context.Database.EnsureCreated();
 
+            _context.Transactions.RemoveRange(_context.Transactions);
+            _context.Categories.RemoveRange(_context.Categories);
+            _context.Wallets.RemoveRange(_context.Wallets);
+            await _context.SaveChangesAsync();
             _reportRepository = new ReportRepository(_context);
+        }
+        public async Task DisposeAsync()
+        {
+            await _context.DisposeAsync();
         }
 
         [Fact]
@@ -135,19 +144,21 @@ namespace WalletWise.Integration.Test.Repositories
         {
             await ClearDataAsync();
 
-            var wallet = new Wallet { Id = 1, Name = "Principal", UserId = TestUserId };
-            var category = new Category { Id = 1, Name = "General", UserId = TestUserId, Type = TypeTransaction.Expense };
-
-            var transactions = new List<Transaction>
-            {
-                new Transaction { Id = 1, Amount = 1000, Date = new DateTime(2026, 1, 1), Type = TypeTransaction.Income, UserId = TestUserId, CategoryId = 1, WalletId = 1 },
-                new Transaction { Id = 2, Amount = 500, Date = new DateTime(2026, 1, 10), Type = TypeTransaction.Income, UserId = TestUserId, CategoryId = 1, WalletId = 1 },
-                new Transaction { Id = 3, Amount = 300, Date = new DateTime(2026, 1, 15), Type = TypeTransaction.Expense, UserId = TestUserId, CategoryId = 1, WalletId = 1 },
-                new Transaction { Id = 4, Amount = 999, Date = new DateTime(2026, 1, 20), Type = TypeTransaction.Income, UserId = "2", CategoryId = 1, WalletId = 1 }
-            };
+            var wallet = new Wallet { Name = "Principal", UserId = TestUserId };
+            var category = new Category { Name = "General", UserId = TestUserId, Type = TypeTransaction.Expense };
 
             await _context.Wallets.AddAsync(wallet);
             await _context.Categories.AddAsync(category);
+            await _context.SaveChangesAsync();
+
+            var transactions = new List<Transaction>
+            {
+                new Transaction { Amount = 1000, Date = new DateTime(2026, 1, 1), Type = TypeTransaction.Income, UserId = TestUserId, CategoryId = category.Id, WalletId = wallet.Id },
+                new Transaction { Amount = 500, Date = new DateTime(2026, 1, 10), Type = TypeTransaction.Income, UserId = TestUserId, CategoryId = category.Id, WalletId = wallet.Id },
+                new Transaction { Amount = 300, Date = new DateTime(2026, 1, 15), Type = TypeTransaction.Expense, UserId = TestUserId, CategoryId = category.Id, WalletId = wallet.Id },
+                new Transaction { Amount = 999, Date = new DateTime(2026, 1, 20), Type = TypeTransaction.Income, UserId = "2", CategoryId = category.Id, WalletId = wallet.Id }
+            };
+
             await _context.Transactions.AddRangeAsync(transactions);
             await _context.SaveChangesAsync();
         }
@@ -156,18 +167,20 @@ namespace WalletWise.Integration.Test.Repositories
         {
             await ClearDataAsync();
 
-            var wallet = new Wallet { Id = 1, Name = "Principal", UserId = TestUserId };
-            var category = new Category { Id = 1, Name = "General", UserId = TestUserId, Type = TypeTransaction.Expense };
-
-            var transactions = new List<Transaction>
-            {
-                new Transaction { Id = 1, Amount = 1000, Date = new DateTime(2026, 1, 5), Type = TypeTransaction.Income, UserId = TestUserId, CategoryId = 1, WalletId = 1 },
-                new Transaction { Id = 2, Amount = 100, Date = new DateTime(2026, 1, 15), Type = TypeTransaction.Expense, UserId = TestUserId, CategoryId = 1, WalletId = 1 },
-                new Transaction { Id = 3, Amount = 200, Date = new DateTime(2026, 2, 8), Type = TypeTransaction.Expense, UserId = TestUserId, CategoryId = 1, WalletId = 1 }
-            };
+            var wallet = new Wallet { Name = "Principal", UserId = TestUserId };
+            var category = new Category { Name = "General", UserId = TestUserId, Type = TypeTransaction.Expense };
 
             await _context.Wallets.AddAsync(wallet);
             await _context.Categories.AddAsync(category);
+            await _context.SaveChangesAsync();
+
+            var transactions = new List<Transaction>
+            {
+                new Transaction { Amount = 1000, Date = new DateTime(2026, 1, 5), Type = TypeTransaction.Income, UserId = TestUserId, CategoryId = category.Id, WalletId = wallet.Id },
+                new Transaction { Amount = 100, Date = new DateTime(2026, 1, 15), Type = TypeTransaction.Expense, UserId = TestUserId, CategoryId = category.Id, WalletId = wallet.Id },
+                new Transaction { Amount = 200, Date = new DateTime(2026, 2, 8), Type = TypeTransaction.Expense, UserId = TestUserId, CategoryId = category.Id, WalletId = wallet.Id }
+            };
+
             await _context.Transactions.AddRangeAsync(transactions);
             await _context.SaveChangesAsync();
         }
@@ -178,23 +191,25 @@ namespace WalletWise.Integration.Test.Repositories
 
             var categories = new List<Category>
             {
-                new Category { Id = 1, Name = "Comida", UserId = TestUserId, IsDeleted = false, Type = TypeTransaction.Expense },
-                new Category { Id = 2, Name = "Servicios", UserId = TestUserId, IsDeleted = false, Type = TypeTransaction.Expense },
-                new Category { Id = 3, Name = "Oculta", UserId = TestUserId, IsDeleted = true, Type = TypeTransaction.Expense }
+                new Category { Name = "Comida", UserId = TestUserId, IsDeleted = false, Type = TypeTransaction.Expense },
+                new Category { Name = "Servicios", UserId = TestUserId, IsDeleted = false, Type = TypeTransaction.Expense },
+                new Category { Name = "Oculta", UserId = TestUserId, IsDeleted = true, Type = TypeTransaction.Expense }
             };
 
-            var wallet = new Wallet { Id = 1, Name = "Principal", UserId = TestUserId };
-
-            var transactions = new List<Transaction>
-            {
-                new Transaction { Id = 1, Amount = 100, Date = new DateTime(2026, 1, 10), Type = TypeTransaction.Expense, UserId = TestUserId, CategoryId = 1, WalletId = 1 },
-                new Transaction { Id = 2, Amount = 200, Date = new DateTime(2026, 1, 12), Type = TypeTransaction.Expense, UserId = TestUserId, CategoryId = 1, WalletId = 1 },
-                new Transaction { Id = 3, Amount = 150, Date = new DateTime(2026, 1, 15), Type = TypeTransaction.Expense, UserId = TestUserId, CategoryId = 2, WalletId = 1 },
-                new Transaction { Id = 4, Amount = 999, Date = new DateTime(2026, 1, 20), Type = TypeTransaction.Expense, UserId = TestUserId, CategoryId = 3, WalletId = 1 }
-            };
+            var wallet = new Wallet { Name = "Principal", UserId = TestUserId };
 
             await _context.Categories.AddRangeAsync(categories);
             await _context.Wallets.AddAsync(wallet);
+            await _context.SaveChangesAsync();
+
+            var transactions = new List<Transaction>
+            {
+                new Transaction { Amount = 100, Date = new DateTime(2026, 1, 10), Type = TypeTransaction.Expense, UserId = TestUserId, CategoryId = categories[0].Id, WalletId = wallet.Id },
+                new Transaction { Amount = 200, Date = new DateTime(2026, 1, 12), Type = TypeTransaction.Expense, UserId = TestUserId, CategoryId = categories[0].Id, WalletId = wallet.Id },
+                new Transaction { Amount = 150, Date = new DateTime(2026, 1, 15), Type = TypeTransaction.Expense, UserId = TestUserId, CategoryId = categories[1].Id, WalletId = wallet.Id },
+                new Transaction { Amount = 999, Date = new DateTime(2026, 1, 20), Type = TypeTransaction.Expense, UserId = TestUserId, CategoryId = categories[2].Id, WalletId = wallet.Id }
+            };
+
             await _context.Transactions.AddRangeAsync(transactions);
             await _context.SaveChangesAsync();
         }
@@ -203,19 +218,21 @@ namespace WalletWise.Integration.Test.Repositories
         {
             await ClearDataAsync();
 
-            var wallet = new Wallet { Id = 1, Name = "Principal", UserId = TestUserId };
-            var category = new Category { Id = 1, Name = "General", UserId = TestUserId, Type = TypeTransaction.Expense };
-
-            var transactions = new List<Transaction>
-            {
-                new Transaction { Id = 1, Amount = 1000, Date = new DateTime(2026, 1, 10), Type = TypeTransaction.Income, UserId = TestUserId, CategoryId = 1, WalletId = 1 },
-                new Transaction { Id = 2, Amount = 200, Date = new DateTime(2026, 1, 15), Type = TypeTransaction.Expense, UserId = TestUserId, CategoryId = 1, WalletId = 1 },
-                new Transaction { Id = 3, Amount = 500, Date = new DateTime(2026, 2, 10), Type = TypeTransaction.Income, UserId = TestUserId, CategoryId = 1, WalletId = 1 },
-                new Transaction { Id = 4, Amount = 700, Date = new DateTime(2026, 2, 12), Type = TypeTransaction.Expense, UserId = TestUserId, CategoryId = 1, WalletId = 1 }
-            };
+            var wallet = new Wallet { Name = "Principal", UserId = TestUserId };
+            var category = new Category { Name = "General", UserId = TestUserId, Type = TypeTransaction.Expense };
 
             await _context.Wallets.AddAsync(wallet);
             await _context.Categories.AddAsync(category);
+            await _context.SaveChangesAsync();
+
+            var transactions = new List<Transaction>
+            {
+                new Transaction { Amount = 1000, Date = new DateTime(2026, 1, 10), Type = TypeTransaction.Income, UserId = TestUserId, CategoryId = category.Id, WalletId = wallet.Id },
+                new Transaction { Amount = 200, Date = new DateTime(2026, 1, 15), Type = TypeTransaction.Expense, UserId = TestUserId, CategoryId = category.Id, WalletId = wallet.Id },
+                new Transaction { Amount = 500, Date = new DateTime(2026, 2, 10), Type = TypeTransaction.Income, UserId = TestUserId, CategoryId = category.Id, WalletId = wallet.Id },
+                new Transaction { Amount = 700, Date = new DateTime(2026, 2, 12), Type = TypeTransaction.Expense, UserId = TestUserId, CategoryId = category.Id, WalletId = wallet.Id }
+            };
+
             await _context.Transactions.AddRangeAsync(transactions);
             await _context.SaveChangesAsync();
         }
@@ -226,21 +243,23 @@ namespace WalletWise.Integration.Test.Repositories
 
             var categories = new List<Category>
             {
-                new Category { Id = 1, Name = "General", UserId = TestUserId, IsDeleted = false, Type = TypeTransaction.Expense },
-                new Category { Id = 2, Name = "Cafe", UserId = TestUserId, IsDeleted = false, Type = TypeTransaction.Expense }
+                new Category { Name = "General", UserId = TestUserId, IsDeleted = false, Type = TypeTransaction.Expense },
+                new Category { Name = "Cafe", UserId = TestUserId, IsDeleted = false, Type = TypeTransaction.Expense }
             };
 
-            var wallet = new Wallet { Id = 1, Name = "Principal", UserId = TestUserId };
-
-            var transactions = new List<Transaction>
-            {
-                new Transaction { Id = 1, Amount = 50, Date = new DateTime(2026, 3, 1), Type = TypeTransaction.Income, UserId = TestUserId, CategoryId = 1, WalletId = 1, Comment = "Ingreso" },
-                new Transaction { Id = 2, Amount = 25, Date = new DateTime(2026, 3, 10), Type = TypeTransaction.Expense, UserId = TestUserId, CategoryId = 2, WalletId = 1, Comment = "Cafe del dia" },
-                new Transaction { Id = 3, Amount = 70, Date = new DateTime(2026, 3, 20), Type = TypeTransaction.Expense, UserId = TestUserId, CategoryId = 1, WalletId = 1, Comment = "Supermercado" }
-            };
+            var wallet = new Wallet { Name = "Principal", UserId = TestUserId };
 
             await _context.Categories.AddRangeAsync(categories);
             await _context.Wallets.AddAsync(wallet);
+            await _context.SaveChangesAsync();
+
+            var transactions = new List<Transaction>
+            {
+                new Transaction { Amount = 50, Date = new DateTime(2026, 3, 1), Type = TypeTransaction.Income, UserId = TestUserId, CategoryId = categories[0].Id, WalletId = wallet.Id, Comment = "Ingreso" },
+                new Transaction { Amount = 25, Date = new DateTime(2026, 3, 10), Type = TypeTransaction.Expense, UserId = TestUserId, CategoryId = categories[1].Id, WalletId = wallet.Id, Comment = "Cafe del dia" },
+                new Transaction { Amount = 70, Date = new DateTime(2026, 3, 20), Type = TypeTransaction.Expense, UserId = TestUserId, CategoryId = categories[0].Id, WalletId = wallet.Id, Comment = "Supermercado" }
+            };
+
             await _context.Transactions.AddRangeAsync(transactions);
             await _context.SaveChangesAsync();
         }
