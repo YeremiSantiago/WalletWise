@@ -187,7 +187,7 @@ namespace WalletWise.Integration.Test.Controllers
             
             try
             {
-                await db.Database.EnsureCreatedAsync();
+                await db.Database.MigrateAsync();
                
             }
             catch
