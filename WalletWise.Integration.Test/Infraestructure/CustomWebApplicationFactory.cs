@@ -15,11 +15,6 @@ namespace WalletWise.Integration.Test.Infraestructure
     public class CustomWebApplicationFactory : WebApplicationFactory<Program>, IAsyncLifetime
     {
         private readonly MsSqlContainer _dbContainer = new MsSqlBuilder()
-            .WithImage("mcr.microsoft.com/mssql/server:2022-latest")
-            .WithCreateParameterModifier(parameters =>
-            {
-                parameters.HostConfig.ShmSize = 1_073_741_824; 
-            })
             .Build();
 
         protected override void ConfigureWebHost(IWebHostBuilder builder)

@@ -13,11 +13,6 @@ namespace WalletWise.Integration.Test.Infraestructure
     public class DatabaseFixture : IAsyncLifetime
     {
         private readonly MsSqlContainer _dbContainer = new MsSqlBuilder()
-            .WithImage("mcr.microsoft.com/mssql/server:2022-latest")
-            .WithCreateParameterModifier(parameters =>
-            {
-                parameters.HostConfig.ShmSize = 1_073_741_824; 
-            })
             .Build();
 
         public string ConnectionString => _dbContainer.GetConnectionString();
