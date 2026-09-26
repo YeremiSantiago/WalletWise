@@ -1,4 +1,3 @@
-using Docker.DotNet.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -20,6 +19,10 @@ namespace WalletWise.Integration.Test.Infraestructure
         public async Task InitializeAsync()
         {
             await _dbContainer.StartAsync();
+
+            // Migrar la base de datos una sola vez al iniciar el fixture
+            using var context = CreateDbContext();
+            await context.Database.MigrateAsync();
         }
 
         public async Task DisposeAsync()
@@ -30,7 +33,8 @@ namespace WalletWise.Integration.Test.Infraestructure
         public AppDbContext CreateDbContext()
         {
             var options = new DbContextOptionsBuilder<AppDbContext>()
-                .UseSqlServer(ConnectionString)
+                .UseSqlServer(ConnectionString,
+                    sqlOptions => sqlOptions.MigrationsAssembly(typeof(AppDbContext).Assembly.FullName))
                 .Options;
 
             return new AppDbContext(options);

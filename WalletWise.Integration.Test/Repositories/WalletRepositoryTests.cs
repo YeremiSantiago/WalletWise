@@ -28,7 +28,6 @@ namespace WalletWise.Integration.Test.Repositories
         public async Task InitializeAsync()
         {
             _context = _fixture.CreateDbContext();
-            await _context.Database.MigrateAsync();
 
             _context.Transactions.RemoveRange(_context.Transactions);
             _context.Categories.RemoveRange(_context.Categories);

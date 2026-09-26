@@ -34,10 +34,12 @@ namespace WalletWise.Integration.Test.Infraestructure
                     services.Remove(d);
 
                 services.AddDbContext<AppDbContext>(options =>
-                options.UseSqlServer(_dbContainer.GetConnectionString()));
+                options.UseSqlServer(_dbContainer.GetConnectionString(),
+                    sqlOptions => sqlOptions.MigrationsAssembly(typeof(AppDbContext).Assembly.FullName)));
 
                 services.AddDbContext<IdentityAppDbContext>(options =>
-                options.UseSqlServer(_dbContainer.GetConnectionString()));
+                options.UseSqlServer(_dbContainer.GetConnectionString(),
+                    sqlOptions => sqlOptions.MigrationsAssembly(typeof(IdentityAppDbContext).Assembly.FullName)));
 
                 services.AddAuthentication(options =>
                 {
