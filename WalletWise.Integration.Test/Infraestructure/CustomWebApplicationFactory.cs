@@ -63,8 +63,8 @@ namespace WalletWise.Integration.Test.Infraestructure
             using var scope = Services.CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
             var identityDb = scope.ServiceProvider.GetRequiredService<IdentityAppDbContext>();
-            
-            await db.Database.EnsureCreatedAsync();
+
+            await EnsureDatabaseInitializedAsync(db);
             var creator = identityDb.Database.GetService<Microsoft.EntityFrameworkCore.Storage.IRelationalDatabaseCreator>();
             await creator.CreateTablesAsync();
         }
@@ -78,12 +78,24 @@ namespace WalletWise.Integration.Test.Infraestructure
         {
             using var scope = Services.CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            await EnsureDatabaseInitializedAsync(db);
 
             db.Transactions.RemoveRange(db.Transactions);
             db.Categories.RemoveRange(db.Categories);
             db.Wallets.RemoveRange(db.Wallets);
 
             await db.SaveChangesAsync();
+        }
+
+        private static async Task EnsureDatabaseInitializedAsync(DbContext dbContext)
+        {
+            if (dbContext.Database.GetMigrations().Any())
+            {
+                await dbContext.Database.MigrateAsync();
+                return;
+            }
+
+            await dbContext.Database.EnsureCreatedAsync();
         }
 
         private static SqliteConnection CreateOpenConnection()
@@ -94,4 +106,3 @@ namespace WalletWise.Integration.Test.Infraestructure
         }
     }
 }
-
