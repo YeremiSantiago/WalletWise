@@ -1,6 +1,5 @@
 using AutoMapper;
 using Microsoft.Extensions.Logging;
-using WalletWise.Application.Common;
 using WalletWise.Application.Dtos.Transaction;
 using WalletWise.Application.Interfaces;
 using WalletWise.Domain.Common;
@@ -44,7 +43,7 @@ namespace WalletWise.Application.Services
 
             if (result is null)
             {
-                throw new Exceptions.NotFoundException($"La transaccion con el id {id} no existe");
+                return Result<TransactionResponseDto?>.Failure(DomainErrors.Transaction.NotFound.WithMessage($"La transaccion con el id {id} no existe"));
             }
 
             return Result<TransactionResponseDto?>.Success(_mapper.Map<TransactionResponseDto>(result));
@@ -57,13 +56,13 @@ namespace WalletWise.Application.Services
 
             if (transaction.Amount <= 0)
             {
-                return Result<TransactionResponseDto>.Failure(BusinessErrorCodes.ERR_INVALID_AMOUNT, "El monto tiene que ser mayor a cero");
+                return Result<TransactionResponseDto>.Failure(DomainErrors.Transaction.InvalidAmount.WithMessage("El monto tiene que ser mayor a cero"));
             }
 
 
             if (transaction.Date > _clock.UtcNow())
             {
-                return Result<TransactionResponseDto>.Failure(BusinessErrorCodes.ERR_FUTURE_DATE_NOT_ALLOWED, "La fecha no puede ser futura para posibles gastos");
+                return Result<TransactionResponseDto>.Failure(DomainErrors.Transaction.FutureDateNotAllowed.WithMessage("La fecha no puede ser futura para posibles gastos"));
             }
 
 
@@ -71,19 +70,19 @@ namespace WalletWise.Application.Services
 
             if (walletExists == null)
             {
-                return Result<TransactionResponseDto>.Failure(BusinessErrorCodes.ERR_WALLET_NOT_FOUND, $"La wallet con ID {transaction.WalletId} no existe");
+                return Result<TransactionResponseDto>.Failure(DomainErrors.Wallet.NotFound.WithMessage($"La wallet con ID {transaction.WalletId} no existe"));
             }
 
             var categoryExists = await _categoryRepository.GetCategoryActiveByIdAsync(transaction.CategoryId, _currentUserService.UserId!);
 
             if (categoryExists == null)
             {
-                return Result<TransactionResponseDto>.Failure(BusinessErrorCodes.ERR_CATEGORY_NOT_FOUND, $"La categoría con ID {transaction.CategoryId} no existe");
+                return Result<TransactionResponseDto>.Failure(DomainErrors.Category.NotFound.WithMessage($"La categoría con ID {transaction.CategoryId} no existe"));
             }
 
             if (categoryExists.Type != transaction.Type)
             {
-                return Result<TransactionResponseDto>.Failure(BusinessErrorCodes.ERR_CATEGORY_TYPE_MISMATCH, "El tipo de la transacción no coincide con el de la categoría");
+                return Result<TransactionResponseDto>.Failure(DomainErrors.Category.TypeMismatch);
             }
 
             transaction.UserId = _currentUserService.UserId!;
@@ -100,18 +99,18 @@ namespace WalletWise.Application.Services
 
             if (exist is null)
             {
-                throw new Exceptions.NotFoundException($"La transaction con el id {id} no existe");
+                return Result<TransactionResponseDto>.Failure(DomainErrors.Transaction.NotFound.WithMessage($"La transaction con el id {id} no existe"));
             }
 
             var categoryExists = await _categoryRepository.GetCategoryActiveByIdAsync(transactionDto.CategoryId, _currentUserService.UserId!);
             if (categoryExists == null)
             {
-                return Result<TransactionResponseDto>.Failure(BusinessErrorCodes.ERR_CATEGORY_NOT_FOUND, $"La categoría con ID {transactionDto.CategoryId} no existe");
+                return Result<TransactionResponseDto>.Failure(DomainErrors.Category.NotFound.WithMessage($"La categoría con ID {transactionDto.CategoryId} no existe"));
             }
 
             if (categoryExists.Type != transactionDto.Type)
             {
-                return Result<TransactionResponseDto>.Failure(BusinessErrorCodes.ERR_CATEGORY_TYPE_MISMATCH, "El tipo de la transacción no coincide con el de la categoría");
+                return Result<TransactionResponseDto>.Failure(DomainErrors.Category.TypeMismatch);
             }
 
             _mapper.Map(transactionDto, exist);
@@ -127,7 +126,7 @@ namespace WalletWise.Application.Services
 
             if (exist is null)
             {
-                throw new Exceptions.NotFoundException($"La transaction con el id {id} no existe");
+                return Result<bool>.Failure(DomainErrors.Transaction.NotFound.WithMessage($"La transaction con el id {id} no existe"));
             }
 
             await _transactionRepository.RemoveAsync(id);
@@ -177,7 +176,7 @@ namespace WalletWise.Application.Services
             var userId = _currentUserService.UserId;
 
             if (userId == null)
-                return Result<TransactionSummaryResponseDto>.Failure(BusinessErrorCodes.ERR_UNAUTHORIZED, "Usuario no autenticado");
+                return Result<TransactionSummaryResponseDto>.Failure(DomainErrors.General.Unauthorized);
 
             var (totalIncome, totalExpense, balance) = await _transactionRepository.GetSummaryAsync(userId, filterParams);
 

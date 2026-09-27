@@ -105,8 +105,12 @@ namespace WalletWise.Unit.Tests.Services
             int id = 10;
             _transactionRepoMock.Setup(r => r.GetByIdForUserAsync(id, TestUserId)).ReturnsAsync((Transaction?)null);
 
-            // Act & Assert
-            await Assert.ThrowsAsync<WalletWise.Application.Exceptions.NotFoundException>(() => _transactionService.GetTransactionByIdAsync(id)); 
+            // Act
+            var result = await _transactionService.GetTransactionByIdAsync(id);
+
+            // Assert
+            Assert.False(result.IsSuccess);
+            Assert.Equal(WalletWise.Domain.Common.DomainErrors.Transaction.NotFound.Code, result.Error?.Code);
         }
 
         [Fact]

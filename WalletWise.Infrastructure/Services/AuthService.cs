@@ -7,7 +7,6 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using WalletWise.Application.Common;
 using WalletWise.Application.Dtos.Auth;
 using WalletWise.Application.Dtos.Users;
 using WalletWise.Application.Interfaces;
@@ -38,7 +37,7 @@ namespace WalletWise.Infrastructure.Services
 
             if (existingUser != null)
             {
-                return Result<LoginResponseDto>.Failure(WalletWise.Application.Common.BusinessErrorCodes.ERR_USER_ALREADY_EXISTS);
+                return Result<LoginResponseDto>.Failure(DomainErrors.Auth.UserAlreadyExists);
             }
 
             var newUser = new IdentityUser
@@ -53,7 +52,7 @@ namespace WalletWise.Infrastructure.Services
             {
                 var errors = string.Join(", ", createResult.Errors.Select(e => e.Description));
                 _logger.LogWarning("Error al registrar usuario {Email}: {Errors}", register.Email, errors);
-                return Result<LoginResponseDto>.Failure(WalletWise.Application.Common.BusinessErrorCodes.ERR_VALIDATION, errors);
+                return Result<LoginResponseDto>.Failure(DomainErrors.General.Validation.WithMessage(errors));
             }
 
             var claims = new List<Claim>
@@ -67,7 +66,7 @@ namespace WalletWise.Infrastructure.Services
             {
                 var errors = string.Join(", ", claimResult.Errors.Select(e => e.Description));
                 _logger.LogWarning("Error al registrar claims del usuario {Email}: {Errors}", register.Email, errors);
-                return Result<LoginResponseDto>.Failure(WalletWise.Application.Common.BusinessErrorCodes.ERR_VALIDATION, errors);
+                return Result<LoginResponseDto>.Failure(DomainErrors.General.Validation.WithMessage(errors));
             }
 
             _logger.LogInformation("usuario creado exitosamente");
@@ -103,12 +102,12 @@ namespace WalletWise.Infrastructure.Services
 
             if (user is null)
             {
-                return Result<LoginResponseDto>.Failure(WalletWise.Application.Common.BusinessErrorCodes.ERR_INVALID_CREDENTIALS);
+                return Result<LoginResponseDto>.Failure(DomainErrors.Auth.InvalidCredentials);
             }
 
             if (await _userManager.IsLockedOutAsync(user))
             {
-                return Result<LoginResponseDto>.Failure(WalletWise.Application.Common.BusinessErrorCodes.ERR_FORBIDDEN);
+                return Result<LoginResponseDto>.Failure(DomainErrors.General.Forbidden);
             }
 
             var isPasswordValid = await _userManager.CheckPasswordAsync(user, login.Password);
@@ -116,7 +115,7 @@ namespace WalletWise.Infrastructure.Services
             if (!isPasswordValid)
             {
                 await _userManager.AccessFailedAsync(user);
-                return Result<LoginResponseDto>.Failure(WalletWise.Application.Common.BusinessErrorCodes.ERR_INVALID_CREDENTIALS);
+                return Result<LoginResponseDto>.Failure(DomainErrors.Auth.InvalidCredentials);
             }
 
             await _userManager.ResetAccessFailedCountAsync(user);
@@ -153,7 +152,7 @@ namespace WalletWise.Infrastructure.Services
             var user = await _userManager.FindByIdAsync(userId);
 
             if (user is null)
-                throw new WalletWise.Application.Exceptions.NotFoundException("Usuario no encontrado");
+                return Result<UserProfileResponseDto>.Failure(DomainErrors.Auth.UserNotFound.WithMessage("Usuario no encontrado"));
 
             var claims = await _userManager.GetClaimsAsync(user);
 
@@ -186,7 +185,7 @@ namespace WalletWise.Infrastructure.Services
             var user = await _userManager.FindByIdAsync(userId);
 
             if (user is null)
-                throw new WalletWise.Application.Exceptions.NotFoundException("Usuario no encontrado");
+                return Result<UserProfileResponseDto>.Failure(DomainErrors.Auth.UserNotFound.WithMessage("Usuario no encontrado"));
 
             var claims = await _userManager.GetClaimsAsync(user);
             var currentNameClaim = claims.FirstOrDefault(c => c.Type == "profile_name");
@@ -206,7 +205,7 @@ namespace WalletWise.Infrastructure.Services
             {
                 var errors = string.Join(", ", result.Errors.Select(e => e.Description));
                 _logger.LogWarning("Error al actualizar nombre de perfil {UserId}: {Errors}", userId, errors);
-                return Result<UserProfileResponseDto>.Failure(WalletWise.Application.Common.BusinessErrorCodes.ERR_VALIDATION, errors);
+                return Result<UserProfileResponseDto>.Failure(DomainErrors.General.Validation.WithMessage(errors));
             }
 
             return await GetCurrentUserProfile(userId);
@@ -217,7 +216,7 @@ namespace WalletWise.Infrastructure.Services
             var user = await _userManager.FindByIdAsync(userId);
 
             if (user is null)
-                throw new WalletWise.Application.Exceptions.NotFoundException("Usuario no encontrado");
+                return Result<bool>.Failure(DomainErrors.Auth.UserNotFound.WithMessage("Usuario no encontrado"));
 
             var result = await _userManager.ChangePasswordAsync(user, request.CurrentPassword, request.NewPassword);
 
@@ -225,7 +224,7 @@ namespace WalletWise.Infrastructure.Services
             {
                 var errors = string.Join(", ", result.Errors.Select(e => e.Description));
                 _logger.LogWarning("Error al cambiar contrasea {UserId}: {Errors}", userId, errors);
-                return Result<bool>.Failure(WalletWise.Application.Common.BusinessErrorCodes.ERR_VALIDATION, errors);
+                return Result<bool>.Failure(DomainErrors.General.Validation.WithMessage(errors));
             }
 
             return Result<bool>.Success(true);
@@ -236,7 +235,7 @@ namespace WalletWise.Infrastructure.Services
             var user = await _userManager.FindByIdAsync(userId);
 
             if (user is null)
-                throw new WalletWise.Application.Exceptions.NotFoundException("Usuario no encontrado");
+                return Result<bool>.Failure(DomainErrors.Auth.UserNotFound.WithMessage("Usuario no encontrado"));
 
             var result = await _userManager.UpdateSecurityStampAsync(user);
 
@@ -244,7 +243,7 @@ namespace WalletWise.Infrastructure.Services
             {
                 var errors = string.Join(", ", result.Errors.Select(e => e.Description));
                 _logger.LogWarning("Error al cerrar sesin {UserId}: {Errors}", userId, errors);
-                return Result<bool>.Failure(WalletWise.Application.Common.BusinessErrorCodes.ERR_UNEXPECTED, errors);
+                return Result<bool>.Failure(DomainErrors.General.Unexpected.WithMessage(errors));
             }
 
              await _context.RefreshTokens
@@ -298,12 +297,12 @@ namespace WalletWise.Infrastructure.Services
 
             if (storedToken is null)
             {
-                return Result<LoginResponseDto>.Failure(WalletWise.Application.Common.BusinessErrorCodes.ERR_NOT_FOUND);
+                return Result<LoginResponseDto>.Failure(DomainErrors.General.NotFound);
             }
 
             if (storedToken.User is null)
             {
-                return Result<LoginResponseDto>.Failure(WalletWise.Application.Common.BusinessErrorCodes.ERR_NOT_FOUND);
+                return Result<LoginResponseDto>.Failure(DomainErrors.General.NotFound);
             }
 
             if (storedToken.IsUsed == true)
@@ -315,17 +314,17 @@ namespace WalletWise.Infrastructure.Services
                 await _context.RefreshTokens.Where(x => x.UserId == storedToken.UserId)
                     .ExecuteDeleteAsync();
 
-                return Result<LoginResponseDto>.Failure(WalletWise.Application.Common.BusinessErrorCodes.ERR_UNAUTHORIZED);
+                return Result<LoginResponseDto>.Failure(DomainErrors.General.Unauthorized);
             }
 
             if (storedToken.IsRevoked == true)
             {
-                return Result<LoginResponseDto>.Failure(WalletWise.Application.Common.BusinessErrorCodes.ERR_UNAUTHORIZED);
+                return Result<LoginResponseDto>.Failure(DomainErrors.General.Unauthorized);
             }
 
             if (storedToken.IsExpired == true)
             {
-                return Result<LoginResponseDto>.Failure(WalletWise.Application.Common.BusinessErrorCodes.ERR_UNAUTHORIZED);
+                return Result<LoginResponseDto>.Failure(DomainErrors.General.Unauthorized);
 
             }
 

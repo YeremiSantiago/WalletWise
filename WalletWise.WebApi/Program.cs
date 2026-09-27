@@ -1,11 +1,10 @@
-﻿using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi.Models;
 using System.Security.Claims;
 using System.Threading.RateLimiting;
 using WalletWise.Application.DependencyInjection;
 using WalletWise.Infrastructure.DependencyInjection;
-using WalletWise.Infrastructure.DependencyInjection;
 using WalletWise.WebApi.Handlers;
-using WalletWise.Application.Common;
+
 using WalletWise.WebApi.Common;
 using Microsoft.AspNetCore.Mvc;
 using WalletWise.Infrastructure.Context;
@@ -28,7 +27,7 @@ namespace WalletWise.WebApi
             builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
             builder.Services.AddProblemDetails();
 
-            builder.Services.AddControllers().ConfigureApiBehaviorOptions(options => { options.InvalidModelStateResponseFactory = context => { var apiError = new ApiErrorResponse { Status = StatusCodes.Status400BadRequest, Error = BusinessErrorCodes.ERR_VALIDATION, Message = "Errores de validación encontrados.", TraceId = context.HttpContext.TraceIdentifier, Timestamp = DateTime.UtcNow }; return new BadRequestObjectResult(apiError); }; });
+            builder.Services.AddControllers().ConfigureApiBehaviorOptions(options => { options.InvalidModelStateResponseFactory = context => { var apiError = new ApiErrorResponse { Status = StatusCodes.Status400BadRequest, Error = WalletWise.Domain.Common.DomainErrors.General.Validation.Code, Message = WalletWise.Domain.Common.DomainErrors.General.Validation.Message, TraceId = context.HttpContext.TraceIdentifier, Timestamp = DateTime.UtcNow }; return new BadRequestObjectResult(apiError); }; });
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 
             builder.Services.AddOpenApi();
@@ -176,20 +175,20 @@ namespace WalletWise.WebApi
 
             var app = builder.Build();
 
-            #region Migrations
-            using (var scope = app.Services.CreateScope())
-            {
-                var appDbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-                appDbContext.Database.Migrate();
-
-                var identityDbContext = scope.ServiceProvider.GetRequiredService<IdentityAppDbContext>();
-                identityDbContext.Database.Migrate();
-            }
-            #endregion
-
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
+                #region Migrations
+                using (var scope = app.Services.CreateScope())
+                {
+                    var appDbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                    appDbContext.Database.Migrate();
+
+                    var identityDbContext = scope.ServiceProvider.GetRequiredService<IdentityAppDbContext>();
+                    identityDbContext.Database.Migrate();
+                }
+                #endregion
+
                 app.MapOpenApi();
                 app.UseSwagger();
                 app.UseSwaggerUI();

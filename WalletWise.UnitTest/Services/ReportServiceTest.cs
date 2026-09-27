@@ -10,6 +10,7 @@ using WalletWise.Domain.Entities;
 using WalletWise.Domain.Interfaces;
 using WalletWise.Domain.Reports;
 using Xunit;
+using WalletWise.Domain.Common;
 
 namespace WalletWise.Unit.Tests.Services
 {
@@ -83,7 +84,7 @@ namespace WalletWise.Unit.Tests.Services
 
             // Assert
             Assert.False(result.IsSuccess);
-            Assert.Equal(WalletWise.Application.Common.BusinessErrorCodes.ERR_UNAUTHORIZED, result.Error);
+            Assert.Equal(DomainErrors.General.Unauthorized.Code, result.Error?.Code);
             Assert.Null(result.Value);
         }
 
@@ -118,7 +119,7 @@ namespace WalletWise.Unit.Tests.Services
             var result = await _reportService.GetMonthlySummaryAsync(2025);
 
             Assert.False(result.IsSuccess);
-            Assert.Equal(WalletWise.Application.Common.BusinessErrorCodes.ERR_UNAUTHORIZED, result.Error);
+            Assert.Equal(DomainErrors.General.Unauthorized.Code, result.Error?.Code);
             Assert.Null(result.Value);
         }
 
@@ -152,7 +153,7 @@ namespace WalletWise.Unit.Tests.Services
             var result = await _reportService.GetByCategoryAsync(start, end, TypeTransaction.Expense);
 
             Assert.False(result.IsSuccess);
-            Assert.Equal(WalletWise.Application.Common.BusinessErrorCodes.ERR_INVALID_DATE_RANGE, result.Error);
+            Assert.Equal(DomainErrors.Report.InvalidDateRange.Code, result.Error?.Code);
             Assert.Null(result.Value);
         }
 
@@ -164,7 +165,7 @@ namespace WalletWise.Unit.Tests.Services
             var result = await _reportService.GetByCategoryAsync(DateTime.Today, DateTime.Today, null);
 
             Assert.False(result.IsSuccess);
-            Assert.Equal(WalletWise.Application.Common.BusinessErrorCodes.ERR_UNAUTHORIZED, result.Error);
+            Assert.Equal(DomainErrors.General.Unauthorized.Code, result.Error?.Code);
             Assert.Null(result.Value);
         }
 
@@ -200,7 +201,7 @@ namespace WalletWise.Unit.Tests.Services
             var result = await _reportService.GetTopCategoriesAsync(start, end, 5);
 
             Assert.False(result.IsSuccess);
-            Assert.Equal(WalletWise.Application.Common.BusinessErrorCodes.ERR_INVALID_DATE_RANGE, result.Error);
+            Assert.Equal(DomainErrors.Report.InvalidDateRange.Code, result.Error?.Code);
             Assert.Null(result.Value);
         }
 
@@ -213,7 +214,7 @@ namespace WalletWise.Unit.Tests.Services
             var result = await _reportService.GetTopCategoriesAsync(start, end, 0);
 
             Assert.False(result.IsSuccess);
-            Assert.Equal(WalletWise.Application.Common.BusinessErrorCodes.ERR_INVALID_LIMIT, result.Error);
+            Assert.Equal(DomainErrors.Report.InvalidLimit.Code, result.Error?.Code);
             Assert.Null(result.Value);
         }
 
@@ -251,7 +252,7 @@ namespace WalletWise.Unit.Tests.Services
             );
 
             Assert.False(result.IsSuccess);
-            Assert.Equal(WalletWise.Application.Common.BusinessErrorCodes.ERR_INVALID_DATE_RANGE, result.Error);
+            Assert.Equal(DomainErrors.Report.InvalidDateRange.Code, result.Error?.Code);
             Assert.Null(result.Value);
         }
 
@@ -266,7 +267,7 @@ namespace WalletWise.Unit.Tests.Services
             );
 
             Assert.False(result.IsSuccess);
-            Assert.Equal(WalletWise.Application.Common.BusinessErrorCodes.ERR_OVERLAPPING_PERIODS, result.Error);
+            Assert.Equal(DomainErrors.Report.OverlappingPeriods.Code, result.Error?.Code);
             Assert.Null(result.Value);
         }
 
@@ -283,7 +284,7 @@ namespace WalletWise.Unit.Tests.Services
             );
 
             Assert.False(result.IsSuccess);
-            Assert.Equal(WalletWise.Application.Common.BusinessErrorCodes.ERR_UNAUTHORIZED, result.Error);
+            Assert.Equal(DomainErrors.General.Unauthorized.Code, result.Error?.Code);
             Assert.Null(result.Value);
         }
 
@@ -338,7 +339,7 @@ namespace WalletWise.Unit.Tests.Services
             var result = await _reportService.ExportAsync(start, end, null, null, null);
 
             Assert.False(result.IsSuccess);
-            Assert.Equal(WalletWise.Application.Common.BusinessErrorCodes.ERR_INVALID_DATE_RANGE, result.Error);
+            Assert.Equal(DomainErrors.Report.InvalidDateRange.Code, result.Error?.Code);
             Assert.Null(result.Value);
         }
 
@@ -350,7 +351,7 @@ namespace WalletWise.Unit.Tests.Services
             var result = await _reportService.ExportAsync(null, null, null, null, null);
 
             Assert.False(result.IsSuccess);
-            Assert.Equal(WalletWise.Application.Common.BusinessErrorCodes.ERR_UNAUTHORIZED, result.Error);
+            Assert.Equal(DomainErrors.General.Unauthorized.Code, result.Error?.Code);
             Assert.Null(result.Value);
         }
 

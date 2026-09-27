@@ -12,7 +12,6 @@ using WalletWise.Domain.Common;
 using WalletWise.Domain.Entities;
 using WalletWise.Domain.Interfaces;
 
-using WalletWise.Application.Common;
 using WalletWise.Application.Exceptions;
 
 namespace WalletWise.Application.Services
@@ -40,7 +39,7 @@ namespace WalletWise.Application.Services
 
             if (result is null)
             {
-                throw new NotFoundException($"La category con el id {id} no existe");
+                return Result<WalletResponseDto?>.Failure(DomainErrors.Wallet.NotFound.WithMessage($"La wallet con el id {id} no existe"));
             }
 
             return Result<WalletResponseDto?>.Success(_mapper.Map<WalletResponseDto>(result));
@@ -59,7 +58,7 @@ namespace WalletWise.Application.Services
             }
             catch (UniqueConstraintViolationException ex)
             {
-                return Result<WalletResponseDto>.Failure(BusinessErrorCodes.ERR_WALLET_NAME_EXISTS, "Ya existe una Wallet con ese mismo nombre");
+                return Result<WalletResponseDto>.Failure(DomainErrors.Wallet.NameExists);
             }
         }
 
@@ -69,7 +68,7 @@ namespace WalletWise.Application.Services
 
             if (exist == null)
             {
-                throw new NotFoundException($"La wallet con el id {id} no pudo ser encontrada");
+                return Result<WalletResponseDto>.Failure(DomainErrors.Wallet.NotFound.WithMessage($"La wallet con el id {id} no pudo ser encontrada"));
             }
 
             _mapper.Map(walletDto, exist);
@@ -85,7 +84,7 @@ namespace WalletWise.Application.Services
 
             if (exist == null)
             {
-                 throw new NotFoundException($"La wallet con el id {id} no pudo ser encontrada");
+                 return Result<bool>.Failure(DomainErrors.Wallet.NotFound.WithMessage($"La wallet con el id {id} no pudo ser encontrada"));
             }
 
             await _walletRepository.RemoveAsync(id);

@@ -108,8 +108,12 @@ namespace WalletWise.Unit.Tests.Services
             _categoryRepoMock.Setup(r => r.GetCategoryActiveByIdAsync(id, TestUserId))
                 .ReturnsAsync((Category?)null);
 
-            // Act & Assert
-            await Assert.ThrowsAsync<WalletWise.Application.Exceptions.NotFoundException>(() => _categoryService.GetCategoryByIdAsync(id));
+            // Act
+            var result = await _categoryService.GetCategoryByIdAsync(id);
+
+            // Assert
+            Assert.False(result.IsSuccess);
+            Assert.Equal(WalletWise.Domain.Common.DomainErrors.Category.NotFound.Code, result.Error?.Code);
         }
 
         [Fact]
@@ -207,7 +211,7 @@ namespace WalletWise.Unit.Tests.Services
             // Assert
             Assert.False(result.IsSuccess);
             Assert.NotNull(result.Error);
-            Assert.Equal(WalletWise.Application.Common.BusinessErrorCodes.ERR_CATEGORY_HAS_TRANSACTIONS, result.Error);
+            Assert.Equal(WalletWise.Domain.Common.DomainErrors.Category.HasTransactions.Code, result.Error?.Code);
             Assert.False(result.Value);
         }
     }

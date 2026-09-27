@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using WalletWise.Application.Common;
 using WalletWise.Application.Exceptions;
+using WalletWise.Domain.Common;
 using WalletWise.WebApi.Common;
 
 namespace WalletWise.WebApi.Handlers
@@ -21,15 +21,17 @@ namespace WalletWise.WebApi.Handlers
             Exception exception,
             CancellationToken cancellationToken)
         {
-            var (statusCode, errorCode, message) = exception switch
+            var error = exception switch
             {
-                NotFoundException => 
-                    (StatusCodes.Status404NotFound, BusinessErrorCodes.ERR_NOT_FOUND, exception.Message ?? "El recurso solicitado no fue encontrado."),
-                ForbiddenAccessException => 
-                    (StatusCodes.Status403Forbidden, BusinessErrorCodes.ERR_FORBIDDEN, "No tienes permisos para acceder a este recurso."),
-                _ => 
-                    (StatusCodes.Status500InternalServerError,BusinessErrorCodes.ERR_UNEXPECTED, "Ha ocurrido un error inesperado.")
+                NotFoundException => DomainErrors.General.NotFound,
+                ForbiddenAccessException => DomainErrors.General.Forbidden,
+                UniqueConstraintViolationException => new Error("General.Conflict", "Hubo un conflicto con los datos proporcionados.", StatusCodes.Status409Conflict),
+                _ => DomainErrors.General.Unexpected
             };
+
+            var statusCode = error.StatusCode;
+            var errorCode = error.Code;
+            var message = exception is NotFoundException ? (exception.Message ?? error.Message) : error.Message;
 
             if (statusCode == StatusCodes.Status500InternalServerError)
             {
