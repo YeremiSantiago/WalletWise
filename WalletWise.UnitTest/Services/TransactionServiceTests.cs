@@ -26,6 +26,7 @@ namespace WalletWise.Unit.Tests.Services
         private readonly Mock<IWalletRepository> _walletRepoMock;
         private readonly Mock<ICategoryRepository> _categoryRepoMock;
         private readonly Mock<ICurrentUserService> _currentUserServiceMock;
+        private readonly Mock<IBudgetRepository> _budgetRepoMock;
 
         private const string TestUserId = "1";
 
@@ -37,6 +38,7 @@ namespace WalletWise.Unit.Tests.Services
             _walletRepoMock = new Mock<IWalletRepository>();
             _categoryRepoMock = new Mock<ICategoryRepository>();
             _currentUserServiceMock = new Mock<ICurrentUserService>();
+            _budgetRepoMock = new Mock<IBudgetRepository>();
 
             _currentUserServiceMock.Setup(x => x.UserId).Returns(TestUserId);
 
@@ -52,6 +54,7 @@ namespace WalletWise.Unit.Tests.Services
                 mapper, 
                 _walletRepoMock.Object, 
                 _categoryRepoMock.Object,
+                _budgetRepoMock.Object,
                 _currentUserServiceMock.Object);
         }
 

@@ -55,6 +55,7 @@ namespace WalletWise.Infrastructure.DependencyInjection
             services.AddScoped<IWalletRepository, WalletRepository>();
             services.AddScoped<ICategoryRepository, CategoryRepository>();
             services.AddScoped<IReportRepository, ReportRepository>();
+            services.AddScoped<IBudgetRepository, BudgetRepository>();
 
             // INFRASTRUCTURE & AUTH 
             services.AddSingleton<IClock, ClockSystem>();

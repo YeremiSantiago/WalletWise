@@ -30,7 +30,7 @@ namespace WalletWise.Application.Services
             _clock = clock;
             _currentUserService = currentUserService;
         }
-
+        
         public async Task<Result<IEnumerable<CategoryResponseDto>>> GetAllCategoriesAsync()
         {
             var userId = _currentUserService.UserId!;

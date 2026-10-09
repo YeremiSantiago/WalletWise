@@ -29,6 +29,7 @@ namespace WalletWise.Integration.Test.Repositories
         {
             _context = _fixture.CreateDbContext();
 
+            _context.Budgets.RemoveRange(_context.Budgets);
             _context.Transactions.RemoveRange(_context.Transactions);
             _context.Categories.RemoveRange(_context.Categories);
             _context.Wallets.RemoveRange(_context.Wallets);

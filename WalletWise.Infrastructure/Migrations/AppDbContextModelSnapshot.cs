@@ -22,6 +22,47 @@ namespace WalletWise.Infrastructure.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("WalletWise.Domain.Entities.Budget", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("CategoryId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("EndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Mode")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("WalletId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CategoryId");
+
+                    b.HasIndex("WalletId");
+
+                    b.ToTable("Budgets", (string)null);
+                });
+
             modelBuilder.Entity("WalletWise.Domain.Entities.Category", b =>
                 {
                     b.Property<int>("Id")
@@ -140,6 +181,25 @@ namespace WalletWise.Infrastructure.Migrations
                     b.ToTable("Wallets", (string)null);
                 });
 
+            modelBuilder.Entity("WalletWise.Domain.Entities.Budget", b =>
+                {
+                    b.HasOne("WalletWise.Domain.Entities.Category", "Category")
+                        .WithMany("Budgets")
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("WalletWise.Domain.Entities.Wallet", "Wallet")
+                        .WithMany("Budgets")
+                        .HasForeignKey("WalletId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Category");
+
+                    b.Navigation("Wallet");
+                });
+
             modelBuilder.Entity("WalletWise.Domain.Entities.Transaction", b =>
                 {
                     b.HasOne("WalletWise.Domain.Entities.Category", "Category")
@@ -161,11 +221,15 @@ namespace WalletWise.Infrastructure.Migrations
 
             modelBuilder.Entity("WalletWise.Domain.Entities.Category", b =>
                 {
+                    b.Navigation("Budgets");
+
                     b.Navigation("Transactions");
                 });
 
             modelBuilder.Entity("WalletWise.Domain.Entities.Wallet", b =>
                 {
+                    b.Navigation("Budgets");
+
                     b.Navigation("Transactions");
                 });
 #pragma warning restore 612, 618

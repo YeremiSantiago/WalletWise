@@ -81,6 +81,7 @@ namespace WalletWise.Integration.Test.Infraestructure
             using var scope = Services.CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
+            db.Budgets.RemoveRange(db.Budgets);
             db.Transactions.RemoveRange(db.Transactions);
             db.Categories.RemoveRange(db.Categories);
             db.Wallets.RemoveRange(db.Wallets);

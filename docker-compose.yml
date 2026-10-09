@@ -3,7 +3,7 @@ services:
     image: mcr.microsoft.com/mssql/server:2022-latest
     environment:
       - ACCEPT_EULA=Y
-      - MSSQL_SA_PASSWORD=Maximo123!
+      - MSSQL_SA_PASSWORD=${DB_PASSWORD}
     ports:
       - "1435:1433"
   

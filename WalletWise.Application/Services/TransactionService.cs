@@ -17,16 +17,18 @@ namespace WalletWise.Application.Services
         private readonly ITransactionRepository _transactionRepository;
         private readonly IWalletRepository _walletRepository;
         private readonly ICategoryRepository _categoryRepository;
+        private readonly IBudgetRepository _budgetRepository;
         private readonly IClock _clock;
         private readonly ICurrentUserService _currentUserService;
 
 
-        public TransactionService(ITransactionRepository transactionRepository, IClock clock, ILogger<Transaction> logger, IMapper mapper, IWalletRepository walletRepository, ICategoryRepository categoryRepository, ICurrentUserService currentUserService) : base(transactionRepository, logger, mapper)
+        public TransactionService(ITransactionRepository transactionRepository, IClock clock, ILogger<Transaction> logger, IMapper mapper, IWalletRepository walletRepository, ICategoryRepository categoryRepository, IBudgetRepository budgetRepository, ICurrentUserService currentUserService) : base(transactionRepository, logger, mapper)
         {
             _transactionRepository = transactionRepository;
             _clock = clock;
             _walletRepository = walletRepository;
             _categoryRepository = categoryRepository;
+            _budgetRepository = budgetRepository;
             _currentUserService = currentUserService;
         }
 
@@ -85,6 +87,14 @@ namespace WalletWise.Application.Services
                 return Result<TransactionResponseDto>.Failure(DomainErrors.Category.TypeMismatch);
             }
 
+            // Validación de presupuesto Strict
+            var budgetError = await ValidateBudgetStrictAsync(
+                transaction.WalletId, transaction.CategoryId,
+                transaction.Date, transaction.Amount, transaction.Type);
+
+            if (budgetError is not null)
+                return Result<TransactionResponseDto>.Failure(budgetError);
+
             transaction.UserId = _currentUserService.UserId!;
 
             await _transactionRepository.AddAsync(transaction);
@@ -112,6 +122,15 @@ namespace WalletWise.Application.Services
             {
                 return Result<TransactionResponseDto>.Failure(DomainErrors.Category.TypeMismatch);
             }
+
+            // Validación de presupuesto Strict ademas excluyendo la transacción actual del cálculo
+            var budgetError = await ValidateBudgetStrictAsync(
+                transactionDto.WalletId, transactionDto.CategoryId,
+                transactionDto.Date, transactionDto.Amount, transactionDto.Type,
+                excludeTransactionId: id);
+
+            if (budgetError is not null)
+                return Result<TransactionResponseDto>.Failure(budgetError);
 
             _mapper.Map(transactionDto, exist);
 
@@ -186,6 +205,36 @@ namespace WalletWise.Application.Services
                 TotalExpense = totalExpense,
                 Balance = balance
             });
+        }
+
+        /// <summary>
+        /// Valida si una transacción de tipo Expense viola un presupuesto en modo Strict.
+        /// Retorna null si no hay violación, o un Error si se excede el límite.
+        /// </summary>
+        private async Task<Error?> ValidateBudgetStrictAsync(
+            int walletId, int categoryId,
+            DateTime transactionDate, decimal amount,
+            TypeTransaction type, int? excludeTransactionId = null)
+        {
+            if (type != TypeTransaction.Expense)
+                return null;
+
+            var userId = _currentUserService.UserId!;
+
+            var budget = await _budgetRepository.FindActiveBudgetAsync(walletId, categoryId, transactionDate, userId);
+
+            if (budget is null || budget.Mode != BudgetMode.Strict)
+                return null;
+
+            var spentAmount = await _budgetRepository.GetSpentAmountAsync(
+                budget.WalletId, budget.CategoryId,
+                budget.StartDate, budget.EndDate,
+                userId, excludeTransactionId);
+
+            if (spentAmount + amount > budget.Amount)
+                return DomainErrors.Budget.StrictLimitExceeded;
+
+            return null;
         }
     }
 }

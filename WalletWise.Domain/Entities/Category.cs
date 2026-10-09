@@ -17,5 +17,6 @@ namespace WalletWise.Domain.Entities
 
         // Navigation Property
         public IEnumerable<Transaction>? Transactions { get; set; }
+        public IEnumerable<Budget>? Budgets { get; set; }
     }
 }
