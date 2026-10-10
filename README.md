@@ -1,118 +1,112 @@
-# WalletWise
+# 📈 WalletWise API
 
-WalletWise is a comprehensive personal finance management RESTful API built with **.NET 9**. It provides users with the tools to track their expenses, manage budgets, analyze their spending habits through detailed reports, and maintain control over multiple wallets. It's designed following **Clean Architecture** principles and implements robust security features including JWT authentication and rate limiting.
+WalletWise es una API RESTful integral para la gestión de finanzas personales, construida con **.NET 9**. Proporciona a los usuarios las herramientas necesarias para registrar gastos, administrar presupuestos estrictos, analizar hábitos financieros mediante reportes y mantener el control sobre múltiples billeteras. 
 
-## 🚀 Features
+Está diseñada como un proyecto de portafolio para demostrar buenas prácticas de desarrollo backend, siguiendo los principios de la **Arquitectura Limpia (Clean Architecture)** e implementando características robustas de seguridad y rendimiento.
 
-- **Authentication & Authorization:** Secure user registration, login, token refresh, and password management using ASP.NET Core Identity and JWT.
-- **Wallet Management:** Create and manage multiple wallets to segregate funds (e.g., Cash, Bank Account, Savings).
-- **Category Management:** Define custom categories for transactions, classified as Income or Expense.
-- **Transaction Tracking:** Record income and expenses, linking them to specific wallets and categories. Includes filtering and pagination.
-- **Budget Control:** Set up budgets per wallet and category for specific periods. Supports a "Strict Mode" to prevent transactions that exceed the defined budget.
-- **Financial Reports:** Generate comprehensive financial insights including global summaries, monthly trends, spending by category, top expenses, and period comparisons. Export data to JSON.
-- **Security & Reliability:** Features global exception handling, model validation, CORS, and endpoint rate limiting to prevent abuse.
+---
 
-## 🛠️ Technologies & Stack
+## 🚀 Funcionalidades Principales
 
-- **Framework:** .NET 9.0 (ASP.NET Core Web API)
-- **Language:** C# 13
-- **Database:** Microsoft SQL Server 2022
-- **ORM:** Entity Framework Core 9.0
-- **Security:** ASP.NET Core Identity, JWT Bearer Authentication
-- **Documentation:** Swagger / OpenAPI
-- **Containerization:** Docker & Docker Compose
-- **Testing:** xUnit, Moq, Testcontainers (Integration Testing)
-- **Other:** AutoMapper
+*   **🔒 Autenticación y Seguridad:** Registro e inicio de sesión seguros con ASP.NET Core Identity. Implementa autenticación mediante **JWT**, rotación con *Refresh Tokens* y limitación de peticiones (*Rate Limiting*) por IP y usuario para prevenir abusos.
+*   **💼 Gestión de Billeteras (Wallets):** Soporte para múltiples billeteras simultáneas para separar fondos (ej. Efectivo, Tarjeta de Crédito, Ahorros).
+*   **📊 Control de Transacciones y Categorías:** Registro de ingresos y gastos categorizados. Los endpoints soportan filtrado y paginación para un manejo eficiente de grandes volúmenes de datos.
+*   **🛡️ Control de Presupuestos (Modo Estricto):** Permite establecer límites de gasto por categoría y periodo. El "Modo Estricto" intercepta y rechaza automáticamente transacciones que superarían el presupuesto definido.
+*   **📈 Reportes Financieros:** Generación de métricas analíticas (resúmenes globales, tendencias mensuales, top de gastos, comparativas entre periodos) y exportación de datos a JSON.
 
-## 🏗️ Architecture
+---
 
-The solution follows **Clean Architecture**, ensuring a clear separation of concerns:
+## 🛠️ Stack Tecnológico y Prácticas
 
-- **`WalletWise.Domain`:** The core of the application. Contains domain entities (`Wallet`, `Transaction`, `Budget`, `Category`), enums, custom exceptions, and domain interfaces. Has no external dependencies.
-- **`WalletWise.Application`:** Contains the business logic. Implements interfaces, services (`ITransactionService`, `IAuthService`, etc.), Data Transfer Objects (DTOs), and mapping profiles (AutoMapper).
-- **`WalletWise.Infrastructure`:** Implementation of data access and external concerns. Contains EF Core `DbContext`s (`AppDbContext`, `IdentityAppDbContext`), repositories, entity configurations, migrations, and identity configurations.
-- **`WalletWise.WebApi`:** The presentation layer. Exposes REST endpoints (Controllers), configures Dependency Injection, middleware (Rate Limiting, CORS, Global Exception Handling), and Swagger.
-- **`WalletWise.UnitTest` & `WalletWise.Integration.Test`:** Automated test projects ensuring application reliability.
+| Capa | Tecnología |
+| :--- | :--- |
+| **Framework** | .NET 9.0 (ASP.NET Core Web API), C# 13 |
+| **Base de Datos** | Microsoft SQL Server 2022 |
+| **ORM** | Entity Framework Core 9.0 |
+| **Seguridad** | ASP.NET Core Identity, Autenticación JWT Bearer |
+| **Pruebas** | xUnit, Moq, **Testcontainers** (Integración) |
+| **Infraestructura** | Docker y Docker Compose |
 
-## ⚙️ Prerequisites & Configuration
+### 🧠 Patrones y Buenas Prácticas Implementadas
+*   **Clean Architecture:** Separación de responsabilidades con un Dominio agnóstico.
+*   **Patrón Repositorio:** Abstracción del acceso a datos centralizada.
+*   **Inyección de Dependencias (DI):** Gestión del ciclo de vida de los servicios de forma desacoplada.
+*   **Manejo Global de Excepciones:** Respuestas HTTP consistentes (`ApiErrorResponse`) sin ensuciar los controladores mediante `IExceptionHandler`.
+*   **Rate Limiting Avanzado:** Políticas de límite de concurrencia para reportes pesados y límite de ventana fija/deslizante para autenticación y operaciones CRUD.
+*   **Mapeo de Objetos:** Aislamiento de las entidades de dominio hacia el cliente usando DTOs y AutoMapper.
 
-- [.NET 9.0 SDK](https://dotnet.microsoft.com/download/dotnet/9.0)
-- [Docker & Docker Compose](https://www.docker.com/) (Optional, for database)
-- SQL Server (if not using Docker)
+---
 
-### Environment Variables (.env)
-If you plan to use Docker for the database, create a `.env` file in the root directory (where `docker-compose.yml` is located):
-```env
-DB_PASSWORD=YourStrongPassword123!
+## 🏗️ Arquitectura de la Solución
+
+El proyecto está estructurado para que el núcleo de la aplicación (Domain) no dependa de ningún framework externo de infraestructura, facilitando el mantenimiento y las pruebas:
+
+```mermaid
+graph TD
+    WebApi[WalletWise.WebApi<br/>(Presentación, Controllers, Auth)] --> Application
+    Infrastructure[WalletWise.Infrastructure<br/>(EF Core, SQL, Identity)] --> Application
+    Application[WalletWise.Application<br/>(Interfaces, Servicios, DTOs)] --> Domain
+    Domain[WalletWise.Domain<br/>(Entidades, Excepciones, Enums)]
+    
+    classDef core fill:#e1f5fe,stroke:#01579b,stroke-width:2px;
+    classDef infra fill:#f3e5f5,stroke:#4a148c,stroke-width:2px;
+    
+    class Domain core;
+    class Application core;
+    class WebApi infra;
+    class Infrastructure infra;
 ```
 
-### Application Settings
-Update the connection strings and JWT settings in `WalletWise.WebApi/appsettings.json` or `appsettings.Development.json`. By default, the API expects two connection strings:
-- `WalletWiseConnection`: For application data.
-- `WalletWiseIdentityConnection`: For user identity data.
+---
 
-*Note: Never commit real passwords or secret keys to source control.*
+## ⚙️ Requisitos y Ejecución Local
 
-## 🏃 Local Execution
+### Prerrequisitos
+*   [SDK de .NET 9.0](https://dotnet.microsoft.com/download/dotnet/9.0)
+*   [Docker](https://www.docker.com/) (Recomendado para levantar la base de datos fácilmente)
 
-### 1. Run the Database (Docker)
-Start the SQL Server instance using Docker Compose:
+### 1. Variables de Entorno
+Crea un archivo `.env` en la raíz del repositorio para que Docker Compose configure la contraseña del servidor SQL.
+```env
+DB_PASSWORD=TuContrasenaSegura123!
+```
+*Nota: Asegúrate de que la contraseña cumpla con las políticas de complejidad de SQL Server (mayúsculas, minúsculas, números, símbolos).*
+
+### 2. Levantar la Base de Datos
+Desde la raíz del proyecto, ejecuta el contenedor de SQL Server:
 ```bash
 docker-compose up -d db
 ```
-This will start a SQL Server 2022 container on port `1435`. 
+*El servidor estará mapeado al puerto `1435` en tu máquina local.*
 
-### 2. Run the Application
-Navigate to the Web API project and run it:
+### 3. Ejecutar la API
+Navega al proyecto de presentación e inicia el servidor. Al estar en el entorno de desarrollo (`Development`), **la aplicación aplicará automáticamente las migraciones** de la base de datos (tanto de la app como de Identity) al arrancar.
 ```bash
 cd WalletWise.WebApi
 dotnet run
 ```
-*(By default, ASP.NET Core listens on http://localhost:5000 or similar).*
 
-### Using Docker for the entire stack
-You can run both the API and the Database together using:
-```bash
-docker-compose up -d
-```
-The API will be accessible on port `5050` (`http://localhost:5050`) based on the provided `docker-compose.yml`.
+---
 
-## 🗄️ Database Migrations
+## 📡 Documentación de la API (Swagger)
 
-The project uses two EF Core contexts: `AppDbContext` (Core data) and `IdentityAppDbContext` (User data). 
+Con la API en ejecución, navega en tu navegador a:
+👉 `http://localhost:5050/swagger` *(O el puerto en el que se haya levantado tu app, como `5000`)*.
 
-**Automatic Migrations:**
-When running the application with the environment variable `ASPNETCORE_ENVIRONMENT=Development`, the API automatically applies pending migrations for both contexts on startup.
+El panel de Swagger interactivo agrupa los endpoints por módulos:
+1.  **Autentícate:** Usa `POST /api/auth/login` con tus credenciales para obtener un JWT.
+2.  **Autorización Global:** Haz clic en el candado o en el botón *Authorize* arriba a la derecha y pega tu token.
+3.  **Explora:** Prueba la creación de Wallets (`/api/wallets`), agrega transacciones (`/api/transactions`) y revisa tus presupuestos (`/api/budgets`).
 
-**Manual Migrations:**
-To apply migrations manually using the EF Core CLI, run the following commands from the solution root:
-```bash
-dotnet ef database update --context IdentityAppDbContext --project WalletWise.Infrastructure --startup-project WalletWise.WebApi
-dotnet ef database update --context AppDbContext --project WalletWise.Infrastructure --startup-project WalletWise.WebApi
-```
+---
 
-## 📡 API Documentation (Swagger)
+## 🧪 Pruebas Automatizadas
 
-When running in the Development environment, interactive API documentation is available via Swagger UI.
+El proyecto incluye una suite de pruebas exhaustiva para garantizar su estabilidad:
+*   **Pruebas Unitarias:** Validan la lógica de negocio compleja en la capa de servicios (como la validación del "Modo Estricto" de los presupuestos) simulando dependencias con `Moq`.
+*   **Pruebas de Integración:** Utilizan **Testcontainers** para levantar de forma completamente transparente y efímera un contenedor de SQL Server. Esto permite probar los repositorios, la base de datos y los endpoints de la API en un entorno real antes de ser destruido.
 
-1. Start the API.
-2. Navigate to: `http://localhost:<PORT>/swagger` (e.g., `http://localhost:5050/swagger` if running via docker-compose)
-3. Click "Authorize" and provide a valid JWT token to test secured endpoints.
-
-**Available Modules:**
-- `Auth`: `/api/auth` (Register, Login, Refresh, Logout, Change Password)
-- `Users`: `/api/users` (Profile management)
-- `Wallets`: `/api/wallets` (CRUD for wallets)
-- `Categories`: `/api/categories` (CRUD for categories)
-- `Transactions`: `/api/transactions` (Record operations, get summary)
-- `Budgets`: `/api/budgets` (Setup limits and monitor spending)
-- `Reports`: `/api/reports` (Analytics, comparisons, JSON exports)
-
-## 🧪 Testing
-
-The solution includes Unit Tests and Integration Tests. Integration tests utilize **Testcontainers** to spin up an ephemeral SQL Server instance for reliable and isolated database testing.
-
-To run all tests, execute the following command from the root directory:
+Para ejecutar todas las pruebas de la solución:
 ```bash
 dotnet test
 ```
