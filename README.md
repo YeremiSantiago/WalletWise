@@ -43,10 +43,10 @@ El proyecto está estructurado para que el núcleo de la aplicación (Domain) no
 
 ```mermaid
 graph TD
-    WebApi[WalletWise.WebApi<br/>(Presentación, Controllers, Auth)] --> Application
-    Infrastructure[WalletWise.Infrastructure<br/>(EF Core, SQL, Identity)] --> Application
-    Application[WalletWise.Application<br/>(Interfaces, Servicios, DTOs)] --> Domain
-    Domain[WalletWise.Domain<br/>(Entidades, Excepciones, Enums)]
+    WebApi["WalletWise.WebApi<br/>(Presentación, Controllers, Auth)"] --> Application
+    Infrastructure["WalletWise.Infrastructure<br/>(EF Core, SQL, Identity)"] --> Application
+    Application["WalletWise.Application<br/>(Interfaces, Servicios, DTOs)"] --> Domain
+    Domain["WalletWise.Domain<br/>(Entidades, Excepciones, Enums)"]
     
     classDef core fill:#e1f5fe,stroke:#01579b,stroke-width:2px;
     classDef infra fill:#f3e5f5,stroke:#4a148c,stroke-width:2px;
